@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - شعبة 306</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="shortcut icon" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
+<link rel="icon" type="image/png" sizes="32x32" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
+<link rel="icon" type="image/png" sizes="16x16" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-color:#2c3e50; --secondary-color:#3498db; --accent-color:#1abc9c; --danger-color:#e74c3c; --success-color:#27ae60; --light-color:#ecf0f1; }
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Tajawal',sans-serif;}
+        body{background:linear-gradient(135deg,var(--primary-color) 0%,var(--secondary-color) 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
+        .container{width:100%;max-width:400px;}
+        .logo-container{text-align:center;margin-bottom:30px;}
+        .logo-container i{font-size:4rem;color:var(--accent-color);margin-bottom:15px;}
+        .logo-container h1{color:white;font-size:2rem;margin-bottom:5px;}
+        .logo-container p{color:rgba(255,255,255,0.8);font-size:1.1rem;}
+        .auth-card{background-color:white;border-radius:15px;padding:30px;box-shadow:0 15px 30px rgba(0,0,0,0.2);transition:transform 0.3s ease;}
+        .auth-card:hover{transform:translateY(-5px);}
+        .auth-tabs{display:flex;margin-bottom:25px;border-bottom:2px solid #eee;}
+        .auth-tab{flex:1;text-align:center;padding:12px;background:none;border:none;font-size:1.1rem;font-weight:500;color:#666;cursor:pointer;position:relative;transition:all 0.3s ease;}
+        .auth-tab.active{color:var(--secondary-color);}
+        .auth-tab.active::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:3px;background-color:var(--secondary-color);border-radius:3px;}
+        .auth-form{display:none;}
+        .auth-form.active{display:block;}
+        .form-group{margin-bottom:20px;}
+        .form-group label{display:block;margin-bottom:8px;color:var(--primary-color);font-weight:500;}
+        .form-control{width:100%;padding:12px 15px;border:2px solid #e0e0e0;border-radius:8px;font-size:1rem;transition:all 0.3s ease;}
+        .form-control:focus{outline:none;border-color:var(--secondary-color);box-shadow:0 0 0 3px rgba(52,152,219,0.2);}
+        .input-with-icon{position:relative;}
+        .input-with-icon i{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#777;}
+        .input-with-icon .form-control{padding-right:15px;padding-left:45px;}
+        .btn{width:100%;padding:14px;border:none;border-radius:8px;font-size:1.1rem;font-weight:500;cursor:pointer;display:flex;justify-content:center;align-items:center;gap:10px;}
+        .btn-primary{background-color:var(--secondary-color);color:white;}
+        .btn-primary:hover{background-color:#2980b9;}
+        .btn-success{background-color:var(--success-color);color:white;}
+        .btn-success:hover{background-color:#219653;}
+        .message{padding:12px;border-radius:8px;margin-top:15px;text-align:center;font-weight:500;display:none;}
+        .message.error{background-color:rgba(231,76,60,0.1);color:var(--danger-color);border:1px solid rgba(231,76,60,0.2);}
+        .message.success{background-color:rgba(39,174,96,0.1);color:var(--success-color);border:1px solid rgba(39,174,96,0.2);}
+        .forgot-link{text-align:center;margin-top:20px;}
+        .forgot-link a{color:var(--secondary-color);text-decoration:none;font-size:0.9rem;}
+        .forgot-link a:hover{text-decoration:underline;}
+        .vs-code-info {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        @media (max-width:480px){.auth-card{padding:20px;}.logo-container h1{font-size:1.6rem;}.logo-container i{font-size:3rem;}}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <i class="fas fa-graduation-cap"></i>
+            <h1>شعبة <span style="color: #1abc9c;">306</span></h1>
+            <p>المنصة التعليمية المتكاملة</p>
+        </div>
+
+        <div class="auth-card">
+   
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-form="login-form">تسجيل الدخول</button>
+                <button class="auth-tab" data-form="register-form">حساب جديد</button>
+            </div>
+
+            <!-- تسجيل الدخول -->
+            <form id="login-form" class="auth-form active">
+                <div class="form-group">
+                    <label for="login-email">البريد الإلكتروني</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="login-email" class="form-control" placeholder="student306@example.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password">كلمة المرور</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="login-password" class="form-control" placeholder="أدخل كلمة المرور">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                </button>
+
+                <div class="forgot-link">
+                    <a href="#" id="forgot-password">نسيت كلمة المرور؟</a>
+                </div>
+            </form>
+
+            <!-- تسجيل جديد -->
+            <form id="register-form" class="auth-form">
+                <div class="form-group">
+                    <label for="register-name">الاسم الأول *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="register-name" class="form-control" 
+                               placeholder="محمد" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-lastname">اسم العائلة (اللقب) *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user-tag"></i>
+                        <input type="text" id="register-lastname" class="form-control" 
+                               placeholder="العتيبي" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-email">البريد الإلكتروني *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="register-email" class="form-control" 
+                               placeholder="student306@example.com" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-password">كلمة المرور *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="register-password" class="form-control" 
+                               placeholder="اختر كلمة مرور قوية" required minlength="6">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-confirm-password">تأكيد كلمة المرور *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="register-confirm-password" class="form-control" 
+                               placeholder="أعد إدخال كلمة المرور" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success" id="register-btn">
+                    <i class="fas fa-user-plus"></i> إنشاء حساب
+                </button>
+            </form>
+
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+
+    <!-- Firebase v12 الكامل -->
+<script type="module">
+    // ===============================
+    // Firebase v12 SDK
+    // ===============================
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged, 
+        signInWithEmailAndPassword, 
+        createUserWithEmailAndPassword, 
+        sendPasswordResetEmail,
+        updateProfile 
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import { 
+        getDatabase, 
+        ref, 
+        set,
+        get
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+    // ===============================
+    // تكوين Firebase
+    // ===============================
+    const firebaseConfig = {
+        apiKey: "AIzaSyCYbDqGBlBEEDGNfXbAbsS4sZupNDb7jrY",
+        authDomain: "system-306.firebaseapp.com",
+        databaseURL: "https://system-306-default-rtdb.firebaseio.com",
+        projectId: "system-306",
+        storageBucket: "system-306.firebasestorage.app",
+        messagingSenderId: "471316495588",
+        appId: "1:471316495588:web:4d7ba9be7fea17c7a8c0f1",
+        measurementId: "G-T4RTTBWHKL"
+    };
+
+    // ===============================
+    // تهيئة Firebase
+    // ===============================
+    let app, auth, database;
+    
+    try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        database = getDatabase(app);
+        console.log("✅ Firebase تم التهيئة بنجاح");
+    } catch (error) {
+        console.error("❌ خطأ في تهيئة Firebase:", error);
+        if (document.querySelector('.vs-code-info')) {
+            document.querySelector('.vs-code-info').innerHTML = 
+                '<i class="fas fa-exclamation-triangle"></i> <strong>Firebase غير متصل</strong><br>' +
+                'تحقق من: 1. اتصال الإنترنت 2. تكوين Firebase';
+        }
+    }
+
+    // ===============================
+    // متغيرات DOM
+    // ===============================
+    const messageDiv = document.getElementById("message");
+
+    // ===============================
+    // دالة عرض الرسائل
+    // ===============================
+    function showMessage(text, type = "error") {
+        if (!messageDiv) return;
+        
+        messageDiv.innerHTML = text;
+        messageDiv.className = `message ${type}`;
+        messageDiv.style.display = "block";
+        
+        setTimeout(() => {
+            messageDiv.style.display = "none";
+        }, 5000);
+    }
+
+    // ===============================
+    // دالة التحقق من حالة التسجيلات
+    // ===============================
+    async function checkRegistrationStatus() {
+        try {
+            if (!database) {
+                console.error("❌ قاعدة البيانات غير متاحة");
+                return true; // السماح في حالة الخطأ
+            }
+            
+            const statusRef = ref(database, 'system/registrationEnabled');
+            const snapshot = await get(statusRef);
+            
+            if (snapshot.exists()) {
+                const isEnabled = snapshot.val();
+                console.log(`📋 حالة التسجيلات: ${isEnabled ? 'مفعلة' : 'معطلة'}`);
+                
+                // إخفاء زر إنشاء حساب إذا كانت التسجيلات معطلة
+                const registerTab = document.querySelector('.auth-tab[data-form="register-form"]');
+                const registerForm = document.getElementById('register-form');
+                
+                if (registerTab && !isEnabled) {
+                    registerTab.style.display = 'none';
+                    if (registerForm.classList.contains('active')) {
+                        document.querySelector('.auth-tab[data-form="login-form"]').click();
+                    }
+                    showMessage("⚠️ إنشاء الحسابات الجديدة متوقف حالياً من قبل المدير", "warning");
+                } else if (registerTab && isEnabled) {
+                    registerTab.style.display = 'flex';
+                }
+                
+                return isEnabled;
+            } else {
+                // إذا لم تكن هناك إعدادات، قم بإنشائها مع القيمة الافتراضية
+                await set(statusRef, true);
+                console.log("✅ تم إنشاء إعدادات التسجيلات الافتراضية");
+                return true;
+            }
+        } catch (error) {
+            console.error("❌ خطأ في التحقق من حالة التسجيلات:", error);
+            return true; // السماح في حالة الخطأ
+        }
+    }
+
+    // ===============================
+    // التبديل بين النماذج
+    // ===============================
+    document.querySelectorAll(".auth-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+            document.querySelectorAll(".auth-tab").forEach(t => t.classList.remove("active"));
+            document.querySelectorAll(".auth-form").forEach(f => f.classList.remove("active"));
+            
+            tab.classList.add("active");
+            const formId = tab.getAttribute("data-form");
+            document.getElementById(formId).classList.add("active");
+            
+            if (messageDiv) {
+                messageDiv.style.display = "none";
+            }
+        });
+    });
+
+    // ===============================
+    // تسجيل الدخول
+    // ===============================
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById("login-email").value.trim();
+        const password = document.getElementById("login-password").value;
+        const loginBtn = document.getElementById("login-btn");
+
+        if (!email || !password) {
+            showMessage("يرجى ملء جميع الحقول", "error");
+            return;
+        }
+
+        if (!auth) {
+            showMessage("Firebase غير متصل. تحقق من اتصال الإنترنت", "error");
+            return;
+        }
+
+        try {
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تسجيل الدخول...';
+
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            
+            // التحقق إذا كان المستخدم مديراً
+            const isAdmin = email === "hussainasari0@gmail.com";
+            
+            // تسجيل النشاط
+            await logUserActivity(userCredential.user.uid, 'login');
+            
+            // حفظ بيانات المستخدم
+            const userData = {
+                uid: userCredential.user.uid,
+                email: userCredential.user.email,
+                displayName: userCredential.user.displayName,
+                isAdmin: isAdmin
+            };
+            
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+            
+            // إذا كان مديراً، توجهه إلى لوحة التحكم
+            if (isAdmin) {
+                showMessage(`✅ تم تسجيل الدخول كمدير بنجاح!<br>مرحباً ${userCredential.user.displayName || email}`, "success");
+                
+                // الانتقال إلى صفحة المدير بعد تأخير
+                setTimeout(() => {
+                    window.location.href = "admin-panel.html";
+                }, 1500);
+            } else {
+                showMessage(`✅ تم تسجيل الدخول بنجاح!<br>مرحباً ${userCredential.user.displayName || email}`, "success");
+                
+                // الانتقال إلى الصفحة الرئيسية بعد تأخير
+                setTimeout(() => {
+                    window.location.href = "main.html";
+                }, 1500);
+            }
+
+        } catch (error) {
+            console.error("❌ خطأ تسجيل الدخول:", error.code, error.message);
+            
+            let errorMessage = "اسم المستخدم أو كلمة المرور غير صحيحة";
+            
+            switch(error.code) {
+                case 'auth/invalid-email':
+                    errorMessage = "البريد الإلكتروني غير صالح";
+                    break;
+                case 'auth/user-not-found':
+                    errorMessage = "لا يوجد حساب بهذا البريد الإلكتروني";
+                    break;
+                case 'auth/wrong-password':
+                    errorMessage = "كلمة المرور غير صحيحة";
+                    break;
+                case 'auth/too-many-requests':
+                    errorMessage = "محاولات كثيرة، حاول مرة أخرى لاحقاً";
+                    break;
+                case 'auth/user-disabled':
+                    errorMessage = "هذا الحساب تم تعطيله";
+                    break;
+                case 'auth/network-request-failed':
+                    errorMessage = "فشل في الاتصال بالخادم";
+                    break;
+            }
+            
+            showMessage(errorMessage, "error");
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول';
+        }
+    });
+
+    // ===============================
+    // إنشاء حساب جديد مع التحقق من حالة التسجيلات
+    // ===============================
+    document.getElementById("register-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const firstName = document.getElementById("register-name").value.trim();
+        const lastName = document.getElementById("register-lastname").value.trim();
+        const email = document.getElementById("register-email").value.trim();
+        const password = document.getElementById("register-password").value;
+        const confirmPassword = document.getElementById("register-confirm-password").value;
+        const registerBtn = document.getElementById("register-btn");
+
+        // التحقق من البيانات
+        if (!firstName || !lastName || !email || !password || !confirmPassword) {
+            showMessage("يرجى ملء جميع الحقول", "error");
+            return;
+        }
+
+        if (password.length < 6) {
+            showMessage("كلمة المرور يجب أن تكون 6 أحرف على الأقل", "error");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            showMessage("كلمة المرور غير مطابقة", "error");
+            return;
+        }
+
+        if (!auth) {
+            showMessage("Firebase غير متصل. تحقق من اتصال الإنترنت", "error");
+            return;
+        }
+
+        try {
+            // التحقق من حالة التسجيلات أولاً
+            const canRegister = await checkRegistrationStatus();
+            if (!canRegister) {
+                showMessage("⚠️ إنشاء الحسابات الجديدة متوقف حالياً من قبل المدير", "error");
+                return;
+            }
+
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء الحساب...';
+
+            // 1. إنشاء المستخدم في Firebase Authentication
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // 2. تحديث اسم المستخدم (الاسم الأول + اللقب)
+            const fullName = `${firstName} ${lastName}`;
+            await updateProfile(user, {
+                displayName: fullName
+            });
+
+            // 3. حفظ بيانات المستخدم في Realtime Database
+            const userData = {
+                uid: user.uid,
+                email: email,
+                firstName: firstName,
+                lastName: lastName,
+                fullName: fullName,
+                role: "student",
+                class: "306",
+                createdAt: new Date().toISOString()
+            };
+
+            const userRef = ref(database, `users/${user.uid}`);
+            await set(userRef, userData);
+
+            // 4. تسجيل نشاط إنشاء الحساب
+            await logUserActivity(user.uid, 'register');
+
+            showMessage(`✅ تم إنشاء الحساب بنجاح!<br>مرحباً ${fullName}`, "success");
+
+            // 5. حفظ بيانات المستخدم محلياً
+            localStorage.setItem('currentUser', JSON.stringify({
+                uid: user.uid,
+                email: email,
+                displayName: fullName,
+                firstName: firstName,
+                lastName: lastName,
+                isAdmin: false
+            }));
+
+            // 6. الانتقال إلى الصفحة الرئيسية
+            setTimeout(() => {
+                window.location.href = "main.html";
+            }, 1500);
+
+        } catch (error) {
+            console.error("❌ خطأ إنشاء الحساب:", error.code, error.message);
+            
+            let errorMessage = "حدث خطأ أثناء إنشاء الحساب";
+            
+            switch(error.code) {
+                case 'auth/email-already-in-use':
+                    errorMessage = "هذا البريد الإلكتروني مستخدم بالفعل";
+                    break;
+                case 'auth/invalid-email':
+                    errorMessage = "البريد الإلكتروني غير صالح";
+                    break;
+                case 'auth/weak-password':
+                    errorMessage = "كلمة المرور ضعيفة، يجب أن تكون أقوى";
+                    break;
+                case 'auth/operation-not-allowed':
+                    errorMessage = "إنشاء الحساب غير مسموح حالياً";
+                    break;
+                case 'auth/network-request-failed':
+                    errorMessage = "فشل في الاتصال بالخادم";
+                    break;
+            }
+            
+            showMessage(errorMessage, "error");
+            registerBtn.disabled = false;
+            registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> إنشاء حساب';
+        }
+    });
+
+    // ===============================
+    // نسيت كلمة المرور
+    // ===============================
+    document.getElementById("forgot-password").addEventListener("click", async (e) => {
+        e.preventDefault();
+        
+        const email = prompt("أدخل بريدك الإلكتروني لاستعادة كلمة المرور:");
+        if (!email) return;
+
+        if (!auth) {
+            alert("Firebase غير متصل. تحقق من اتصال الإنترنت");
+            return;
+        }
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            alert("يرجى التواصل مع مدير الموقع لاستعادة كلمة المرور");
+        } catch (error) {
+            let errorMessage = "حدث خطأ أثناء إرسال رابط الاستعادة";
+            
+            if (error.code === 'auth/user-not-found') {
+                errorMessage = "لا يوجد حساب مرتبط بهذا البريد الإلكتروني";
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage = "البريد الإلكتروني غير صالح";
+            }
+            
+            alert(errorMessage);
+        }
+    });
+
+    // ===============================
+    // تسجيل نشاط المستخدم
+    // ===============================
+    async function logUserActivity(userId, activityType) {
+        if (!database) return;
+        
+        try {
+            const activityRef = ref(database, `userActivities/${userId}/${Date.now()}`);
+            await set(activityRef, {
+                type: activityType,
+                timestamp: new Date().toISOString()
+            });
+        } catch (error) {
+            console.warn("⚠️ لم يتم تسجيل النشاط:", error);
+        }
+    }
+
+    // ===============================
+    // التحقق من حالة المستخدم الحالي
+    // ===============================
+    if (auth) {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("👤 المستخدم مسجل بالفعل:", user.email);
+                
+                // إذا كان المستخدم مسجلاً، توجيهه مباشرة
+                if (window.location.pathname.endsWith('login.html')) {
+                    showMessage(`👋 مرحباً بعودتك ${user.displayName || user.email}!`, "success");
+                    
+                    // التحقق إذا كان مديراً
+                    const isAdmin = user.email === "hussainasari0@gmail.com";
+                    
+                    // حفظ بياناته محلياً
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName,
+                        isAdmin: isAdmin
+                    }));
+                    
+                    setTimeout(() => {
+                        if (isAdmin) {
+                            window.location.href = "admin-panel.html";
+                        } else {
+                            window.location.href = "main.html";
+                        }
+                    }, 1000);
+                }
+            }
+        });
+    }
+
+    // ===============================
+    // إنشاء إعدادات النظام إذا لم تكن موجودة
+    // ===============================
+    async function initializeSystemSettings() {
+        try {
+            if (!database) return;
+            
+            const systemRef = ref(database, 'system');
+            const snapshot = await get(systemRef);
+            
+            if (!snapshot.exists()) {
+                // إنشاء إعدادات النظام الافتراضية
+                const defaultSettings = {
+                    registrationEnabled: true,
+                    registrationStatusUpdated: new Date().toISOString(),
+                    createdBy: "system",
+                    createdAt: new Date().toISOString()
+                };
+                
+                await set(systemRef, defaultSettings);
+                console.log("✅ تم إنشاء إعدادات النظام الافتراضية");
+            }
+        } catch (error) {
+            console.error("❌ خطأ في إنشاء إعدادات النظام:", error);
+        }
+    }
+
+    // ===============================
+    // إضافة رابط للمديرين
+    // ===============================
+    function addAdminLink() {
+        const adminLink = document.createElement('div');
+        adminLink.className = 'admin-access';
+        adminLink.style.cssText = `
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        `;
+        
+        
+        
+        // إضافة الرابط بعد نموذج تسجيل الدخول
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.parentNode.insertBefore(adminLink, loginForm.nextSibling);
+        }
+    }
+
+    // ===============================
+    // بيانات تجريبية للاختبار
+    // ===============================
+    function setupTestData() {
+        // زر لإضافة بيانات تجريبية
+        const testBtn = document.createElement('button');
+        testBtn.innerHTML = '<i class="fas fa-flask"></i> بيانات تجريبية';
+        testBtn.style.cssText = `
+            background: #9b59b6;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin: 10px auto;
+            display: block;
+            cursor: pointer;
+        `;
+        
+        testBtn.onclick = () => {
+            document.getElementById('login-email').value = 'test@example.com';
+            document.getElementById('login-password').value = '123456';
+            document.getElementById('register-name').value = 'محمد';
+            document.getElementById('register-lastname').value = 'العتيبي';
+            document.getElementById('register-email').value = `student${Date.now()}@section306.edu`;
+            document.getElementById('register-password').value = '123456';
+            document.getElementById('register-confirm-password').value = '123456';
+            
+            showMessage("تم تعبئة بيانات تجريبية. يمكنك الآن التسجيل", "info");
+        };
+        
+        // إضافة الزر إذا كان هناك مكان لعرضه
+        const vsCodeInfo = document.querySelector('.vs-code-info');
+        if (vsCodeInfo) {
+            vsCodeInfo.appendChild(testBtn);
+        }
+    }
+
+    // ===============================
+    // بدء التطبيق
+    // ===============================
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log("🚀 صفحة تسجيل الدخول جاهزة");
+        
+        if (!auth) {
+            showMessage("⚠️ Firebase غير متصل. تأكد من اتصال الإنترنت وتكوين Firebase", "warning");
+            return;
+        }
+        
+        // إنشاء إعدادات النظام
+        await initializeSystemSettings();
+        
+        // التحقق من حالة التسجيلات
+        await checkRegistrationStatus();
+        
+        // إضافة رابط المدير
+        addAdminLink();
+        
+        // إعداد البيانات التجريبية
+        setupTestData();
+        
+        console.log("✅ جميع الخدمات جاهزة");
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,3897 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المنصة التعليمية - شعبة 306</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="shortcut icon" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
+<link rel="icon" type="image/png" sizes="32x32" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
+<link rel="icon" type="image/png" sizes="16x16" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+:root {
+    --primary: #2c3e50;
+    --secondary: #3498db;
+    --accent: #1abc9c;
+    --danger: #e74c3c;
+    --warning: #f39c12;
+    --success: #27ae60;
+    --light: #ecf0f1;
+    --dark: #2c3e50;
+    --radius: 12px;
+    --shadow: 0 5px 15px rgba(0,0,0,0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Tajawal', sans-serif;
+}
+
+body {
+    background: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding-top: 80px;
+}
+
+.container {
+    width: 90%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* شاشة التحميل */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    flex-direction: column;
+    color: white;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* الهيدر مع تأثير التمرير */
+header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    padding: 15px 0;
+    box-shadow: var(--shadow);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 80px;
+    transition: var(--transition);
+}
+
+header.scrolled {
+    height: 70px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+header.scrolled .logo-text h1 {
+    font-size: 1.3rem;
+}
+
+header.scrolled .logo-text p {
+    display: none;
+}
+
+header.scrolled .logo-section i {
+    font-size: 1.8rem;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: var(--transition);
+}
+
+.logo-section i {
+    font-size: 2rem;
+    color: var(--accent);
+    transition: var(--transition);
+}
+
+.logo-text h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+    transition: var(--transition);
+}
+
+.logo-text p {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    transition: var(--transition);
+}
+
+.logout-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.logout-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+}
+
+.notification-container {
+    position: relative;
+}
+
+.notification-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: white;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    z-index: 1001;
+}
+
+.notification-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--danger);
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    border: 2px solid var(--primary);
+}
+
+/* الإشعارات */
+.notification-dropdown {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    width: 350px;
+    max-height: 500px;
+    overflow-y: auto;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    z-index: 9999;
+    display: none;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from { 
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notification-dropdown.show {
+    display: block;
+}
+
+.notification-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.notification-header h3 {
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.clear-notifications {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: var(--transition);
+}
+
+.clear-notifications:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.notification-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+}
+
+.notification-item:hover {
+    background: #f9f9f9;
+}
+
+.notification-item.unread {
+    background: #f0f7ff;
+}
+
+.notification-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.notification-icon.assignment {
+    background: rgba(52,152,219,0.1);
+    color: var(--secondary);
+}
+
+.notification-icon.exam {
+    background: rgba(231,76,60,0.1);
+    color: var(--danger);
+}
+
+.notification-icon.event {
+    background: rgba(46,204,113,0.1);
+    color: var(--success);
+}
+
+.notification-icon.info {
+    background: rgba(52,152,219,0.1);
+    color: var(--secondary);
+}
+
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-title {
+    font-weight: 500;
+    margin-bottom: 3px;
+    color: var(--primary);
+    font-size: 0.95rem;
+}
+
+.notification-message {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 3px;
+    word-break: break-word;
+}
+
+.notification-time {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.notification-sender {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 2px;
+}
+
+.notification-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: #888;
+}
+
+.notification-empty i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #ddd;
+}
+
+/* التنقل */
+nav {
+    background: white;
+    padding: 12px 0;
+    margin: 20px 0;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    position: relative;
+    z-index: 900;
+}
+
+.nav-links {
+    display: flex;
+    justify-content: space-around;
+    list-style: none;
+    gap: 8px;
+    padding: 0 10px;
+    min-width: max-content;
+}
+
+.nav-link-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: var(--primary);
+    padding: 12px 15px;
+    border-radius: var(--radius);
+    transition: var(--transition);
+    min-width: 85px;
+    position: relative;
+    z-index: 901;
+}
+
+.nav-link-item:hover,
+.nav-link-item.active {
+    background: var(--secondary);
+    color: white;
+}
+
+.nav-icon {
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+}
+
+.nav-text {
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* المحتوى الرئيسي */
+main {
+    flex: 1;
+    position: relative;
+    z-index: 800;
+}
+
+.page-content {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.page-content.active {
+    display: flex;
+}
+
+/* البطاقات */
+.card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 801;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--light);
+}
+
+.card-header h2 {
+    font-size: 1.3rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.badge {
+    background: var(--secondary);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.badge.pending {
+    background: var(--warning);
+}
+
+.badge.completed {
+    background: var(--success);
+}
+
+.badge.urgent {
+    background: var(--danger);
+}
+
+/* لوحة التحكم */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, var(--secondary) 0%, #2c3e50 100%);
+    color: white;
+    padding: 20px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: var(--transition);
+    position: relative;
+    z-index: 801;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    opacity: 0.9;
+}
+
+.stat-info h3 {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    opacity: 0.9;
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+/* العناصر */
+.task-item,
+.assignment-item,
+.exam-item,
+.event-item,
+.submission-item {
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: var(--radius);
+    border-right: 5px solid var(--secondary);
+    background: #f9f9f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    transition: var(--transition);
+    position: relative;
+    z-index: 801;
+}
+
+.task-item:hover,
+.assignment-item:hover,
+.exam-item:hover {
+    background: #f0f7ff;
+}
+
+.task-item.urgent {
+    border-right-color: var(--danger);
+}
+
+.task-item.completed,
+.assignment-item.completed {
+    border-right-color: var(--success);
+}
+
+.assignment-item.pending {
+    border-right-color: var(--warning);
+}
+
+.task-info h3,
+.assignment-info h3,
+.exam-info h3 {
+    margin-bottom: 6px;
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.task-meta,
+.assignment-meta,
+.exam-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.task-meta i,
+.assignment-meta i,
+.exam-meta i {
+    margin-left: 5px;
+}
+
+.task-actions,
+.assignment-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    width: 100%;
+    justify-content: flex-end;
+    position: relative;
+    z-index: 802;
+}
+
+/* الأزرار */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 803;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: var(--secondary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-success:hover {
+    background: #219653;
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+.btn-warning {
+    background: var(--warning);
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #d68910;
+}
+
+/* الجدول الدراسي */
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    position: relative;
+    z-index: 801;
+}
+
+.schedule-table th {
+    background: var(--primary);
+    color: white;
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.schedule-table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: center;
+    background: white;
+    transition: var(--transition);
+}
+
+.schedule-table td:hover {
+    background: #f0f7ff;
+}
+
+.schedule-table tr:nth-child(even) td {
+    background: #f9f9f9;
+}
+
+/* حقل تعديل الجدول */
+.schedule-edit-form {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: var(--radius);
+    margin-top: 20px;
+    border: 2px dashed #ddd;
+}
+
+.schedule-edit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+/* الحقول */
+.form-group {
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 801;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    transition: var(--transition);
+    position: relative;
+    z-index: 802;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+}
+
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* المعرض */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+    position: relative;
+    z-index: 801;
+}
+
+.gallery-item {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: var(--transition);
+    position: relative;
+    z-index: 802;
+}
+
+.gallery-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.gallery-item img:hover {
+    transform: scale(1.05);
+}
+
+.gallery-info {
+    padding: 15px;
+}
+
+.gallery-info h4 {
+    margin-bottom: 5px;
+    color: var(--primary);
+}
+
+.gallery-info p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.gallery-info small {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* النسبة الموزونة */
+.input-with-percent {
+    position: relative;
+}
+
+.input-with-percent .form-control {
+    padding-left: 50px;
+}
+
+.percent-sign {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    z-index: 803;
+}
+
+.result-box {
+    background: linear-gradient(135deg, var(--accent) 0%, #16a085 100%);
+    color: white;
+    padding: 25px;
+    border-radius: var(--radius);
+    text-align: center;
+    position: relative;
+    z-index: 801;
+}
+
+.result-label {
+    font-size: 1rem;
+    margin-bottom: 8px;
+    opacity: 0.9;
+}
+
+.result-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.result-description {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* التقويم - محسّن */
+
+
+/* ترتيب التقويم مع إضافة الأحداث */
+.calendar-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.calendar-section {
+    flex: 1;
+}
+
+.events-section {
+    flex: 1;
+}
+
+@media (min-width: 992px) {
+    .calendar-layout {
+        flex-direction: row;
+    }
+    
+    .calendar-section {
+        flex: 2;
+    }
+    
+    .events-section {
+        flex: 1;
+    }
+}
+
+/* التنبيهات المخصصة */
+.custom-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.custom-alert-box {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    text-align: center;
+    animation: slideIn 0.3s ease;
+    position: relative;
+    z-index: 10001;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.custom-alert-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+    position: relative;
+    z-index: 10002;
+}
+
+/* حالات فارغة */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+    position: relative;
+    z-index: 801;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #ddd;
+}
+
+.empty-state p {
+    font-size: 1rem;
+}
+
+/* الفوتر */
+footer {
+    background: var(--primary);
+    color: white;
+    padding: 25px 0;
+    margin-top: 40px;
+    text-align: center;
+    position: relative;
+    z-index: 700;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 25px;
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 200px;
+}
+
+.footer-section h3 {
+    margin-bottom: 15px;
+    color: var(--accent);
+    font-size: 1.1rem;
+}
+
+.footer-section ul {
+    list-style: none;
+}
+
+.footer-section ul li {
+    margin-bottom: 8px;
+}
+
+.footer-section ul li a {
+    color: #ddd;
+    text-decoration: none;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    position: relative;
+    z-index: 701;
+}
+
+.footer-section ul li a:hover {
+    color: var(--accent);
+}
+
+.copyright {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    color: #aaa;
+    font-size: 0.85rem;
+}
+
+/* تحسين التجاوبية */
+@media (max-width: 768px) {
+    .logo-section {
+        position: relative;
+        left: auto;
+        transform: none;
+        order: 2;
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .logout-btn {
+        order: 1;
+        margin-right: 10px;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .notification-container {
+        order: 3;
+        margin-left: 10px;
+    }
+    
+    .notification-dropdown {
+        position: fixed;
+        top: 70px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+        max-width: calc(100% - 20px);
+    }
+    
+    nav {
+        margin-top: 90px;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+    }
+    
+    .calendar-grid {
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+    }
+    
+    .calendar-day {
+        min-height: 45px;
+        font-size: 0.75rem;
+        padding: 8px 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-text h1 {
+        font-size: 1.2rem;
+    }
+    
+    .logo-section i {
+        font-size: 1.5rem;
+    }
+    
+    .logo-text p {
+        display: none;
+    }
+    
+    .logout-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .logout-btn span {
+        display: none;
+    }
+    
+    .logout-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .logout-btn i {
+        margin: 0;
+        font-size: 1rem;
+    }
+    
+    .notification-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+    
+    header {
+        height: 70px;
+        padding: 15px 0;
+    }
+    
+    .nav-links {
+        gap: 5px;
+    }
+    
+    .nav-link-item {
+        padding: 10px 8px;
+        min-width: 70px;
+    }
+    
+    .nav-icon {
+        font-size: 1.2rem;
+    }
+    
+    .nav-text {
+        font-size: 0.75rem;
+    }
+    
+    .notification-dropdown {
+        width: calc(100% - 20px);
+        max-width: none;
+    }
+    
+    .calendar-grid {
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+    }
+    
+    .calendar-day {
+        min-height: 40px;
+        font-size: 0.7rem;
+        padding: 6px 3px;
+    }
+}
+
+/* تأثير التمرير للهيدر */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* للهواتف الصغيرة */
+@media (max-width: 360px) {
+    .logo-section i {
+        font-size: 1.2rem;
+    }
+    
+    .logo-text h1 {
+        font-size: 1rem;
+    }
+    
+    .nav-link-item {
+        padding: 8px 6px;
+        min-width: 60px;
+    }
+    
+    .nav-icon {
+        font-size: 1rem;
+    }
+    
+    .nav-text {
+        font-size: 0.7rem;
+    }
+}
+/* التقويم - محسّن ومتحرك */
+.calendar-container {
+    padding: 20px;
+    max-width: 100%;
+    overflow-x: auto; /* السماح بالتمرير الأفقي */
+    position: relative;
+}
+
+.calendar-wrapper {
+    min-width: 700px; /* عرض أدنى للتقويم */
+}
+
+.calendar-header {
+    background: var(--primary);
+    color: white;
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: var(--radius);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin: 15px 0;
+    width: 100%;
+    min-width: 700px; /* عرض أدنى للشبكة */
+}
+
+.calendar-day {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    min-height: 80px; /* زيادة الارتفاع */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: visible; /* السماح برؤية الأحداث */
+    border: 1px solid #eee;
+}
+
+.calendar-day:hover {
+    background: var(--secondary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.calendar-day.active {
+    background: var(--accent);
+    color: white;
+    transform: scale(1.05);
+}
+
+.calendar-day.has-event {
+    background: rgba(52,152,219,0.15);
+    border: 2px solid var(--secondary);
+    position: relative;
+}
+
+.calendar-day .event-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--danger);
+    border-radius: 50%;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+/* نافذة عرض الحدث */
+.event-details-popup {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    width: 250px;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    padding: 15px;
+    z-index: 1000;
+    display: none;
+    animation: fadeIn 0.2s ease;
+    border: 1px solid #ddd;
+}
+
+.event-details-popup.show {
+    display: block;
+}
+
+.event-details-popup::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: 20px;
+    width: 10px;
+    height: 10px;
+    background: white;
+    transform: rotate(45deg);
+    border-top: 1px solid #ddd;
+    border-left: 1px solid #ddd;
+}
+
+.event-details-header {
+    font-weight: bold;
+    color: var(--primary);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--light);
+}
+
+.event-details-item {
+    margin-bottom: 8px;
+    padding: 5px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.event-details-item .event-type {
+    font-size: 0.8rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: var(--secondary);
+    color: white;
+    display: inline-block;
+    margin-left: 5px;
+}
+
+/* تحسين التجاوبية للتقويم */
+@media (max-width: 768px) {
+    .calendar-wrapper {
+        min-width: 100%;
+    }
+    
+    .calendar-grid {
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+        min-width: 100%;
+    }
+    
+    .calendar-day {
+        min-height: 70px;
+        font-size: 0.85rem;
+        padding: 10px 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-grid {
+        gap: 6px;
+    }
+    
+    .calendar-day {
+        min-height: 60px;
+        font-size: 0.8rem;
+        padding: 8px 4px;
+    }
+    
+    .event-details-popup {
+        width: 200px;
+        right: -50px;
+    }
+}
+    </style>
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="spinner"></div>
+        <h2>جاري تحميل المنصة التعليمية...</h2>
+        <p id="loading-message">التحقق من تسجيل الدخول</p>
+    </div>
+
+    <!-- التنبيهات المخصصة -->
+    <div id="custom-alert-container"></div>
+
+    <!-- الهيدر (مخفي حتى يتم تسجيل الدخول) -->
+    <header id="main-header" style="display: none;">
+        <div class="container header-content">
+            <button class="logout-btn" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> خروج
+            </button>
+
+            <div class="logo-section">
+                <i class="fas fa-graduation-cap"></i>
+                <div class="logo-text">
+                    <h1 id="user-display-name">اسم المستخدم</h1>
+                    <p id="welcome-message">المنصة التعليمية المتكاملة</p>
+                </div>
+            </div>
+
+            <div class="notification-container">
+                <button class="notification-btn" id="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <div class="notification-badge" id="notification-count">0</div>
+                </button>
+                
+                <div class="notification-dropdown" id="notification-dropdown">
+                    <div class="notification-header">
+                        <h3><i class="fas fa-bell"></i> الإشعارات</h3>
+                        <button class="clear-notifications" id="clear-notifications">مسح الكل</button>
+                    </div>
+                    <div class="notification-list" id="notification-list">
+                        <div class="notification-empty">
+                            <i class="far fa-bell"></i>
+                            <p>لا توجد إشعارات</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- التنقل (مخفي حتى يتم تسجيل الدخول) -->
+    <nav id="main-nav" style="display: none;">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="#" class="nav-link-item active" data-page="dashboard"><i class="fas fa-home nav-icon"></i><span class="nav-text">الرئيسية</span></a></li>
+                <li><a href="#" class="nav-link-item" data-page="assignments"><i class="fas fa-tasks nav-icon"></i><span class="nav-text">الواجبات</span></a></li>
+                <li><a href="#" class="nav-link-item" data-page="submissions"><i class="fas fa-file-upload nav-icon"></i><span class="nav-text">التسليمات</span></a></li>
+                <li><a href="#" class="nav-link-item" data-page="schedule"><i class="fas fa-calendar-alt nav-icon"></i><span class="nav-text">الجدول</span></a></li>
+                <li><a href="#" class="nav-link-item" data-page="exams"><i class="fas fa-clipboard-list nav-icon"></i><span class="nav-text">الاختبارات</span></a></li>
+                <li><a href="#" class="nav-link-item" data-page="calculator"><i class="fas fa-calculator nav-icon"></i><span class="nav-text">النسبة الموزونة</span></a></li>
+                <li><a href="#" class="nav-link-item" data-page="gallery"><i class="fas fa-images nav-icon"></i><span class="nav-text">المعرض</span></a></li>
+                <li><a href="#" class="nav-link-item" data-page="calendar"><i class="far fa-calendar nav-icon"></i><span class="nav-text">التقويم</span></a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- المحتوى الرئيسي (مخفي حتى يتم تسجيل الدخول) -->
+    <main class="container" id="main-content" style="display: none;">
+        <!-- الرئيسية -->
+        <div id="dashboard" class="page-content active">
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                    <div class="stat-info">
+                        <h3>الواجبات المعلقة</h3>
+                        <div class="stat-number" id="stat-pending">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-clipboard-check"></i></div>
+                    <div class="stat-info">
+                        <h3>الواجبات المسلمة</h3>
+                        <div class="stat-number" id="stat-completed">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+                    <div class="stat-info">
+                        <h3>الاختبارات القادمة</h3>
+                        <div class="stat-number" id="stat-exams">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-info">
+                        <h3>النسبة الموزونة</h3>
+                        <div class="stat-number" id="stat-average">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-bell"></i> التذكيرات العاجلة</h2>
+                    <span class="badge" id="urgent-badge">0 عاجل</span>
+                </div>
+                <div id="urgent-tasks">
+                    <!-- سيتم ملؤه تلقائياً -->
+                </div>
+            </div>
+        </div>
+
+        <!-- الواجبات -->
+        <div id="assignments" class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-plus-circle"></i> إضافة واجب جديد</h2>
+                </div>
+                <form id="add-assignment-form">
+                    <div class="form-group">
+                        <label for="assignment-title">عنوان الواجب *</label>
+                        <input type="text" id="assignment-title" class="form-control" placeholder="أدخل عنوان الواجب" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignment-subject">المادة *</label>
+                        <select id="assignment-subject" class="form-control" required>
+                            <option value="">اختر المادة</option>
+                            <option value="الرياضيات">الرياضيات</option>
+                            <option value="اللغة العربية">اللغة العربية</option>
+                            <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                            <option value="الفيزياء">الفيزياء</option>
+                            <option value="الكيمياء">الكيمياء</option>
+                            <option value="التاريخ">التاريخ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignment-due-date">تاريخ التسليم *</label>
+                        <input type="date" id="assignment-due-date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignment-description">وصف الواجب (اختياري)</label>
+                        <textarea id="assignment-description" class="form-control" placeholder="أدخل وصف الواجب"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px;">
+                        <i class="fas fa-plus"></i> إضافة الواجب للجميع
+                    </button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-list"></i> الواجبات المشتركة</h2>
+                    <span class="badge" id="shared-assignments-count">0 واجب</span>
+                </div>
+                <div id="assignments-list"></div>
+            </div>
+        </div>
+
+        <!-- التسليمات -->
+        <div id="submissions" class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-history"></i> تسليماتي</h2>
+                    <span class="badge" id="submitted-count-badge">0 تسليم</span>
+                </div>
+                <div id="submissions-list"></div>
+            </div>
+        </div>
+
+        <!-- الجدول الدراسي -->
+        <div id="schedule" class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-calendar-alt"></i> الجدول الدراسي الأسبوعي</h2>
+                    <span class="badge">6 حصص يومياً</span>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="schedule-table" id="weekly-schedule">
+                        <thead>
+                            <tr>
+                                <th>اليوم</th>
+                                <th>الحصة الأولى</th>
+                                <th>الحصة الثانية</th>
+                                <th>الحصة الثالثة</th>
+                                <th>الحصة الرابعة</th>
+                                <th>الحصة الخامسة</th>
+                                <th>الحصة السادسة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-body">
+                            <!-- سيتم ملؤه تلقائياً -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- الاختبارات -->
+        <div id="exams" class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-plus-circle"></i> إضافة اختبار جديد</h2>
+                </div>
+                <form id="add-exam-form">
+                    <div class="form-group">
+                        <label for="exam-title">عنوان الاختبار *</label>
+                        <input type="text" id="exam-title" class="form-control" placeholder="أدخل عنوان الاختبار" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="exam-subject">المادة *</label>
+                        <select id="exam-subject" class="form-control" required>
+                            <option value="">اختر المادة</option>
+                            <option value="الرياضيات">الرياضيات</option>
+                            <option value="اللغة العربية">اللغة العربية</option>
+                            <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                            <option value="الفيزياء">الفيزياء</option>
+                            <option value="الكيمياء">الكيمياء</option>
+                            <option value="التاريخ">التاريخ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="exam-date">تاريخ الاختبار *</label>
+                        <input type="date" id="exam-date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="exam-time">وقت الاختبار *</label>
+                        <input type="time" id="exam-time" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="exam-location">مكان الاختبار (اختياري)</label>
+                        <input type="text" id="exam-location" class="form-control" placeholder="أدخل مكان الاختبار">
+                    </div>
+                    <div class="form-group">
+                        <label for="exam-description">وصف الاختبار (اختياري)</label>
+                        <textarea id="exam-description" class="form-control" placeholder="أدخل وصف الاختبار"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-plus"></i> إضافة الاختبار للجميع
+                    </button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-clipboard-list"></i> الاختبارات القادمة</h2>
+                    <span class="badge" id="exams-count-badge">0 اختبار</span>
+                </div>
+                <div id="exams-list"></div>
+            </div>
+        </div>
+
+        <!-- النسبة الموزونة -->
+        <div id="calculator" class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-calculator"></i> حاسبة النسبة الموزونة</h2>
+                    <span class="badge">نظام القبول السعودي</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                    <div>
+                        <div class="form-group">
+                            <label for="qiyas-score">نسبة اختبار القدرات (%)</label>
+                            <div class="input-with-percent">
+                                <input type="number" id="qiyas-score" class="form-control" min="0" max="100" placeholder="أدخل نسبة القدرات">
+                                <span class="percent-sign">%</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tahseeli-score">نسبة الاختبار التحصيلي (%)</label>
+                            <div class="input-with-percent">
+                                <input type="number" id="tahseeli-score" class="form-control" min="0" max="100" placeholder="أدخل نسبة التحصيلي">
+                                <span class="percent-sign">%</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="gpa-score">المعدل التراكمي (%)</label>
+                            <div class="input-with-percent">
+                                <input type="number" id="gpa-score" class="form-control" min="0" max="100" placeholder="أدخل المعدل التراكمي">
+                                <span class="percent-sign">%</span>
+                            </div>
+                        </div>
+                        <button id="calculate-weighted" class="btn btn-success" style="width: 100%; padding: 15px;">
+                            <i class="fas fa-calculator"></i> حساب النسبة الموزونة
+                        </button>
+                    </div>
+                    
+                    <div class="result-box">
+                        <div class="result-label">النسبة الموزونة النهائية</div>
+                        <div class="result-value" id="weighted-result">0%</div>
+                        <div class="result-description" id="weighted-description">أدخل النسب للحساب</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- المعرض -->
+        <div id="gallery" class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-images"></i> معرض الصور</h2>
+                    <span class="badge" id="total-photos-badge">0 صورة</span>
+                </div>
+                <div style="padding: 20px; border-bottom: 1px solid #eee;">
+                    <form id="upload-image-form">
+                        <div class="form-group">
+                            <label for="image-title">عنوان الصورة *</label>
+                            <input type="text" id="image-title" class="form-control" placeholder="أدخل عنوان للصورة" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="image-url">رابط الصورة *</label>
+                            <input type="text" id="image-url" class="form-control" placeholder="https://example.com/image.jpg" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="image-description">وصف الصورة (اختياري)</label>
+                            <textarea id="image-description" class="form-control" placeholder="أدخل وصف للصورة"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px;">
+                            <i class="fas fa-upload"></i> رفع الصورة للجميع
+                        </button>
+                    </form>
+                </div>
+                <div id="images-gallery" style="padding: 20px;"></div>
+            </div>
+        </div>
+
+        <!-- التقويم -->
+        <div id="calendar" class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="far fa-calendar-alt"></i> إضافة حدث جديد</h2>
+                </div>
+                <form id="add-event-form">
+                    <div class="form-group">
+                        <label for="event-title">عنوان الحدث *</label>
+                        <input type="text" id="event-title" class="form-control" placeholder="أدخل عنوان الحدث" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-date">تاريخ الحدث *</label>
+                        <input type="date" id="event-date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-type">نوع الحدث *</label>
+                        <select id="event-type" class="form-control" required>
+                            <option value="">اختر نوع الحدث</option>
+                            <option value="اختبار">اختبار</option>
+                            <option value="واجب">واجب</option>
+                            <option value="مناسبة">مناسبة</option>
+                            <option value="إجازة">إجازة</option>
+                            <option value="اجتماع">اجتماع</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-description">وصف الحدث (اختياري)</label>
+                        <textarea id="event-description" class="form-control" placeholder="أدخل وصف للحدث"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-plus"></i> إضافة الحدث للجميع
+                    </button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="far fa-calendar-alt"></i> تقويم الأحداث</h2>
+                    <span class="badge">أحداث مشتركة</span>
+                </div>
+                <div class="calendar-container" id="calendar-container"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- الفوتر (مخفي حتى يتم تسجيل الدخول) -->
+    <footer id="main-footer" style="display: none;">
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h3>عن المنصة</h3>
+                <p>منصة تعليمية متكاملة لطلاب شعبة 306 لإدارة الواجبات والاختبارات والجدول الدراسي بطريقة منظمة وفعالة.</p>
+            </div>
+            <div class="footer-section">
+                <h3>روابط سريعة</h3>
+                <ul>
+                    <li><a href="#" class="nav-link-item" data-page="dashboard"><i class="fas fa-chevron-left"></i> الرئيسية</a></li>
+                    <li><a href="#" class="nav-link-item" data-page="assignments"><i class="fas fa-chevron-left"></i> الواجبات</a></li>
+                    <li><a href="#" class="nav-link-item" data-page="exams"><i class="fas fa-chevron-left"></i> الاختبارات</a></li>
+                    <li><a href="#" class="nav-link-item" data-page="gallery"><i class="fas fa-chevron-left"></i> المعرض</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>اتصل بنا</h3>
+                <p><i class="fas fa-phone"></i> 0580787562</p>
+                <p><i class="fas fa-envelope"></i> hussainasari0@gmail.com</p>
+                <p><i class="fas fa-map-marker-alt"></i> المملكة العربية السعودية</p>
+            </div>
+        </div>
+        <div class="container copyright">
+            <p>جميع الحقوق محفوظة &copy; 2026 - شعبة 306 التعليمية</p>
+            <p>تم التطوير بواسطة حسين وdeepseek</p>
+        </div>
+    </footer>
+
+    <!-- Firebase v12 Modular SDK -->
+<script type="module">
+// ===============================
+// Firebase v12 SDK
+// ===============================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { 
+    getAuth, 
+    onAuthStateChanged, 
+    signOut 
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { 
+    getDatabase, 
+    ref, 
+    onValue, 
+    set, 
+    update, 
+    get, 
+    push, 
+    remove 
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+// ===============================
+// تكوين Firebase
+// ===============================
+const firebaseConfig = {
+    apiKey: "AIzaSyCYbDqGBlBEEDGNfXbAbsS4sZupNDb7jrY",
+    authDomain: "system-306.firebaseapp.com",
+    databaseURL: "https://system-306-default-rtdb.firebaseio.com",
+    projectId: "system-306",
+    storageBucket: "system-306.firebasestorage.app",
+    messagingSenderId: "471316495588",
+    appId: "1:471316495588:web:4d7ba9be7fea17c7a8c0f1",
+    measurementId: "G-T4RTTBWHKL"
+};
+
+// ===============================
+// تهيئة Firebase
+// ===============================
+let app, auth, database;
+
+try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    database = getDatabase(app);
+    console.log("✅ Firebase تم التهيئة بنجاح");
+} catch (error) {
+    console.error("❌ خطأ في تهيئة Firebase:", error);
+    showAlert("خطأ", "Firebase غير متصل. تحقق من اتصال الإنترنت", "danger");
+}
+
+// ===============================
+// تعريف المتغيرات العامة
+// ===============================
+let userId = null;
+let currentUser = null;
+let userName = "";
+let userFullName = "";
+let userEmail = "";
+const classId = 'section306';
+let originalLogoText = "شعبة 306";
+let allEvents = [];
+let currentCalendarMonth = new Date().getMonth();
+let currentCalendarYear = new Date().getFullYear();
+
+// ===============================
+// وظائف مساعدة
+// ===============================
+function showAlert(title, message, type = 'info') {
+    const alertContainer = document.getElementById('custom-alert-container');
+    alertContainer.innerHTML = `
+        <div class="custom-alert-overlay">
+            <div class="custom-alert-box">
+                <h3 style="margin-bottom: 15px; color: var(--${type});">${title}</h3>
+                <p style="margin-bottom: 20px;">${message}</p>
+                <div class="custom-alert-actions">
+                    <button class="btn btn-primary" onclick="this.closest('.custom-alert-overlay').remove()">حسناً</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function formatDate(dateString) {
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleString('ar-SA', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (error) {
+        return dateString;
+    }
+}
+
+function getTimeRemaining(dueDate) {
+    const now = new Date();
+    const due = new Date(dueDate);
+    const diffTime = due - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return 'منتهي';
+    if (diffDays === 0) return 'ينتهي اليوم';
+    if (diffDays === 1) return 'غداً';
+    return `${diffDays} يوم`;
+}
+
+function updateLoadingMessage(message) {
+    const loadingMessage = document.getElementById('loading-message');
+    if (loadingMessage) {
+        loadingMessage.textContent = message;
+    }
+}
+
+// ===============================
+// إدارة تأثير التمرير في الهيدر
+// ===============================
+function initScrollEffect() {
+    const header = document.getElementById('main-header');
+    const logoText = document.getElementById('user-display-name');
+    
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            header.classList.add('scrolled');
+            if (userFullName && logoText) {
+                logoText.textContent = userFullName;
+            }
+        } else {
+            header.classList.remove('scrolled');
+            if (logoText) {
+                logoText.textContent = originalLogoText;
+            }
+        }
+    });
+}
+
+// ===============================
+// التحقق من تسجيل الدخول
+// ===============================
+function checkAuthStatus() {
+    updateLoadingMessage("التحقق من حالة المصادقة...");
+    
+    if (!auth) {
+        console.error("❌ Firebase Authentication غير متوفر");
+        redirectToLogin();
+        return;
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            console.log("✅ المستخدم مسجل:", user.email);
+            currentUser = user;
+            userId = user.uid;
+            userEmail = user.email || '';
+            
+            await loadUserData();
+            showUserInterface();
+            initScrollEffect();
+            
+        } else {
+            console.log("❌ المستخدم غير مسجل");
+            redirectToLogin();
+        }
+    }, (error) => {
+        console.error("❌ خطأ في التحقق من المصادقة:", error);
+        updateLoadingMessage("خطأ في الاتصال بالخادم");
+        
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            try {
+                const userData = JSON.parse(savedUser);
+                console.log("🔄 استخدام البيانات المحلية:", userData.email);
+                showAlert("معلومات", "يتم استخدام البيانات المحلية مؤقتاً", "warning");
+                showUserInterface();
+                initScrollEffect();
+            } catch (e) {
+                redirectToLogin();
+            }
+        } else {
+            redirectToLogin();
+        }
+    });
+}
+
+// ===============================
+// تحميل بيانات المستخدم
+// ===============================
+async function loadUserData() {
+    if (!userId || !database) return;
+    
+    try {
+        const userRef = ref(database, `users/${userId}`);
+        const snapshot = await get(userRef);
+        
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            userFullName = userData.fullName || userData.displayName || userData.firstName + ' ' + userData.lastName || 'مستخدم';
+            userName = userData.firstName || userData.displayName || 'مستخدم';
+            updateUserDisplay();
+            await addUserToClass();
+            await logUserActivity('dashboard_access');
+        } else {
+            userFullName = currentUser.displayName || currentUser.email || 'مستخدم';
+            userName = currentUser.displayName || currentUser.email || 'مستخدم';
+            updateUserDisplay();
+            await createUserInDatabase();
+        }
+        
+    } catch (error) {
+        console.warn("⚠️ لم يتم تحميل بيانات المستخدم:", error);
+        userFullName = currentUser.displayName || currentUser.email || 'مستخدم';
+        userName = currentUser.displayName || currentUser.email || 'مستخدم';
+        updateUserDisplay();
+    }
+}
+
+// ===============================
+// إنشاء بيانات المستخدم
+// ===============================
+async function createUserInDatabase() {
+    if (!userId || !database) return;
+    
+    try {
+        const userRef = ref(database, `users/${userId}`);
+        const userData = {
+            uid: userId,
+            email: currentUser.email || '',
+            displayName: currentUser.displayName || '',
+            fullName: currentUser.displayName || '',
+            firstName: currentUser.displayName ? currentUser.displayName.split(' ')[0] : 'مستخدم',
+            lastName: currentUser.displayName ? currentUser.displayName.split(' ').slice(1).join(' ') : '',
+            role: "student",
+            class: "306",
+            createdAt: new Date().toISOString(),
+            lastActive: new Date().toISOString()
+        };
+        
+        await set(userRef, userData);
+        console.log("✅ تم إنشاء بيانات المستخدم في قاعدة البيانات");
+        
+    } catch (error) {
+        console.warn("⚠️ لم يتم إنشاء بيانات المستخدم:", error);
+    }
+}
+
+// ===============================
+// تحديث عرض المستخدم
+// ===============================
+function updateUserDisplay() {
+    const userDisplay = document.getElementById('user-display-name');
+    const welcomeMessage = document.getElementById('welcome-message');
+    
+    if (userDisplay) {
+        userDisplay.textContent = originalLogoText;
+    }
+    
+    if (welcomeMessage) {
+        const now = new Date();
+        const hour = now.getHours();
+        let greeting = '';
+        
+        if (hour < 12) greeting = 'صباح الخير';
+        else if (hour < 18) greeting = 'مساء الخير';
+        else greeting = 'مساء الخير';
+        
+        welcomeMessage.textContent = `${greeting} ${userName}، في شعبة 306`;
+    }
+}
+
+// ===============================
+// إظهار واجهة المستخدم
+// ===============================
+function showUserInterface() {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+        loadingScreen.style.display = 'none';
+    }
+    
+    document.getElementById('main-header').style.display = 'block';
+    document.getElementById('main-nav').style.display = 'block';
+    document.getElementById('main-content').style.display = 'block';
+    document.getElementById('main-footer').style.display = 'block';
+    
+    initNavigation();
+    loadDashboard();
+    
+    setTimeout(() => {
+        showAlert("مرحباً", `أهلاً وسهلاً بك ${userName}!`, "success");
+    }, 500);
+}
+
+// ===============================
+// توجيه لصفحة تسجيل الدخول
+// ===============================
+function redirectToLogin() {
+    updateLoadingMessage("التوجيه إلى صفحة تسجيل الدخول...");
+    
+    setTimeout(() => {
+        window.location.href = "index.html";
+    }, 2000);
+}
+
+// ===============================
+// إضافة المستخدم للصف المشترك
+// ===============================
+async function addUserToClass() {
+    if (!userId || !userFullName || !database) return;
+    
+    try {
+        const classRef = ref(database, `classes/${classId}`);
+        const classSnapshot = await get(classRef);
+        
+        if (!classSnapshot.exists()) {
+            await set(classRef, {
+                name: 'شعبة 306',
+                description: 'الصف الدراسي المشترك لشعبة 306',
+                created: new Date().toISOString(),
+                members: { [userId]: true },
+                memberCount: 1,
+                activeUsers: { [userId]: new Date().toISOString() }
+            });
+            
+            await set(ref(database, `classes/${classId}/assignments`), {});
+            await set(ref(database, `classes/${classId}/exams`), {});
+            await set(ref(database, `classes/${classId}/gallery`), {});
+            await set(ref(database, `classes/${classId}/events`), {});
+            await set(ref(database, `classes/${classId}/notifications`), {});
+            await set(ref(database, `classes/${classId}/schedule`), getDefaultSchedule());
+            
+            console.log('✅ تم إنشاء الصف المشترك');
+        } else {
+            const classData = classSnapshot.val();
+            const members = classData.members || {};
+            
+            if (!members[userId]) {
+                await update(classRef, {
+                    [`members/${userId}`]: true,
+                    memberCount: (classData.memberCount || 0) + 1,
+                    [`activeUsers/${userId}`]: new Date().toISOString()
+                });
+                console.log('✅ تم إضافة المستخدم للصف');
+            } else {
+                await update(ref(database, `classes/${classId}/activeUsers/${userId}`), new Date().toISOString());
+            }
+        }
+    } catch (error) {
+        console.warn("⚠️ لم يتم إضافة المستخدم للصف:", error);
+    }
+}
+
+// ===============================
+// تسجيل نشاط المستخدم
+// ===============================
+async function logUserActivity(activityType) {
+    if (!userId || !database) return;
+    
+    try {
+        const activityRef = ref(database, `userActivities/${userId}/${Date.now()}`);
+        await set(activityRef, {
+            type: activityType,
+            timestamp: new Date().toISOString(),
+            user: userName,
+            email: userEmail
+        });
+    } catch (error) {
+        console.warn("⚠️ لم يتم تسجيل النشاط:", error);
+    }
+}
+
+// ===============================
+// إدارة التنقل
+// ===============================
+function initNavigation() {
+    const navLinks = document.querySelectorAll('.nav-link-item');
+    const pages = document.querySelectorAll('.page-content');
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            const pageId = link.dataset.page;
+            
+            pages.forEach(p => p.classList.remove('active'));
+            navLinks.forEach(l => l.classList.remove('active'));
+            
+            const page = document.getElementById(pageId);
+            if (page) {
+                page.classList.add('active');
+                link.classList.add('active');
+            }
+            
+            switch(pageId) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'assignments':
+                    loadAssignments();
+                    break;
+                case 'submissions':
+                    loadSubmissions();
+                    break;
+                case 'schedule':
+                    loadSchedule();
+                    break;
+                case 'exams':
+                    loadExams();
+                    break;
+                case 'calculator':
+                    loadCalculator();
+                    break;
+                case 'gallery':
+                    loadGallery();
+                    break;
+                case 'calendar':
+                    loadCalendar();
+                    break;
+            }
+        });
+    });
+
+    document.getElementById('logout-btn')?.addEventListener('click', async () => {
+        if (confirm('هل تريد تسجيل الخروج؟')) {
+            try {
+                await logUserActivity('logout');
+                await signOut(auth);
+                localStorage.removeItem('currentUser');
+                showAlert("تم تسجيل الخروج", "تم تسجيل الخروج بنجاح!", "success");
+                
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 1500);
+                
+            } catch (error) {
+                console.error("❌ خطأ تسجيل الخروج:", error);
+                showAlert("خطأ", "تعذر تسجيل الخروج", "danger");
+            }
+        }
+    });
+}
+
+// ===============================
+// نظام الإشعارات المشتركة
+// ===============================
+async function loadNotifications() {
+    if (!userId || !database) return;
+    
+    const classNotificationsRef = ref(database, `classes/${classId}/notifications`);
+    
+    onValue(classNotificationsRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        const classNotifications = Object.entries(data).map(([key, value]) => ({
+            id: key,
+            ...value
+        }));
+        
+        renderNotifications(classNotifications);
+    });
+}
+
+function renderNotifications(notifications) {
+    const notificationList = document.getElementById('notification-list');
+    const notificationCount = document.getElementById('notification-count');
+    
+    if (!notificationList || !notificationCount) return;
+    
+    const sortedNotifications = notifications.sort((a, b) => 
+        new Date(b.timestamp || b.time) - new Date(a.timestamp || a.time)
+    );
+    
+    const unreadCount = sortedNotifications.filter(n => !n.readBy || !n.readBy[userId]).length;
+    notificationCount.textContent = unreadCount;
+    
+    if (sortedNotifications.length === 0) {
+        notificationList.innerHTML = `
+            <div class="notification-empty">
+                <i class="far fa-bell"></i>
+                <p>لا توجد إشعارات</p>
+            </div>`;
+    } else {
+        notificationList.innerHTML = sortedNotifications.map(notification => {
+            const isRead = notification.readBy && notification.readBy[userId];
+            return `
+                <div class="notification-item ${isRead ? '' : 'unread'}" data-id="${notification.id}">
+                    <div class="notification-icon ${notification.type || 'info'}">
+                        <i class="fas fa-${getNotificationIcon(notification.type)}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">${notification.title}</div>
+                        <div class="notification-message">${notification.message}</div>
+                        <div class="notification-time">${formatDate(notification.timestamp || notification.time)}</div>
+                        <div class="notification-sender">
+                            <small><i class="fas fa-user"></i> ${notification.sender || 'النظام'}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+function getNotificationIcon(type) {
+    const icons = {
+        assignment: 'tasks',
+        exam: 'clipboard-list',
+        event: 'calendar',
+        success: 'check-circle',
+        warning: 'exclamation-triangle',
+        danger: 'exclamation-circle',
+        info: 'info-circle'
+    };
+    return icons[type] || 'bell';
+}
+
+async function sendNotificationToAll(title, message, type = 'info') {
+    if (!userId || !database) return;
+    
+    try {
+        const notificationsRef = ref(database, `classes/${classId}/notifications`);
+        const newNotificationRef = push(notificationsRef);
+        
+        await set(newNotificationRef, {
+            id: newNotificationRef.key,
+            title,
+            message,
+            type,
+            sender: userName || userEmail || 'مستخدم',
+            senderId: userId,
+            timestamp: new Date().toISOString(),
+            time: new Date().toLocaleString('ar-SA'),
+            readBy: {}
+        });
+        
+        console.log("✅ تم إرسال الإشعار للجميع:", title);
+        
+    } catch (error) {
+        console.error("❌ خطأ في إرسال الإشعار:", error);
+    }
+}
+
+// إدارة الإشعارات في الواجهة
+const notificationBtn = document.getElementById('notification-btn');
+const notificationDropdown = document.getElementById('notification-dropdown');
+const clearNotificationsBtn = document.getElementById('clear-notifications');
+
+notificationBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notificationDropdown.classList.toggle('show');
+});
+
+document.addEventListener('click', (e) => {
+    if (!notificationBtn?.contains(e.target) && !notificationDropdown?.contains(e.target)) {
+        notificationDropdown?.classList.remove('show');
+    }
+});
+
+document.getElementById('notification-list')?.addEventListener('click', async (e) => {
+    const notificationItem = e.target.closest('.notification-item');
+    if (notificationItem && userId && database) {
+        const notificationId = notificationItem.dataset.id;
+        const notificationRef = ref(database, `classes/${classId}/notifications/${notificationId}/readBy/${userId}`);
+        await set(notificationRef, true);
+        notificationItem.classList.remove('unread');
+        updateNotificationCount();
+    }
+});
+
+function updateNotificationCount() {
+    const notificationItems = document.querySelectorAll('.notification-item');
+    const unreadCount = Array.from(notificationItems).filter(item => 
+        item.classList.contains('unread')
+    ).length;
+    
+    const notificationCount = document.getElementById('notification-count');
+    if (notificationCount) {
+        notificationCount.textContent = unreadCount;
+    }
+}
+
+clearNotificationsBtn?.addEventListener('click', async () => {
+    if (!userId || !database) return;
+    
+    if (confirm('هل تريد مسح جميع الإشعارات؟ (سيتم حذفها للجميع)')) {
+        try {
+            const notificationsRef = ref(database, `classes/${classId}/notifications`);
+            await set(notificationsRef, {});
+            showAlert('تم المسح', 'تم مسح جميع الإشعارات المشتركة', 'success');
+        } catch (error) {
+            showAlert('خطأ', 'تعذر مسح الإشعارات', 'danger');
+        }
+    }
+});
+
+// ===============================
+// نظام الواجبات المشتركة - المحسّن
+// ===============================
+async function loadAssignments() {
+    if (!userId || !database) return;
+    
+    const assignmentsRef = ref(database, `classes/${classId}/assignments`);
+    
+    onValue(assignmentsRef, async (snapshot) => {
+        const data = snapshot.val() || {};
+        const assignments = Object.entries(data).map(([id, assignment]) => ({
+            id,
+            ...assignment
+        }));
+        
+        const userSubmissionsRef = ref(database, `users/${userId}/assignments`);
+        const userSnapshot = await get(userSubmissionsRef);
+        const userSubmissions = userSnapshot.val() || {};
+        
+        renderAssignments(assignments, userSubmissions);
+        updateAssignmentStats(assignments, userSubmissions);
+    });
+}
+
+function renderAssignments(assignments, userSubmissions) {
+    const assignmentsList = document.getElementById('assignments-list');
+    const sharedCount = document.getElementById('shared-assignments-count');
+    
+    if (!assignmentsList) return;
+    
+    sharedCount.textContent = `${assignments.length} واجب مشترك`;
+    
+    if (assignments.length === 0) {
+        assignmentsList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-tasks"></i>
+                <p>لا توجد واجبات مشتركة حالياً</p>
+            </div>`;
+    } else {
+        // تصفية الواجبات غير المسلمة فقط
+        const unsubmittedAssignments = assignments.filter(assignment => 
+            !userSubmissions[assignment.id]
+        );
+        
+        const sortedAssignments = unsubmittedAssignments.sort((a, b) => 
+            new Date(a.dueDate) - new Date(b.dueDate)
+        );
+        
+        assignmentsList.innerHTML = sortedAssignments.map(assignment => {
+            const timeRemaining = getTimeRemaining(assignment.dueDate);
+            const isUrgent = timeRemaining.includes('اليوم') || timeRemaining.includes('غداً');
+            
+            return `
+                <div class="assignment-item ${isUrgent ? 'urgent' : 'pending'}">
+                    <div class="assignment-info">
+                        <h3>${assignment.title}</h3>
+                        <div class="assignment-meta">
+                            <span><i class="fas fa-book"></i> ${assignment.subject}</span>
+                            <span><i class="fas fa-calendar"></i> ${formatDate(assignment.dueDate)}</span>
+                            <span><i class="fas fa-user"></i> ${assignment.addedBy || 'مجهول'}</span>
+                            <span><i class="fas fa-clock"></i> ${timeRemaining}</span>
+                            <span><i class="fas fa-users"></i> ${assignment.submittedCount || 0}/${assignment.totalMembers || 0}</span>
+                        </div>
+                        ${assignment.description ? `<p style="margin-top: 10px; color: #666; font-size: 0.9rem;">${assignment.description}</p>` : ''}
+                    </div>
+                    <div class="assignment-actions">
+                        <button class="btn btn-success" onclick="submitAssignment('${assignment.id}')">
+                            <i class="fas fa-check"></i> تسليم
+                        </button>
+                        ${assignment.addedById === userId ? 
+                            `<button class="btn btn-danger" onclick="deleteAssignment('${assignment.id}')" style="margin-right: 5px;">
+                                <i class="fas fa-trash"></i> 
+                            </button>` : ''
+                        }
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // إضافة رسالة إذا لم تكن هناك واجبات غير مسلمة
+        if (unsubmittedAssignments.length === 0) {
+            assignmentsList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-check-circle"></i>
+                    <p>🎉 ممتاز! لقد سلمت جميع الواجبات</p>
+                </div>`;
+        }
+    }
+}
+
+function updateAssignmentStats(assignments, userSubmissions) {
+    const pendingAssignments = assignments.filter(assignment => 
+        !userSubmissions[assignment.id]
+    ).length;
+    
+    const completedAssignments = assignments.filter(assignment => 
+        userSubmissions[assignment.id]
+    ).length;
+    
+    const statPending = document.getElementById('stat-pending');
+    const statCompleted = document.getElementById('stat-completed');
+    
+    if (statPending) statPending.textContent = pendingAssignments;
+    if (statCompleted) statCompleted.textContent = completedAssignments;
+}
+
+// إضافة واجب جديد للجميع
+document.getElementById('add-assignment-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (!userId || !database) {
+        showAlert('خطأ', 'يرجى تسجيل الدخول أولاً', 'danger');
+        return;
+    }
+    
+    const title = document.getElementById('assignment-title').value.trim();
+    const subject = document.getElementById('assignment-subject').value;
+    const dueDate = document.getElementById('assignment-due-date').value;
+    const description = document.getElementById('assignment-description')?.value || '';
+    
+    if (!title || !subject || !dueDate) {
+        showAlert('خطأ', 'يرجى ملء جميع الحقول المطلوبة', 'danger');
+        return;
+    }
+    
+    const assignmentsRef = ref(database, `classes/${classId}/assignments`);
+    const newAssignmentRef = push(assignmentsRef);
+    const assignmentId = newAssignmentRef.key;
+    
+    await set(newAssignmentRef, {
+        id: assignmentId,
+        title,
+        subject,
+        dueDate,
+        description,
+        addedBy: userName || userEmail || 'مستخدم',
+        addedById: userId,
+        createdAt: new Date().toISOString(),
+        totalMembers: 0,
+        submittedCount: 0
+    });
+    
+    await sendNotificationToAll(
+        'واجب جديد',
+        `تم إضافة واجب جديد في مادة ${subject}: "${title}" - التسليم: ${formatDate(dueDate)}`,
+        'assignment'
+    );
+    
+    await updateAssignmentMembersCount(assignmentId);
+    
+    e.target.reset();
+    showAlert('تم الإضافة', 'تم إضافة الواجب للجميع بنجاح!', 'success');
+});
+
+async function updateAssignmentMembersCount(assignmentId) {
+    const classRef = ref(database, `classes/${classId}/members`);
+    const snapshot = await get(classRef);
+    
+    if (snapshot.exists()) {
+        const members = snapshot.val();
+        const memberCount = Object.keys(members).length;
+        
+        await update(ref(database, `classes/${classId}/assignments/${assignmentId}`), {
+            totalMembers: memberCount
+        });
+    }
+}
+
+// دالة محسّنة لتسليم الواجب
+window.submitAssignment = async function(assignmentId) {
+    if (!userId || !database) return;
+    
+    const assignmentRef = ref(database, `classes/${classId}/assignments/${assignmentId}`);
+    const userAssignmentRef = ref(database, `users/${userId}/assignments/${assignmentId}`);
+    const assignmentSnapshot = await get(assignmentRef);
+    
+    if (!assignmentSnapshot.exists()) {
+        showAlert('خطأ', 'الواجب غير موجود', 'danger');
+        return;
+    }
+    
+    const assignment = assignmentSnapshot.val();
+    
+    // التحقق مما إذا كان قد تم تسليم الواجب مسبقاً
+    const userAssignmentSnapshot = await get(userAssignmentRef);
+    if (userAssignmentSnapshot.exists()) {
+        showAlert('معلومات', 'لقد قمت بتسليم هذا الواجب مسبقاً', 'info');
+        return;
+    }
+    
+    // إنشاء تسليم المستخدم
+    const submissionData = {
+        assignmentId: assignmentId,
+        title: assignment.title,
+        subject: assignment.subject,
+        dueDate: assignment.dueDate,
+        description: assignment.description || '',
+        addedBy: assignment.addedBy || 'مجهول',
+        submissionDate: new Date().toLocaleString('ar-SA'),
+        submittedAt: new Date().toISOString(),
+        submittedAtTimestamp: new Date().getTime(),
+        grade: null,
+        status: 'submitted'
+    };
+    
+    // حفظ التسليم في قسم المستخدم
+    await set(userAssignmentRef, submissionData);
+    
+    // تحديث عدد المسلمين في الواجب المشترك
+    await update(assignmentRef, {
+        submittedCount: (assignment.submittedCount || 0) + 1
+    });
+    
+    // إرسال إشعار
+    await sendNotificationToAll(
+        'تم تسليم واجب',
+        `${userName} سلم واجب: "${assignment.title}"`,
+        'success'
+    );
+    
+    // إضافة حدث في التقويم للتسليم
+    await addSubmissionEvent(assignment);
+    
+    showAlert('تم التسليم', 'تم تسليم الواجب بنجاح! تم نقله لقسم التسليمات.', 'success');
+    
+    // تحديث كلا القسمين
+    loadAssignments();
+    loadSubmissions();
+};
+
+// إضافة حدث تسليم في التقويم
+async function addSubmissionEvent(assignment) {
+    if (!userId || !database) return;
+    
+    const eventsRef = ref(database, `classes/${classId}/events`);
+    const newEventRef = push(eventsRef);
+    
+    await set(newEventRef, {
+        id: newEventRef.key,
+        title: `تسليم واجب: ${assignment.title}`,
+        date: new Date().toISOString().split('T')[0],
+        type: 'واجب',
+        description: `قام ${userName} بتسليم الواجب في مادة ${assignment.subject}`,
+        addedBy: 'النظام',
+        addedById: 'system',
+        createdAt: new Date().toISOString(),
+        timestamp: new Date().getTime()
+    });
+}
+
+// دالة لحذف واجب
+window.deleteAssignment = async function(assignmentId) {
+    if (!confirm('هل أنت متأكد من حذف هذا الواجب؟ سيتم حذفه للجميع.')) {
+        return;
+    }
+    
+    const assignmentRef = ref(database, `classes/${classId}/assignments/${assignmentId}`);
+    const assignmentSnapshot = await get(assignmentRef);
+    
+    if (!assignmentSnapshot.exists()) {
+        showAlert('خطأ', 'الواجب غير موجود', 'danger');
+        return;
+    }
+    
+    const assignment = assignmentSnapshot.val();
+    
+    if (assignment.addedById !== userId) {
+        showAlert('خطأ', 'لا يمكنك حذف واجب لم تقم بإضافته', 'danger');
+        return;
+    }
+    
+    await remove(assignmentRef);
+    
+    await sendNotificationToAll(
+        'تم حذف واجب',
+        `تم حذف الواجب: "${assignment.title}"`,
+        'warning'
+    );
+    
+    showAlert('تم الحذف', 'تم حذف الواجب بنجاح!', 'success');
+};
+
+// ===============================
+// نظام التسليمات الشخصية - المحسّن
+// ===============================
+async function loadSubmissions() {
+    if (!userId || !database) return;
+    
+    const userAssignmentsRef = ref(database, `users/${userId}/assignments`);
+    
+    onValue(userAssignmentsRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        const submissions = Object.values(data);
+        
+        renderSubmissions(submissions);
+    });
+}
+
+function renderSubmissions(submissions) {
+    const submissionsList = document.getElementById('submissions-list');
+    const submittedCount = document.getElementById('submitted-count-badge');
+    
+    if (!submissionsList) return;
+    
+    submittedCount.textContent = `${submissions.length} تسليم`;
+    
+    if (submissions.length === 0) {
+        submissionsList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-file-upload"></i>
+                <p>لا توجد تسليمات بعد</p>
+            </div>`;
+    } else {
+        submissionsList.innerHTML = submissions
+            .sort((a, b) => (b.submittedAtTimestamp || 0) - (a.submittedAtTimestamp || 0))
+            .map(submission => {
+                const submissionDate = submission.submissionDate || 
+                                      (submission.submittedAt ? formatDate(submission.submittedAt) : 'غير محدد');
+                
+                return `
+                    <div class="assignment-item completed">
+                        <div class="assignment-info">
+                            <h3>${submission.title}</h3>
+                            <div class="assignment-meta">
+                                <span><i class="fas fa-book"></i> ${submission.subject}</span>
+                                <span><i class="fas fa-calendar-check"></i> ${submissionDate}</span>
+                                ${submission.grade ? 
+                                    `<span><i class="fas fa-star"></i> الدرجة: ${submission.grade}/100</span>` :
+                                    '<span><i class="fas fa-clock"></i> بانتظار التصحيح</span>'
+                                }
+                                ${submission.addedBy ? 
+                                    `<span><i class="fas fa-chalkboard-teacher"></i> ${submission.addedBy}</span>` : 
+                                    ''
+                                }
+                            </div>
+                            ${submission.description ? 
+                                `<p style="margin-top: 10px; color: #666; font-size: 0.9rem;">${submission.description}</p>` : 
+                                ''
+                            }
+                        </div>
+                        <div class="submission-status">
+                            <span class="badge completed">تم التسليم</span>
+                            ${submission.status === 'graded' ? 
+                                `<span class="badge success" style="margin-right: 5px;">تم التصحيح</span>` : 
+                                ''
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+    }
+}
+
+// ===============================
+// نظام الاختبارات المشتركة
+// ===============================
+async function loadExams() {
+    if (!userId || !database) return;
+    
+    const examsRef = ref(database, `classes/${classId}/exams`);
+    
+    onValue(examsRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        const exams = Object.values(data);
+        
+        renderExams(exams);
+        updateExamsStats(exams);
+    });
+}
+
+function renderExams(exams) {
+    const examsList = document.getElementById('exams-list');
+    const examsCount = document.getElementById('exams-count-badge');
+    
+    if (!examsList) return;
+    
+    examsCount.textContent = `${exams.length} اختبار`;
+    
+    if (exams.length === 0) {
+        examsList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-clipboard-list"></i>
+                <p>لا توجد اختبارات قادمة</p>
+            </div>`;
+    } else {
+        const sortedExams = exams.sort((a, b) => 
+            new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time)
+        );
+        
+        examsList.innerHTML = sortedExams.map(exam => {
+            const examDateTime = new Date(exam.date + 'T' + exam.time);
+            const now = new Date();
+            const timeDiff = examDateTime - now;
+            const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+            
+            let status = 'قادم';
+            let badgeClass = 'warning';
+            
+            if (daysLeft < 0) {
+                status = 'منتهي';
+                badgeClass = 'completed';
+            } else if (daysLeft === 0) {
+                status = 'اليوم';
+                badgeClass = 'urgent';
+            } else if (daysLeft <= 3) {
+                status = `بعد ${daysLeft} أيام`;
+                badgeClass = 'warning';
+            }
+            
+            return `
+                <div class="exam-item">
+                    <div class="exam-info">
+                        <h3>${exam.title}</h3>
+                        <div class="exam-meta">
+                            <span><i class="fas fa-book"></i> ${exam.subject}</span>
+                            <span><i class="fas fa-calendar"></i> ${formatDate(exam.date)}</span>
+                            <span><i class="fas fa-clock"></i> ${exam.time}</span>
+                            ${exam.location ? `<span><i class="fas fa-map-marker-alt"></i> ${exam.location}</span>` : ''}
+                            <span><i class="fas fa-user"></i> ${exam.addedBy || 'مجهول'}</span>
+                        </div>
+                        ${exam.description ? `<p style="margin-top: 10px; color: #666; font-size: 0.9rem;">${exam.description}</p>` : ''}
+                    </div>
+                    <span class="badge ${badgeClass}">${status}</span>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+function updateExamsStats(exams) {
+    const now = new Date();
+    const upcomingExams = exams.filter(exam => {
+        const examDate = new Date(exam.date + 'T' + exam.time);
+        return examDate > now;
+    }).length;
+    
+    const statExams = document.getElementById('stat-exams');
+    if (statExams) {
+        statExams.textContent = upcomingExams;
+    }
+}
+
+// إضافة اختبار جديد للجميع
+document.getElementById('add-exam-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (!userId || !database) {
+        showAlert('خطأ', 'يرجى تسجيل الدخول أولاً', 'danger');
+        return;
+    }
+    
+    const title = document.getElementById('exam-title').value;
+    const subject = document.getElementById('exam-subject').value;
+    const date = document.getElementById('exam-date').value;
+    const time = document.getElementById('exam-time').value;
+    const location = document.getElementById('exam-location')?.value || '';
+    const description = document.getElementById('exam-description')?.value || '';
+    
+    if (!title || !subject || !date || !time) {
+        showAlert('خطأ', 'يرجى ملء جميع الحقول المطلوبة', 'danger');
+        return;
+    }
+    
+    const examsRef = ref(database, `classes/${classId}/exams`);
+    const newExamRef = push(examsRef);
+    
+    await set(newExamRef, {
+        id: newExamRef.key,
+        title,
+        subject,
+        date,
+        time,
+        location,
+        description,
+        addedBy: userName || userEmail || 'مستخدم',
+        addedById: userId,
+        createdAt: new Date().toISOString()
+    });
+    
+    await sendNotificationToAll(
+        'اختبار جديد',
+        `تم إضافة اختبار جديد في مادة ${subject}: "${title}" - التاريخ: ${formatDate(date)} الساعة: ${time}`,
+        'exam'
+    );
+    
+    e.target.reset();
+    showAlert('تم الإضافة', 'تم إضافة الاختبار للجميع بنجاح!', 'success');
+});
+
+// ===============================
+// الجدول الدراسي المشترك
+// ===============================
+async function loadSchedule() {
+    if (!userId || !database) return;
+    
+    const scheduleRef = ref(database, `classes/${classId}/schedule`);
+    
+    onValue(scheduleRef, (snapshot) => {
+        const data = snapshot.val() || getDefaultSchedule();
+        renderSchedule(data);
+        renderScheduleEditForm();
+    });
+}
+
+function getDefaultSchedule() {
+    return {
+        "الأحد": ["الرياضيات", "اللغة العربية", "اللغة الإنجليزية", "الفيزياء", "الكيمياء", "التاريخ"],
+        "الإثنين": ["اللغة العربية", "الرياضيات", "الفيزياء", "الكيمياء", "اللغة الإنجليزية", "التاريخ"],
+        "الثلاثاء": ["اللغة الإنجليزية", "الرياضيات", "الكيمياء", "الفيزياء", "اللغة العربية", "التاريخ"],
+        "الأربعاء": ["الفيزياء", "الكيمياء", "الرياضيات", "اللغة العربية", "اللغة الإنجليزية", "التاريخ"],
+        "الخميس": ["الكيمياء", "الفيزياء", "اللغة العربية", "الرياضيات", "التاريخ", "اللغة الإنجليزية"]
+    };
+}
+
+function renderSchedule(schedule) {
+    const scheduleBody = document.getElementById('schedule-body');
+    const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"];
+    
+    if (scheduleBody) {
+        scheduleBody.innerHTML = days.map(day => `
+            <tr>
+                <td><strong>${day}</strong></td>
+                ${(schedule[day] || Array(6).fill('')).map(subject => `
+                    <td>${subject || '-'}</td>
+                `).join('')}
+            </tr>
+        `).join('');
+    }
+}
+
+function renderScheduleEditForm() {
+    const scheduleSection = document.getElementById('schedule');
+    if (!scheduleSection) return;
+    
+    if (!document.getElementById('schedule-edit-form')) {
+        const editForm = `
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-edit"></i> تعديل الجدول الدراسي</h2>
+                </div>
+                <div class="schedule-edit-form">
+                    <form id="schedule-edit-form">
+                        <div class="schedule-edit-grid">
+                            <div class="form-group">
+                                <label for="edit-day">اليوم *</label>
+                                <select id="edit-day" class="form-control" required>
+                                    <option value="">اختر اليوم</option>
+                                    <option value="الأحد">الأحد</option>
+                                    <option value="الإثنين">الإثنين</option>
+                                    <option value="الثلاثاء">الثلاثاء</option>
+                                    <option value="الأربعاء">الأربعاء</option>
+                                    <option value="الخميس">الخميس</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit-period">الحصة *</label>
+                                <select id="edit-period" class="form-control" required>
+                                    <option value="">اختر الحصة</option>
+                                    <option value="0">الحصة الأولى</option>
+                                    <option value="1">الحصة الثانية</option>
+                                    <option value="2">الحصة الثالثة</option>
+                                    <option value="3">الحصة الرابعة</option>
+                                    <option value="4">الحصة الخامسة</option>
+                                    <option value="5">الحصة السادسة</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit-subject">المادة *</label>
+                                <select id="edit-subject" class="form-control" required>
+                                    <option value="">اختر المادة</option>
+                                    <option value="الرياضيات">الرياضيات</option>
+                                    <option value="اللغة العربية">اللغة العربية</option>
+                                    <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                                    <option value="الفيزياء">الفيزياء</option>
+                                    <option value="المواطنة الرقمية">المواطنة الرقمية</option>
+                                    <option value="المهارات الحياتية">المهارات الحياتية</option>
+                                    <option value="الجغرافيا">الجغرافيا</option>
+                                    <option value="التربية البدنية">التربية البدنية</option>
+                                    <option value="الدراسات الإسلامية">الدراسات الإسلامية</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-save"></i> حفظ التعديل للجميع
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `;
+        
+        const scheduleTableCard = scheduleSection.querySelector('.card');
+        if (scheduleTableCard) {
+            scheduleTableCard.insertAdjacentHTML('afterend', editForm);
+        }
+        
+        document.getElementById('schedule-edit-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await updateSchedule();
+        });
+    }
+}
+
+async function updateSchedule() {
+    if (!userId || !database) return;
+    
+    const day = document.getElementById('edit-day').value;
+    const period = parseInt(document.getElementById('edit-period').value);
+    const subject = document.getElementById('edit-subject').value;
+    
+    if (!day || isNaN(period) || !subject) {
+        showAlert('خطأ', 'يرجى ملء جميع الحقول المطلوبة', 'danger');
+        return;
+    }
+    
+    try {
+        const scheduleRef = ref(database, `classes/${classId}/schedule/${day}/${period}`);
+        await set(scheduleRef, subject);
+        
+        await sendNotificationToAll(
+            'تعديل الجدول',
+            `تم تعديل الجدول الدراسي: ${day} - الحصة ${period + 1}: ${subject}`,
+            'info'
+        );
+        
+        document.getElementById('schedule-edit-form').reset();
+        showAlert('تم التعديل', 'تم تحديث الجدول الدراسي للجميع', 'success');
+        
+    } catch (error) {
+        console.error("❌ خطأ في تحديث الجدول:", error);
+        showAlert('خطأ', 'تعذر تحديث الجدول الدراسي', 'danger');
+    }
+}
+
+// ===============================
+// حاسبة النسبة الموزونة
+// ===============================
+function loadCalculator() {
+    if (userId && database) {
+        loadSavedWeightedScore();
+    }
+    
+    document.getElementById('calculate-weighted')?.addEventListener('click', calculateWeighted);
+}
+
+async function loadSavedWeightedScore() {
+    if (!userId || !database) return;
+    
+    try {
+        const userRef = ref(database, `users/${userId}`);
+        const snapshot = await get(userRef);
+        
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            if (userData.weightedScore) {
+                document.getElementById('qiyas-score').value = userData.qiyasScore || '';
+                document.getElementById('tahseeli-score').value = userData.tahseeliScore || '';
+                document.getElementById('gpa-score').value = userData.gpaScore || '';
+                calculateWeighted();
+            }
+        }
+    } catch (error) {
+        console.warn("⚠️ لم يتم تحميل النسبة المحفوظة:", error);
+    }
+}
+
+function calculateWeighted() {
+    const qiyas = parseFloat(document.getElementById('qiyas-score').value) || 0;
+    const tahseeli = parseFloat(document.getElementById('tahseeli-score').value) || 0;
+    const gpa = parseFloat(document.getElementById('gpa-score').value) || 0;
+    
+    const weightedScore = (qiyas * 0.30) + (tahseeli * 0.30) + (gpa * 0.40);
+    
+    const weightedResult = document.getElementById('weighted-result');
+    const weightedDescription = document.getElementById('weighted-description');
+    const statAverage = document.getElementById('stat-average');
+    
+    if (weightedResult) weightedResult.textContent = weightedScore.toFixed(2) + '%';
+    if (statAverage) statAverage.textContent = weightedScore.toFixed(2) + '%';
+    
+    let description = '';
+    if (weightedScore >= 90) description = 'ممتاز! نسبة عالية جداً';
+    else if (weightedScore >= 80) description = 'جيد جداً';
+    else if (weightedScore >= 70) description = 'جيد';
+    else if (weightedScore >= 60) description = 'مقبول';
+    else description = 'يحتاج تحسين';
+    
+    if (weightedDescription) weightedDescription.textContent = description;
+    
+    if (userId && database) {
+        saveWeightedScore(weightedScore, qiyas, tahseeli, gpa);
+    }
+}
+
+async function saveWeightedScore(score, qiyas, tahseeli, gpa) {
+    if (!userId || !database) return;
+    
+    const userRef = ref(database, `users/${userId}`);
+    await update(userRef, {
+        weightedScore: score,
+        qiyasScore: qiyas,
+        tahseeliScore: tahseeli,
+        gpaScore: gpa,
+        lastCalculated: new Date().toISOString()
+    });
+}
+
+// ===============================
+// المعرض المشترك - المحسّن
+// ===============================
+async function loadGallery() {
+    if (!userId || !database) return;
+    
+    const galleryRef = ref(database, `classes/${classId}/gallery`);
+    
+    onValue(galleryRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        const images = Object.values(data);
+        renderGallery(images);
+    });
+}
+
+function renderGallery(images) {
+    const galleryContainer = document.getElementById('images-gallery');
+    const totalPhotos = document.getElementById('total-photos-badge');
+    
+    if (!galleryContainer) return;
+    
+    if (totalPhotos) totalPhotos.textContent = `${images.length} صورة مشتركة`;
+    
+    if (images.length === 0) {
+        galleryContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-images"></i>
+                <p>لا توجد صور مشتركة حالياً</p>
+            </div>`;
+    } else {
+        galleryContainer.innerHTML = `
+            <div class="gallery-grid">
+                ${images.map(image => `
+                    <div class="gallery-item">
+                        <div class="image-container">
+                            <img src="${image.url}" alt="${image.title}" 
+                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200/cccccc/666666?text=صورة+غير+متوفرة';"
+                                 onclick="openImageModal('${image.url}', '${image.title}')">
+                            <div class="image-loading" style="display:none;">جار التحميل...</div>
+                        </div>
+                        <div class="gallery-info">
+                            <h4>${image.title}</h4>
+                            <p>${image.description || ''}</p>
+                            <small><i class="fas fa-user"></i> ${image.addedBy || 'مجهول'} - ${formatDate(image.uploadDate || image.createdAt)}</small>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>`;
+        
+        setTimeout(() => {
+            checkImagesLoad();
+        }, 1000);
+    }
+}
+
+function checkImagesLoad() {
+    const images = document.querySelectorAll('.gallery-item img');
+    images.forEach(img => {
+        if (!img.complete || img.naturalHeight === 0) {
+            img.src = 'https://via.placeholder.com/300x200/cccccc/666666?text=خطأ+في+تحميل+الصورة';
+        }
+    });
+}
+
+document.getElementById('upload-image-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (!userId || !database) {
+        showAlert('خطأ', 'يرجى تسجيل الدخول أولاً', 'danger');
+        return;
+    }
+    
+    const title = document.getElementById('image-title').value.trim();
+    const url = document.getElementById('image-url').value.trim();
+    const description = document.getElementById('image-description')?.value.trim() || '';
+    
+    if (!title || !url) {
+        showAlert('خطأ', 'يرجى ملء جميع الحقول المطلوبة', 'danger');
+        return;
+    }
+    
+    if (!isValidImageUrl(url)) {
+        showAlert('خطأ', 'يرجى إدخال رابط صورة صحيح (يجب أن ينتهي بـ .jpg, .png, .gif, .webp)', 'danger');
+        return;
+    }
+    
+    const isValid = await validateImageUrl(url);
+    if (!isValid) {
+        showAlert('خطأ', 'لم يتم العثور على الصورة في الرابط المقدم. يرجى التحقق من الرابط.', 'danger');
+        return;
+    }
+    
+    const galleryRef = ref(database, `classes/${classId}/gallery`);
+    const newImageRef = push(galleryRef);
+    
+    await set(newImageRef, {
+        id: newImageRef.key,
+        title,
+        url,
+        description,
+        addedBy: userName || userEmail || 'مستخدم',
+        addedById: userId,
+        uploadDate: new Date().toLocaleString('ar-SA'),
+        createdAt: new Date().toISOString(),
+        validated: true
+    });
+    
+    await sendNotificationToAll(
+        'صورة جديدة',
+        `تمت إضافة صورة جديدة: "${title}"`,
+        'info'
+    );
+    
+    e.target.reset();
+    showAlert('تم الرفع', 'تم رفع الصورة للجميع بنجاح!', 'success');
+});
+
+function isValidImageUrl(url) {
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+    const urlLower = url.toLowerCase();
+    return imageExtensions.some(ext => urlLower.includes(ext)) || 
+           urlLower.includes('images.unsplash.com') ||
+           urlLower.includes('i.imgur.com');
+}
+
+async function validateImageUrl(url) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url;
+        
+        setTimeout(() => resolve(false), 5000);
+    });
+}
+
+window.openImageModal = function(url, title) {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        padding: 20px;
+    `;
+    
+    modal.innerHTML = `
+        <div style="position: relative; max-width: 90%; max-height: 90%;">
+            <img src="${url}" alt="${title}" style="max-width: 100%; max-height: 80vh; border-radius: 10px;">
+            <button onclick="this.parentElement.parentElement.remove()" 
+                    style="position: absolute; top: -40px; left: -40px; background: #e74c3c; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer;">
+                ✕
+            </button>
+            <div style="color: white; text-align: center; margin-top: 10px; font-size: 18px;">${title}</div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+};
+
+// ===============================
+// التقويم المشترك - المحسّن لعرض الأحداث
+// ===============================
+async function loadCalendar() {
+    if (!userId || !database) return;
+    
+    createCalendarLayout();
+    loadEvents();
+}
+
+function createCalendarLayout() {
+    const calendarPage = document.getElementById('calendar');
+    if (!calendarPage) return;
+    
+    if (document.querySelector('.calendar-layout')) return;
+    
+    calendarPage.innerHTML = `
+        <div class="calendar-layout">
+            <div class="calendar-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="far fa-calendar-alt"></i> تقويم الأحداث</h2>
+                        <span class="badge">أحداث مشتركة</span>
+                    </div>
+                    <div class="calendar-container" id="calendar-container"></div>
+                </div>
+            </div>
+            
+            <div class="events-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-info-circle"></i> تفاصيل الأحداث</h2>
+                    </div>
+                    <div id="event-details-container">
+                        <div class="empty-state" id="no-event-selected">
+                            <i class="far fa-calendar"></i>
+                            <p>انقر على يوم في التقويم لعرض الأحداث</p>
+                        </div>
+                        <div id="events-list" style="display: none;"></div>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <h2><i class="fas fa-plus-circle"></i> إضافة حدث جديد</h2>
+                    </div>
+                    <form id="add-event-form">
+                        <div class="form-group">
+                            <label for="event-title">عنوان الحدث *</label>
+                            <input type="text" id="event-title" class="form-control" placeholder="أدخل عنوان الحدث" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-date">تاريخ الحدث *</label>
+                            <input type="date" id="event-date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-type">نوع الحدث *</label>
+                            <select id="event-type" class="form-control" required>
+                                <option value="">اختر نوع الحدث</option>
+                                <option value="اختبار">اختبار</option>
+                                <option value="واجب">واجب</option>
+                                <option value="مناسبة">مناسبة</option>
+                                <option value="إجازة">إجازة</option>
+                                <option value="اجتماع">اجتماع</option>
+                                <option value="موعد نهائي">موعد نهائي</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-description">وصف الحدث (اختياري)</label>
+                            <textarea id="event-description" class="form-control" placeholder="أدخل وصف للحدث"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-plus"></i> إضافة الحدث للجميع
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    generateCalendar();
+    
+    document.getElementById('add-event-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await addEvent();
+    });
+    
+    // إضافة أزرار التنقل بين الشهور
+    document.getElementById('prev-month')?.addEventListener('click', () => {
+        currentCalendarMonth--;
+        if (currentCalendarMonth < 0) {
+            currentCalendarMonth = 11;
+            currentCalendarYear--;
+        }
+        generateCalendar();
+    });
+    
+    document.getElementById('next-month')?.addEventListener('click', () => {
+        currentCalendarMonth++;
+        if (currentCalendarMonth > 11) {
+            currentCalendarMonth = 0;
+            currentCalendarYear++;
+        }
+        generateCalendar();
+    });
+}
+
+async function loadEvents() {
+    if (!userId || !database) return;
+    
+    const eventsRef = ref(database, `classes/${classId}/events`);
+    
+    onValue(eventsRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        allEvents = Object.values(data);
+        updateCalendarEvents(allEvents);
+    });
+}
+
+function generateCalendar() {
+    const year = currentCalendarYear;
+    const month = currentCalendarMonth;
+    
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    const calendarContainer = document.getElementById('calendar-container');
+    if (!calendarContainer) return;
+    
+    let calendarHTML = `
+        <div class="calendar-header">
+            <button id="prev-month" class="calendar-nav"><i class="fas fa-chevron-right"></i></button>
+            <span>${getMonthName(month)} ${year}</span>
+            <button id="next-month" class="calendar-nav"><i class="fas fa-chevron-left"></i></button>
+        </div>
+        <div class="calendar-grid">
+            <div class="calendar-header">الأحد</div>
+            <div class="calendar-header">الإثنين</div>
+            <div class="calendar-header">الثلاثاء</div>
+            <div class="calendar-header">الأربعاء</div>
+            <div class="calendar-header">الخميس</div>
+            <div class="calendar-header">الجمعة</div>
+            <div class="calendar-header">السبت</div>
+    `;
+    
+    for (let i = 0; i < firstDay.getDay(); i++) {
+        calendarHTML += '<div class="calendar-day empty"></div>';
+    }
+    
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+        const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        const dayEvents = allEvents.filter(event => event.date === dateStr);
+        
+        calendarHTML += `
+            <div class="calendar-day ${dayEvents.length > 0 ? 'has-event' : ''}" 
+                 data-date="${dateStr}" 
+                 id="day-${dateStr}"
+                 onclick="showDayEvents('${dateStr}')">
+                <div class="day-number">${day}</div>
+                ${dayEvents.length > 0 ? 
+                    `<div class="event-indicator" title="${dayEvents.length} حدث">${dayEvents.length}</div>` : 
+                    ''}
+            </div>
+        `;
+    }
+    
+    calendarHTML += '</div>';
+    calendarContainer.innerHTML = calendarHTML;
+}
+
+function updateCalendarEvents(events) {
+    events.forEach(event => {
+        const dateStr = event.date;
+        const dayElement = document.getElementById(`day-${dateStr}`);
+        if (dayElement) {
+            const dayEvents = events.filter(e => e.date === dateStr);
+            dayElement.classList.toggle('has-event', dayEvents.length > 0);
+            
+            if (dayEvents.length > 0) {
+                const indicator = dayElement.querySelector('.event-indicator');
+                if (indicator) {
+                    indicator.textContent = dayEvents.length;
+                    indicator.title = `${dayEvents.length} حدث`;
+                } else {
+                    dayElement.innerHTML = `
+                        <div class="day-number">${dayElement.textContent.match(/\d+/)?.[0] || ''}</div>
+                        <div class="event-indicator" title="${dayEvents.length} حدث">${dayEvents.length}</div>
+                    `;
+                }
+            } else {
+                const indicator = dayElement.querySelector('.event-indicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+        }
+    });
+}
+
+window.showDayEvents = function(dateStr) {
+    const noEventElement = document.getElementById('no-event-selected');
+    const eventsListElement = document.getElementById('events-list');
+    
+    const dayEvents = allEvents.filter(event => event.date === dateStr);
+    
+    if (dayEvents.length === 0) {
+        if (noEventElement) noEventElement.style.display = 'block';
+        if (eventsListElement) eventsListElement.style.display = 'none';
+        return;
+    }
+    
+    if (noEventElement) noEventElement.style.display = 'none';
+    
+    const eventsHTML = `
+        <div class="day-events-header">
+            <h3><i class="far fa-calendar-check"></i> أحداث ${formatDate(dateStr)}</h3>
+            <span class="badge">${dayEvents.length} حدث</span>
+        </div>
+        <div class="events-list-container">
+            ${dayEvents.map(event => `
+                <div class="event-item ${event.type}">
+                    <div class="event-icon">
+                        <i class="fas ${getEventIcon(event.type)}"></i>
+                    </div>
+                    <div class="event-details">
+                        <h4>${event.title}</h4>
+                        <p>${event.description || 'لا يوجد وصف'}</p>
+                        <div class="event-meta">
+                            <span><i class="fas fa-calendar"></i> ${event.date}</span>
+                            <span><i class="fas fa-user"></i> ${event.addedBy || 'مجهول'}</span>
+                            <span class="event-type-badge ${event.type}">${event.type}</span>
+                        </div>
+                    </div>
+                    ${event.addedById === userId ? 
+                        `<button class="btn btn-sm btn-danger delete-event" onclick="deleteEvent('${event.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>` : 
+                        ''}
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    if (eventsListElement) {
+        eventsListElement.innerHTML = eventsHTML;
+        eventsListElement.style.display = 'block';
+    }
+    
+    document.querySelectorAll('.calendar-day').forEach(day => {
+        day.classList.remove('selected');
+    });
+    const selectedDay = document.getElementById(`day-${dateStr}`);
+    if (selectedDay) {
+        selectedDay.classList.add('selected');
+    }
+};
+
+function getEventIcon(type) {
+    const icons = {
+        'اختبار': 'fa-clipboard-list',
+        'واجب': 'fa-tasks',
+        'مناسبة': 'fa-calendar-star',
+        'إجازة': 'fa-umbrella-beach',
+        'اجتماع': 'fa-users',
+        'موعد نهائي': 'fa-clock'
+    };
+    return icons[type] || 'fa-calendar';
+}
+
+async function addEvent() {
+    if (!userId || !database) {
+        showAlert('خطأ', 'يرجى تسجيل الدخول أولاً', 'danger');
+        return;
+    }
+    
+    const title = document.getElementById('event-title').value.trim();
+    const date = document.getElementById('event-date').value;
+    const type = document.getElementById('event-type').value;
+    const description = document.getElementById('event-description').value.trim();
+    
+    if (!title || !date || !type) {
+        showAlert('خطأ', 'يرجى ملء الحقول المطلوبة', 'danger');
+        return;
+    }
+    
+    const eventsRef = ref(database, `classes/${classId}/events`);
+    const newEventRef = push(eventsRef);
+    const eventId = newEventRef.key;
+    
+    await set(newEventRef, {
+        id: eventId,
+        title,
+        date,
+        type,
+        description,
+        addedBy: userName || userEmail || 'مستخدم',
+        addedById: userId,
+        createdAt: new Date().toISOString(),
+        timestamp: new Date().getTime()
+    });
+    
+    await sendNotificationToAll(
+        'حدث جديد',
+        `تم إضافة حدث جديد: "${title}" - التاريخ: ${formatDate(date)}`,
+        'event'
+    );
+    
+    document.getElementById('add-event-form').reset();
+    showAlert('تم الإضافة', 'تم إضافة الحدث للجميع بنجاح!', 'success');
+    
+    loadEvents();
+    showDayEvents(date);
+}
+
+window.deleteEvent = async function(eventId) {
+    if (!confirm('هل أنت متأكد من حذف هذا الحدث؟ سيتم حذفه للجميع.')) {
+        return;
+    }
+    
+    try {
+        const eventRef = ref(database, `classes/${classId}/events/${eventId}`);
+        await remove(eventRef);
+        
+        showAlert('تم الحذف', 'تم حذف الحدث بنجاح!', 'success');
+        
+        loadEvents();
+        document.getElementById('no-event-selected').style.display = 'block';
+        document.getElementById('events-list').style.display = 'none';
+        
+    } catch (error) {
+        console.error("❌ خطأ في حذف الحدث:", error);
+        showAlert('خطأ', 'تعذر حذف الحدث', 'danger');
+    }
+};
+
+function getMonthName(month) {
+    const months = [
+        'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+        'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+    ];
+    return months[month];
+}
+
+// ===============================
+// تحميل لوحة التحكم
+// ===============================
+async function loadDashboard() {
+    if (!userId || !database) return;
+    
+    loadNotifications();
+    await updateDashboardStats();
+}
+
+async function updateDashboardStats() {
+    if (!userId || !database) return;
+    
+    try {
+        const assignmentsRef = ref(database, `classes/${classId}/assignments`);
+        const userSubmissionsRef = ref(database, `users/${userId}/assignments`);
+        const examsRef = ref(database, `classes/${classId}/exams`);
+        
+        const [assignmentsSnapshot, userSnapshot, examsSnapshot] = await Promise.all([
+            get(assignmentsRef),
+            get(userSubmissionsRef),
+            get(examsRef)
+        ]);
+        
+        const assignments = Object.values(assignmentsSnapshot.val() || {});
+        const userSubmissions = userSnapshot.val() || {};
+        const exams = Object.values(examsSnapshot.val() || {});
+        
+        const pendingAssignments = assignments.filter(assignment => 
+            !userSubmissions[assignment.id]
+        ).length;
+        
+        const completedAssignments = assignments.filter(assignment => 
+            userSubmissions[assignment.id]
+        ).length;
+        
+        const upcomingExams = exams.filter(exam => {
+            const examDate = new Date(exam.date + 'T' + exam.time);
+            return examDate > new Date();
+        }).length;
+        
+        const statPending = document.getElementById('stat-pending');
+        const statCompleted = document.getElementById('stat-completed');
+        const statExams = document.getElementById('stat-exams');
+        
+        if (statPending) statPending.textContent = pendingAssignments;
+        if (statCompleted) statCompleted.textContent = completedAssignments;
+        if (statExams) statExams.textContent = upcomingExams;
+        
+        updateUrgentTasks(assignments, userSubmissions, exams);
+        
+    } catch (error) {
+        console.warn("⚠️ لم يتم تحديث الإحصائيات:", error);
+    }
+}
+
+function updateUrgentTasks(assignments, userSubmissions, exams = []) {
+    const urgentTasks = document.getElementById('urgent-tasks');
+    const urgentCount = document.getElementById('urgent-badge');
+    
+    if (!urgentTasks || !urgentCount) return;
+    
+    const urgentAssignments = assignments.filter(assignment => {
+        if (!userSubmissions[assignment.id]) {
+            const dueDate = new Date(assignment.dueDate);
+            const today = new Date();
+            const diffTime = dueDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays <= 3 && diffDays >= 0;
+        }
+        return false;
+    });
+    
+    const urgentExams = exams.filter(exam => {
+        const examDate = new Date(exam.date + 'T' + exam.time);
+        const today = new Date();
+        const diffTime = examDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays <= 3 && diffDays >= 0;
+    });
+    
+    const totalUrgent = urgentAssignments.length + urgentExams.length;
+    urgentCount.textContent = `${totalUrgent} عاجل`;
+    
+    if (totalUrgent === 0) {
+        urgentTasks.innerHTML = `
+            <div class="empty-state" style="padding: 20px;">
+                <i class="fas fa-check-circle"></i>
+                <p>لا توجد مهام عاجلة</p>
+            </div>`;
+    } else {
+        let tasksHTML = '';
+        
+        urgentAssignments.forEach(assignment => {
+            const timeRemaining = getTimeRemaining(assignment.dueDate);
+            tasksHTML += `
+                <div class="task-item urgent">
+                    <div class="task-info">
+                        <h3>${assignment.title}</h3>
+                        <div class="task-meta">
+                            <span><i class="fas fa-tasks"></i> واجب</span>
+                            <span><i class="fas fa-book"></i> ${assignment.subject}</span>
+                            <span><i class="fas fa-calendar"></i> ${formatDate(assignment.dueDate)}</span>
+                            <span><i class="fas fa-exclamation-triangle"></i> ${timeRemaining}</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-warning" onclick="submitAssignment('${assignment.id}')">
+                        <i class="fas fa-check"></i> تسليم الآن
+                    </button>
+                </div>
+            `;
+        });
+        
+        urgentExams.forEach(exam => {
+            const examDate = new Date(exam.date + 'T' + exam.time);
+            const today = new Date();
+            const diffTime = examDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            let timeRemaining = '';
+            if (diffDays === 0) timeRemaining = 'اليوم';
+            else if (diffDays === 1) timeRemaining = 'غداً';
+            else timeRemaining = `بعد ${diffDays} أيام`;
+            
+            tasksHTML += `
+                <div class="task-item urgent">
+                    <div class="task-info">
+                        <h3>${exam.title}</h3>
+                        <div class="task-meta">
+                            <span><i class="fas fa-clipboard-list"></i> اختبار</span>
+                            <span><i class="fas fa-book"></i> ${exam.subject}</span>
+                            <span><i class="fas fa-calendar"></i> ${formatDate(exam.date)}</span>
+                            <span><i class="fas fa-clock"></i> ${exam.time}</span>
+                            <span><i class="fas fa-exclamation-triangle"></i> ${timeRemaining}</span>
+                        </div>
+                    </div>
+                    <span class="badge urgent">اختبار</span>
+                </div>
+            `;
+        });
+        
+        urgentTasks.innerHTML = tasksHTML;
+    }
+}
+
+// ===============================
+// CSS إضافي للتحسينات
+// ===============================
+const additionalStyles = `
+    <style>
+        .calendar-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .calendar-day {
+            position: relative;
+            min-height: 80px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .calendar-day:hover {
+            background-color: #f0f8ff;
+        }
+        
+        .calendar-day.selected {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+        
+        .calendar-day.has-event {
+            background-color: #fff8e1;
+        }
+        
+        .day-number {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .event-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #ff5722;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .day-events-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .event-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            transition: transform 0.2s;
+        }
+        
+        .event-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .event-icon {
+            background: #f5f5f5;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            color: #2196f3;
+            font-size: 20px;
+        }
+        
+        .event-details {
+            flex: 1;
+        }
+        
+        .event-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .event-type-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .event-type-badge.اختبار { background: #ffebee; color: #c62828; }
+        .event-type-badge.واجب { background: #e8f5e9; color: #2e7d32; }
+        .event-type-badge.مناسبة { background: #fff3e0; color: #ef6c00; }
+        
+        .image-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .image-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .calendar-nav {
+            background: #2196f3;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .calendar-day.empty {
+            background: #f9f9f9;
+            cursor: default;
+        }
+        
+        @media (max-width: 768px) {
+            .calendar-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+`;
+
+document.head.insertAdjacentHTML('beforeend', additionalStyles);
+
+// ===============================
+// بدء تحميل المنصة
+// ===============================
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 بدء تحميل المنصة التعليمية...");
+    checkAuthStatus();
+});
+</script>
+</body>
+</html>

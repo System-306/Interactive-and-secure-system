@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل دخول المدير - شعبة 306</title>
+       <link rel="shortcut icon" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
+<link rel="icon" type="image/png" sizes="32x32" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
+<link rel="icon" type="image/png" sizes="16x16" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #1abc9c;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #27ae60;
+            --dark: #1a252f;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .admin-login-container {
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo-section i {
+            font-size: 4rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+        
+        .logo-section h1 {
+            color: white;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .logo-section p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+        
+        .admin-login-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        
+        .admin-badge {
+            background: linear-gradient(to right, var(--accent), #16a085);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        
+        .admin-login-card h2 {
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        
+        .admin-credentials {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-right: 4px solid var(--accent);
+        }
+        
+        .admin-credentials h4 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .credential-item {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .credential-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .credential-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .credential-value {
+            color: var(--primary);
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        
+        .credential-value.password {
+            color: var(--success);
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-with-icon {
+            position: relative;
+        }
+        
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777;
+        }
+        
+        .input-with-icon input {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .input-with-icon input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, var(--secondary), #2980b9);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .message.success {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+        
+        .message.error {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+        
+        .message.info {
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--secondary);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .back-link a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 576px) {
+            .admin-login-card {
+                padding: 25px;
+            }
+            
+            .logo-section h1 {
+                font-size: 1.8rem;
+            }
+            
+            .admin-credentials {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-login-container">
+        <div class="logo-section">
+            <i class="fas fa-user-shield"></i>
+            <h1>شعبة <span style="color: #1abc9c;">306</span></h1>
+            <p>تسجيل دخول المدير</p>
+        </div>
+        
+        <div class="admin-login-card">
+            <div class="admin-badge">
+                <i class="fas fa-crown"></i>
+                حساب المدير المميز
+            </div>
+            
+            <h2><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</h2>
+            
+            <div class="admin-credentials">
+                <h4><i class="fas fa-user-circle"></i> بيانات الدخول الخاصة بك</h4>
+                <div class="credential-item">
+                    <div class="credential-label">البريد الإلكتروني:</div>
+                    <div class="credential-value">hussainasari0@gmail.com</div>
+                </div>
+                <div class="credential-item">
+                    <div class="credential-label">كلمة المرور:</div>
+                    <div class="credential-value password">Admin@306_2024</div>
+                </div>
+                <div class="credential-item">
+                    <div class="credential-label">اسم المدير:</div>
+                    <div class="credential-value">حسين محمود العصاري</div>
+                </div>
+            </div>
+            
+            <form id="admin-login-form">
+                <div class="form-group">
+                    <label for="admin-email">
+                        <i class="fas fa-envelope"></i>
+                        البريد الإلكتروني
+                    </label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="admin-email" 
+                               value="hussainasari0@gmail.com"
+                               required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="admin-password">
+                        <i class="fas fa-lock"></i>
+                        كلمة المرور
+                    </label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="admin-password" 
+                               value="Admin@306_2024"
+                               required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول كمدير
+                </button>
+                <div class="admin-access" style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+    <p style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">هل أنت مدير النظام؟</p>
+    <a href="admin-panel.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">
+        <i class="fas fa-user-shield"></i> تسجيل الدخول كمدير
+    </a>
+</div>
+                
+                <div class="back-link">
+                    <a href="index.html">
+                        <i class="fas fa-arrow-right"></i>
+                        العودة إلى صفحة تسجيل الطلاب
+                    </a>
+                </div>
+            </form>
+            
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // استيراد مكتبات Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            updateProfile 
+        } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+        import { 
+            getDatabase, 
+            ref, 
+            set,
+            get
+        } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+        // تكوين Firebase - استخدم نفس التكوين
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYbDqGBlBEEDGNfXbAbsS4sZupNDb7jrY",
+            authDomain: "system-306.firebaseapp.com",
+            databaseURL: "https://system-306-default-rtdb.firebaseio.com",
+            projectId: "system-306",
+            storageBucket: "system-306.firebasestorage.app",
+            messagingSenderId: "471316495588",
+            appId: "1:471316495588:web:4d7ba9be7fea17c7a8c0f1",
+            measurementId: "G-T4RTTBWHKL"
+        };
+
+        // تهيئة Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // بيانات المدير
+        const adminData = {
+            email: "hussainasari0@gmail.com",
+            password: "Admin@306_2024",
+            name: "حسين محمود العصاري",
+            role: "admin"
+        };
+
+        // عناصر DOM
+        const loginForm = document.getElementById('admin-login-form');
+        const loginBtn = document.getElementById('login-btn');
+        const messageDiv = document.getElementById('message');
+
+        // دالة إظهار الرسائل
+        function showMessage(text, type = 'info') {
+            const icon = type === 'success' ? 'check-circle' : 
+                        type === 'error' ? 'exclamation-circle' : 'info-circle';
+            
+            messageDiv.innerHTML = `<i class="fas fa-${icon}"></i> ${text}`;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // دالة التحقق من صلاحية المدير
+        function isValidAdmin(email, password) {
+            return email === adminData.email && password === adminData.password;
+        }
+
+        // دالة إنشاء حساب المدير إذا لم يكن موجوداً
+        async function createAdminIfNotExists() {
+            try {
+                // محاولة تسجيل الدخول أولاً
+                await signInWithEmailAndPassword(auth, adminData.email, adminData.password);
+                console.log("✅ حساب المدير موجود بالفعل");
+                return true;
+            } catch (error) {
+                // إذا فشل تسجيل الدخول، جرب إنشاء الحساب
+                if (error.code === 'auth/user-not-found') {
+                    try {
+                        console.log("🔄 إنشاء حساب المدير لأول مرة...");
+                        
+                        // إنشاء الحساب
+                        const userCredential = await createUserWithEmailAndPassword(
+                            auth, 
+                            adminData.email, 
+                            adminData.password
+                        );
+                        
+                        // تحديث ملف التعريف
+                        await updateProfile(userCredential.user, {
+                            displayName: adminData.name
+                        });
+                        
+                        // حفظ بيانات المدير في قاعدة البيانات
+                        const adminRef = ref(database, `users/${userCredential.user.uid}`);
+                        await set(adminRef, {
+                            uid: userCredential.user.uid,
+                            email: adminData.email,
+                            firstName: "حسين",
+                            lastName: "العصاري",
+                            fullName: adminData.name,
+                            role: "admin",
+                            class: "admin",
+                            createdAt: new Date().toISOString(),
+                            permissions: [
+                                "manage_users",
+                                "control_registration", 
+                                "view_all_data",
+                                "edit_system_settings"
+                            ],
+                            isSuperAdmin: true
+                        });
+                        
+                        // إنشاء إعدادات النظام الافتراضية
+                        const systemRef = ref(database, 'system');
+                        await set(systemRef, {
+                            registrationEnabled: true,
+                            registrationStatusUpdated: new Date().toISOString(),
+                            createdBy: adminData.email,
+                            createdAt: new Date().toISOString()
+                        });
+                        
+                        console.log("✅ تم إنشاء حساب المدير بنجاح");
+                        showMessage("✅ تم إنشاء حساب المدير بنجاح لأول مرة", 'success');
+                        return true;
+                        
+                    } catch (createError) {
+                        console.error("❌ خطأ في إنشاء حساب المدير:", createError);
+                        showMessage("❌ حدث خطأ في إنشاء حساب المدير", 'error');
+                        return false;
+                    }
+                } else {
+                    console.error("❌ خطأ في تسجيل الدخول:", error);
+                    return false;
+                }
+            }
+        }
+
+        // دالة تسجيل الدخول كمدير
+        async function loginAsAdmin(email, password) {
+            try {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تسجيل الدخول...';
+                
+                // التحقق من بيانات المدير
+                if (!isValidAdmin(email, password)) {
+                    showMessage("❌ بيانات الدخول غير صحيحة للمدير", 'error');
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول كمدير';
+                    return false;
+                }
+                
+                // التأكد من وجود حساب المدير
+                const adminExists = await createAdminIfNotExists();
+                if (!adminExists) {
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول كمدير';
+                    return false;
+                }
+                
+                // تسجيل الدخول باستخدام Firebase Auth
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                
+                // حفظ بيانات المدير محلياً
+                localStorage.setItem('currentUser', JSON.stringify({
+                    uid: userCredential.user.uid,
+                    email: adminData.email,
+                    displayName: adminData.name,
+                    role: 'admin',
+                    isAdmin: true,
+                    isSuperAdmin: true
+                }));
+                
+                // تحديث آخر وقت تسجيل دخول
+                const activityRef = ref(database, `adminActivities/${Date.now()}`);
+                await set(activityRef, {
+                    type: 'admin_login',
+                    timestamp: new Date().toISOString(),
+                    admin: adminData.email
+                });
+                
+                showMessage("✅ تم تسجيل الدخول بنجاح! جاري الانتقال إلى لوحة التحكم...", 'success');
+                
+                // الانتقال إلى لوحة التحكم بعد ثانيتين
+                setTimeout(() => {
+                    window.location.href = "admin-panel.html";
+                }, 1500);
+                
+                return true;
+                
+            } catch (error) {
+                console.error("❌ خطأ في تسجيل الدخول:", error);
+                
+                let errorMessage = "حدث خطأ أثناء تسجيل الدخول";
+                
+                switch(error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage = "البريد الإلكتروني غير صالح";
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = "هذا الحساب تم تعطيله";
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = "كلمة المرور غير صحيحة";
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = "محاولات كثيرة، حاول مرة أخرى لاحقاً";
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage = "فشل في الاتصال بالخادم";
+                        break;
+                }
+                
+                showMessage(`❌ ${errorMessage}`, 'error');
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول كمدير';
+                return false;
+            }
+        }
+
+        // مستمع حدث لإرسال النموذج
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('admin-email').value.trim();
+            const password = document.getElementById('admin-password').value;
+            
+            if (!email || !password) {
+                showMessage("⚠️ يرجى ملء جميع الحقول", 'error');
+                return;
+            }
+            
+            await loginAsAdmin(email, password);
+        });
+
+        // دالة نسخ بيانات الدخول تلقائياً
+        function autoFillCredentials() {
+            document.getElementById('admin-email').value = adminData.email;
+            document.getElementById('admin-password').value = adminData.password;
+            
+            // إظهار رسالة معلومات
+            setTimeout(() => {
+                showMessage("✅ تم تعبئة بيانات الدخول تلقائياً. اضغط على زر تسجيل الدخول", 'info');
+            }, 1000);
+        }
+
+        // تهيئة الصفحة
+        function initPage() {
+            // تعبئة البيانات تلقائياً
+            autoFillCredentials();
+            
+            // إضافة زر لإظهار/إخفاء كلمة المرور
+            const passwordInput = document.getElementById('admin-password');
+            const showPasswordBtn = document.createElement('button');
+            showPasswordBtn.type = 'button';
+            showPasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
+            showPasswordBtn.style.cssText = `
+                position: absolute;
+                left: 45px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: none;
+                border: none;
+                color: #777;
+                cursor: pointer;
+                font-size: 1rem;
+            `;
+            
+            showPasswordBtn.addEventListener('click', () => {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    showPasswordBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                } else {
+                    passwordInput.type = 'password';
+                    showPasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                }
+            });
+            
+            document.querySelector('.input-with-icon').appendChild(showPasswordBtn);
+            
+            console.log("🔑 بيانات المدير:");
+            console.log("📧 البريد:", adminData.email);
+            console.log("🔐 كلمة المرور:", adminData.password);
+            console.log("👤 الاسم:", adminData.name);
+            
+            showMessage("مرحباً بك في صفحة تسجيل دخول المدير", 'info');
+        }
+
+        // بدء التطبيق
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>
