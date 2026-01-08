@@ -930,6 +930,252 @@
             }
         }
     </style>
+    <style>
+/* أنماط إضافية لإدارة الحسابات */
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+}
+
+.user-checkbox:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.bulk-actions {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 1000;
+    display: none;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    border-top: none;
+}
+
+.file-item, .activity-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-item:last-child, .activity-item:last-child {
+    border-bottom: none;
+}
+
+.file-item i {
+    color: #6c757d;
+}
+
+.activity-item .small {
+    font-size: 0.6rem;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1050;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+.close {
+    float: left;
+    font-size: 1.5rem;
+    font-weight: bold;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: .5;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.close:hover {
+    opacity: .75;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #bd2130;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #1e7e34;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background-color: #d39e00;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid #dee2e6;
+}
+
+.btn-outline:hover {
+    background: #f8f9fa;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.badge-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* التجاوب */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .modal-content {
+        width: 95%;
+    }
+}
+</style>
 </head>
 <body>
     <!-- زر القائمة للهواتف -->
@@ -1225,26 +1471,58 @@
         </div>
     </div>
     
-    <!-- نافذة حذف المستخدم -->
-    <div id="delete-user-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-exclamation-triangle"></i> تأكيد حذف المستخدم</h3>
-                <button class="close-modal">&times;</button>
+<!-- في نافذة حذف المستخدم أضف -->
+<div id="delete-user-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-exclamation-triangle"></i> تأكيد حذف المستخدم</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="color: var(--danger); margin-bottom: 15px;">
+                <i class="fas fa-exclamation-circle"></i> تحذير: هذا الإجراء لا يمكن التراجع عنه
+            </p>
+            
+            <div class="form-group">
+                <label for="delete-reason">سبب الحذف</label>
+                <select id="delete-reason" class="form-control">
+                    <option value="انتهاك قوانين المنصة">انتهاك قوانين المنصة</option>
+                    <option value="سلوك غير لائق">سلوك غير لائق</option>
+                    <option value="مخالفات متكررة">مخالفات متكررة</option>
+                    <option value="طلب المستخدم">طلب المستخدم</option>
+                    <option value="أسباب أخرى">أسباب أخرى</option>
+                </select>
             </div>
-            <div class="modal-body">
-                <p style="color: var(--danger); margin-bottom: 15px;">
-                    <i class="fas fa-exclamation-circle"></i> تحذير: هذا الإجراء لا يمكن التراجع عنه
+            
+            <div class="form-group">
+                <label for="custom-reason" style="display: none;">سبب آخر</label>
+                <input type="text" id="custom-reason" class="form-control" placeholder="حدد السبب..." style="display: none;">
+            </div>
+            
+            <div class="form-check" style="margin-bottom: 15px;">
+                <input type="checkbox" id="silent-delete" class="form-check-input">
+                <label for="silent-delete" class="form-check-label">
+                    حذف خفي (بدون إشعار للصف)
+                </label>
+            </div>
+            
+            <p>سيتم إرسال رسالة للمستخدم:</p>
+            <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <p id="delete-notification-preview" style="margin: 0; color: #666;">
+                    "تم حذف حسابك في منصة شعبة 306 بسبب انتهاك قوانين المنصة."
                 </p>
-                <p>هل أنت متأكد من حذف حساب المستخدم:</p>
-                <p id="delete-user-name" style="font-weight: bold; margin: 15px 0; color: var(--primary);"></p>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary close-modal">إلغاء</button>
-                    <button type="button" id="confirm-delete-user" class="btn btn-danger">حذف المستخدم</button>
-                </div>
+            </div>
+            
+            <p>المستخدم المراد حذفه:</p>
+            <p id="delete-user-name" style="font-weight: bold; margin: 15px 0; color: var(--primary);"></p>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary close-modal">إلغاء</button>
+                <button type="button" id="confirm-delete-user" class="btn btn-danger">حذف المستخدم وإرسال التنبيه</button>
             </div>
         </div>
     </div>
+</div>
     
     <!-- نافذة إعلان جديد -->
     <div id="new-announcement-modal" class="modal">
@@ -1303,852 +1581,1169 @@
     </div>
 
     <!-- Firebase SDK -->
-    <script type="module">
-        // استيراد مكتبات Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-        import { 
-            getAuth, 
-            signOut,
-            sendPasswordResetEmail
-        } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-        import { 
-            getDatabase, 
-            ref, 
-            get, 
-            set, 
-            update,
-            remove,
-            onValue,
-            push,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+   <script type="module">
+// استيراد مكتبات Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { 
+    getAuth, 
+    signOut,
+    sendPasswordResetEmail,
+    deleteUser,
+    updatePassword,
+    updateEmail,
+    reauthenticateWithCredential,
+    EmailAuthProvider
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { 
+    getDatabase, 
+    ref, 
+    get, 
+    set, 
+    update,
+    remove,
+    onValue,
+    push,
+    query,
+    orderByChild,
+    equalTo,
+    limitToLast
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import { 
+    getStorage,
+    ref as storageRef,
+    deleteObject,
+    listAll
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
 
-        // تكوين Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyCYbDqGBlBEEDGNfXbAbsS4sZupNDb7jrY",
-            authDomain: "system-306.firebaseapp.com",
-            databaseURL: "https://system-306-default-rtdb.firebaseio.com",
-            projectId: "system-306",
-            storageBucket: "system-306.firebasestorage.app",
-            messagingSenderId: "471316495588",
-            appId: "1:471316495588:web:4d7ba9be7fea17c7a8c0f1",
-            measurementId: "G-T4RTTBWHKL"
-        };
+// تكوين Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyCYbDqGBlBEEDGNfXbAbsS4sZupNDb7jrY",
+    authDomain: "system-306.firebaseapp.com",
+    databaseURL: "https://system-306-default-rtdb.firebaseio.com",
+    projectId: "system-306",
+    storageBucket: "system-306.firebasestorage.app",
+    messagingSenderId: "471316495588",
+    appId: "1:471316495588:web:4d7ba9be7fea17c7a8c0f1",
+    measurementId: "G-T4RTTBWHKL"
+};
 
-        // تهيئة Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const database = getDatabase(app);
+// تهيئة Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+const storage = getStorage(app);
 
-        // متغيرات التطبيق
-        let allUsers = [];
-        let registrationEnabled = true;
-        let currentUserToEdit = null;
-        let currentUserToDelete = null;
-        let currentUserToReset = null;
-        let currentTab = 'dashboard';
+// المتغيرات العامة
+let currentUser = null;
+let allUsers = [];
+let currentEditingUser = null;
+let classId = 'section306';
+let searchTimeout = null;
 
-        // عناصر DOM الرئيسية
-        const messageDiv = document.getElementById('message');
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const sidebar = document.getElementById('sidebar');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const adminNameElement = document.getElementById('adminName');
-        const adminEmailElement = document.getElementById('adminEmail');
-        const adminAvatarElement = document.getElementById('adminAvatar');
+// عناصر DOM
+const elements = {
+    // معلومات المدير
+    adminName: document.getElementById('admin-name'),
+    adminEmail: document.getElementById('admin-email'),
+    adminAvatar: document.getElementById('admin-avatar'),
+    adminStats: document.getElementById('admin-stats'),
+    
+    // الإحصائيات
+    totalUsers: document.getElementById('total-users'),
+    activeUsers: document.getElementById('active-users'),
+    todayUsers: document.getElementById('today-users'),
+    pendingUsers: document.getElementById('pending-users'),
+    
+    // البحث والتصفية
+    searchInput: document.getElementById('user-search'),
+    filterRole: document.getElementById('filter-role'),
+    filterStatus: document.getElementById('filter-status'),
+    filterClass: document.getElementById('filter-class'),
+    resetFilters: document.getElementById('reset-filters'),
+    
+    // الجدول
+    usersTable: document.getElementById('users-table'),
+    tableBody: document.getElementById('users-table-body'),
+    loadingRow: document.getElementById('loading-row'),
+    
+    // الأزرار
+    addUserBtn: document.getElementById('add-user-btn'),
+    exportBtn: document.getElementById('export-btn'),
+    bulkActions: document.getElementById('bulk-actions'),
+    deleteSelectedBtn: document.getElementById('delete-selected-btn'),
+    exportSelectedBtn: document.getElementById('export-selected-btn'),
+    
+    // النوافذ المنبثقة
+    addUserModal: document.getElementById('add-user-modal'),
+    editUserModal: document.getElementById('edit-user-modal'),
+    deleteUserModal: document.getElementById('delete-user-modal'),
+    resetPasswordModal: document.getElementById('reset-password-modal'),
+    bulkDeleteModal: document.getElementById('bulk-delete-modal'),
+    userDetailsModal: document.getElementById('user-details-modal'),
+    
+    // النماذج
+    addUserForm: document.getElementById('add-user-form'),
+    editUserForm: document.getElementById('edit-user-form'),
+    
+    // الأزرار في النوافذ
+    closeModalBtns: document.querySelectorAll('.close-modal'),
+    confirmDeleteBtn: document.getElementById('confirm-delete-btn'),
+    confirmResetBtn: document.getElementById('confirm-reset-btn'),
+    confirmBulkDeleteBtn: document.getElementById('confirm-bulk-delete-btn'),
+    
+    // رسائل
+    messageContainer: document.getElementById('message-container'),
+    
+    // التحكم في التسجيلات
+    registrationToggle: document.getElementById('registration-toggle'),
+    registrationStatus: document.getElementById('registration-status')
+};
+
+// دالة إظهار الرسائل
+function showMessage(message, type = 'info', duration = 5000) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    messageDiv.innerHTML = `
+        <span>${message}</span>
+        <button type="button" class="close" onclick="this.parentElement.remove()">
+            <span>&times;</span>
+        </button>
+    `;
+    
+    elements.messageContainer.innerHTML = '';
+    elements.messageContainer.appendChild(messageDiv);
+    
+    if (duration > 0) {
+        setTimeout(() => {
+            if (messageDiv.parentElement) {
+                messageDiv.remove();
+            }
+        }, duration);
+    }
+}
+
+// دالة تنسيق التاريخ
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// دالة الحصول على الأحرف الأولى من الاسم
+function getInitials(name) {
+    if (!name) return '?';
+    return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().substring(0, 2);
+}
+
+// دالة تحميل بيانات المدير
+async function loadAdminData() {
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            window.location.href = 'index.html';
+            return;
+        }
         
-        // عناصر لوحة التحكم
-        const toggleRegistration = document.getElementById('toggle-registration');
-        const registrationStatusElement = document.getElementById('registration-status');
-        const lastUpdateElement = document.getElementById('last-update');
-        const backupBtn = document.getElementById('backup-btn');
-        const lastBackupElement = document.getElementById('last-backup');
-        const dataSizeElement = document.getElementById('data-size');
-        const firebaseStatusElement = document.getElementById('firebase-status');
-        const systemLastUpdateElement = document.getElementById('system-last-update');
-        const totalUsersElement = document.getElementById('total-users');
-        const activeUsersElement = document.getElementById('active-users');
-        const todayUsersElement = document.getElementById('today-users');
+        // التحقق من صلاحيات المدير
+        const userRef = ref(database, `users/${user.uid}`);
+        const snapshot = await get(userRef);
         
-        // عناصر إدارة المستخدمين
-        const userSearchInput = document.getElementById('user-search');
-        const usersTableBody = document.getElementById('users-table-body');
-        
-        // عناصر الإعلانات
-        const newAnnouncementBtn = document.getElementById('new-announcement-btn');
-        const announcementsList = document.getElementById('announcements-list');
-        
-        // النوافذ المنبثقة
-        const editUserModal = document.getElementById('edit-user-modal');
-        const resetPasswordModal = document.getElementById('reset-password-modal');
-        const deleteUserModal = document.getElementById('delete-user-modal');
-        const newAnnouncementModal = document.getElementById('new-announcement-modal');
-        const closeModalButtons = document.querySelectorAll('.close-modal');
-        const editUserForm = document.getElementById('edit-user-form');
-        const confirmResetPasswordBtn = document.getElementById('confirm-reset-password');
-        const confirmDeleteUserBtn = document.getElementById('confirm-delete-user');
-        const announcementForm = document.getElementById('announcement-form');
-        const announcementRecipients = document.getElementById('announcement-recipients');
-        const specificUsersContainer = document.getElementById('specific-users-container');
-        const specificUsersSelect = document.getElementById('specific-users');
-
-        // دالة إظهار الرسائل
-        function showMessage(text, type = 'info') {
-            const icon = type === 'success' ? 'check-circle' : 
-                        type === 'error' ? 'exclamation-circle' : 'info-circle';
-            
-            messageDiv.innerHTML = `<i class="fas fa-${icon}"></i> ${text}`;
-            messageDiv.className = `message ${type}`;
-            messageDiv.style.display = 'flex';
-            
+        if (!snapshot.exists() || !snapshot.val().isAdmin) {
+            showMessage('ليس لديك صلاحية الوصول إلى هذه الصفحة', 'danger');
             setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 5000);
+                window.location.href = 'dashboard.html';
+            }, 2000);
+            return;
         }
+        
+        const userData = snapshot.val();
+        currentUser = user;
+        
+        // تحديث واجهة المدير
+        if (elements.adminName) {
+            elements.adminName.textContent = userData.fullName || user.displayName || 'مدير النظام';
+        }
+        if (elements.adminEmail) {
+            elements.adminEmail.textContent = user.email;
+        }
+        if (elements.adminAvatar) {
+            elements.adminAvatar.textContent = getInitials(userData.fullName || user.email);
+        }
+        
+        // تحميل الإحصائيات
+        loadStatistics();
+        loadAllUsers();
+        
+        // تحميل حالة التسجيلات
+        loadRegistrationStatus();
+        
+    } catch (error) {
+        console.error('خطأ في تحميل بيانات المدير:', error);
+        showMessage('خطأ في تحميل البيانات', 'danger');
+    }
+}
 
-        // دالة التحقق من حالة المدير
-        function checkAdminStatus() {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+// دالة تحميل الإحصائيات
+async function loadStatistics() {
+    try {
+        const usersRef = ref(database, 'users');
+        const snapshot = await get(usersRef);
+        
+        if (!snapshot.exists()) {
+            elements.totalUsers.textContent = '0';
+            elements.activeUsers.textContent = '0';
+            elements.todayUsers.textContent = '0';
+            elements.pendingUsers.textContent = '0';
+            return;
+        }
+        
+        const users = [];
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        let todayCount = 0;
+        let activeCount = 0;
+        let pendingCount = 0;
+        
+        snapshot.forEach(child => {
+            const user = child.val();
+            user.id = child.key;
+            users.push(user);
             
-            if (!currentUser) {
-                showMessage('⛔ يرجى تسجيل الدخول أولاً', 'error');
-                setTimeout(() => {
-                    window.location.href = 'admin-login.html';
-                }, 2000);
-                return false;
+            // حساب المستخدمين النشطين (آخر نشاط خلال 7 أيام)
+            if (user.lastActive) {
+                const lastActiveDate = new Date(user.lastActive);
+                const diffDays = (now - lastActiveDate) / (1000 * 60 * 60 * 24);
+                if (diffDays <= 7) activeCount++;
             }
             
-            if (!currentUser.isAdmin && currentUser.email !== "hussainasari0@gmail.com") {
-                showMessage('⛔ ليس لديك صلاحيات للوصول إلى هذه الصفحة', 'error');
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
-                return false;
+            // حساب المستخدمين المسجلين اليوم
+            if (user.createdAt) {
+                const createdDate = new Date(user.createdAt);
+                if (createdDate >= todayStart) todayCount++;
             }
             
-            // تحديث معلومات المستخدم
-            if (adminNameElement) adminNameElement.textContent = currentUser.displayName || 'مدير النظام';
-            if (adminEmailElement) adminEmailElement.textContent = currentUser.email;
-            if (adminAvatarElement) adminAvatarElement.textContent = (currentUser.displayName || 'م').charAt(0);
-            
-            return true;
+            // حساب المستخدمين المعلقين (إذا كان هناك حقل status)
+            if (user.status === 'pending') pendingCount++;
+        });
+        
+        elements.totalUsers.textContent = users.length;
+        elements.activeUsers.textContent = activeCount;
+        elements.todayUsers.textContent = todayCount;
+        elements.pendingUsers.textContent = pendingCount;
+        
+        // تحديث نص الإحصائيات
+        if (elements.adminStats) {
+            elements.adminStats.textContent = `إدارة ${users.length} حساب`;
         }
+        
+    } catch (error) {
+        console.error('خطأ في تحميل الإحصائيات:', error);
+    }
+}
 
-        // دالة تحميل حالة التسجيلات
-        async function loadRegistrationStatus() {
+// دالة تحميل جميع المستخدمين
+async function loadAllUsers() {
+    try {
+        elements.loadingRow.style.display = 'table-row';
+        
+        const usersRef = ref(database, 'users');
+        const snapshot = await get(usersRef);
+        
+        allUsers = [];
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                const user = child.val();
+                user.id = child.key;
+                allUsers.push(user);
+            });
+        }
+        
+        renderUsersTable(allUsers);
+        elements.loadingRow.style.display = 'none';
+        
+    } catch (error) {
+        console.error('خطأ في تحميل المستخدمين:', error);
+        elements.loadingRow.style.display = 'none';
+        showMessage('خطأ في تحميل بيانات المستخدمين', 'danger');
+    }
+}
+
+// دالة عرض جدول المستخدمين
+function renderUsersTable(users) {
+    const tableBody = elements.tableBody;
+    tableBody.innerHTML = '';
+    
+    if (users.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="10" class="text-center py-4">
+                    <i class="fas fa-users-slash fa-2x text-muted mb-3"></i>
+                    <p class="text-muted">لا توجد حسابات بعد</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    // تطبيق الفلاتر
+    let filteredUsers = [...users];
+    
+    // فلترة حسب الدور
+    const roleFilter = elements.filterRole.value;
+    if (roleFilter) {
+        filteredUsers = filteredUsers.filter(user => user.role === roleFilter);
+    }
+    
+    // فلترة حسب الحالة
+    const statusFilter = elements.filterStatus.value;
+    if (statusFilter) {
+        filteredUsers = filteredUsers.filter(user => user.status === statusFilter);
+    }
+    
+    // فلترة حسب الصف
+    const classFilter = elements.filterClass.value;
+    if (classFilter) {
+        filteredUsers = filteredUsers.filter(user => user.class === classFilter);
+    }
+    
+    // تطبيق البحث
+    const searchTerm = elements.searchInput.value.toLowerCase();
+    if (searchTerm) {
+        filteredUsers = filteredUsers.filter(user => 
+            (user.fullName && user.fullName.toLowerCase().includes(searchTerm)) ||
+            (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+            (user.firstName && user.firstName.toLowerCase().includes(searchTerm)) ||
+            (user.lastName && user.lastName.toLowerCase().includes(searchTerm)) ||
+            (user.phone && user.phone.includes(searchTerm))
+        );
+    }
+    
+    // ترتيب حسب آخر تحديث
+    filteredUsers.sort((a, b) => {
+        const dateA = a.updatedAt || a.createdAt || '0';
+        const dateB = b.updatedAt || b.createdAt || '0';
+        return new Date(dateB) - new Date(dateA);
+    });
+    
+    filteredUsers.forEach(user => {
+        const row = document.createElement('tr');
+        
+        // حالة الحساب
+        let statusBadge = '';
+        if (user.status === 'active') {
+            statusBadge = '<span class="badge badge-success">نشط</span>';
+        } else if (user.status === 'suspended') {
+            statusBadge = '<span class="badge badge-danger">موقوف</span>';
+        } else if (user.status === 'pending') {
+            statusBadge = '<span class="badge badge-warning">بانتظار</span>';
+        } else {
+            statusBadge = '<span class="badge badge-secondary">غير معروف</span>';
+        }
+        
+        // الدور
+        let roleBadge = '';
+        if (user.role === 'admin') {
+            roleBadge = '<span class="badge badge-primary">مدير</span>';
+        } else if (user.role === 'teacher') {
+            roleBadge = '<span class="badge badge-info">معلم</span>';
+        } else {
+            roleBadge = '<span class="badge badge-light">طالب</span>';
+        }
+        
+        // آخر نشاط
+        let lastActiveText = 'غير معروف';
+        if (user.lastActive) {
+            const lastActive = new Date(user.lastActive);
+            const now = new Date();
+            const diffHours = Math.floor((now - lastActive) / (1000 * 60 * 60));
+            
+            if (diffHours < 1) lastActiveText = 'الآن';
+            else if (diffHours < 24) lastActiveText = `قبل ${diffHours} ساعة`;
+            else lastActiveText = formatDate(user.lastActive);
+        }
+        
+        row.innerHTML = `
+            <td>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input user-checkbox" value="${user.id}">
+                </div>
+            </td>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="avatar-circle avatar-sm bg-primary text-white mr-2">
+                        ${getInitials(user.fullName || user.email)}
+                    </div>
+                    <div>
+                        <strong>${user.fullName || 'غير محدد'}</strong>
+                        <div class="text-muted small">${user.email || 'لا يوجد'}</div>
+                    </div>
+                </div>
+            </td>
+            <td>${user.email || 'غير محدد'}</td>
+            <td>${roleBadge}</td>
+            <td>${user.class || '306'}</td>
+            <td>${statusBadge}</td>
+            <td>${formatDate(user.createdAt || new Date().toISOString())}</td>
+            <td>${lastActiveText}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-info view-user" data-id="${user.id}" title="عرض التفاصيل">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-primary edit-user" data-id="${user.id}" title="تعديل">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning reset-password" data-id="${user.id}" title="إعادة تعيين كلمة المرور">
+                    <i class="fas fa-key"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger delete-user" data-id="${user.id}" title="حذف">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+    
+    // إضافة مستمعي الأحداث للأزرار
+    addEventListenersToButtons();
+    updateBulkActions();
+}
+
+// دالة إضافة مستمعي الأحداث لأزرار الجدول
+function addEventListenersToButtons() {
+    // عرض التفاصيل
+    document.querySelectorAll('.view-user').forEach(btn => {
+        btn.addEventListener('click', () => showUserDetails(btn.dataset.id));
+    });
+    
+    // تعديل المستخدم
+    document.querySelectorAll('.edit-user').forEach(btn => {
+        btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+    });
+    
+    // إعادة تعيين كلمة المرور
+    document.querySelectorAll('.reset-password').forEach(btn => {
+        btn.addEventListener('click', () => openResetPasswordModal(btn.dataset.id));
+    });
+    
+    // حذف المستخدم
+    document.querySelectorAll('.delete-user').forEach(btn => {
+        btn.addEventListener('click', () => openDeleteModal(btn.dataset.id));
+    });
+    
+    // اختيار/إلغاء اختيار جميع المستخدمين
+    const selectAllCheckbox = document.getElementById('select-all');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateBulkActions();
+        });
+    }
+    
+    // تحديث الإجراءات الجماعية عند اختيار مستخدم
+    document.querySelectorAll('.user-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', updateBulkActions);
+    });
+}
+
+// دالة تحديث حالة أزرار الإجراءات الجماعية
+function updateBulkActions() {
+    const selectedCount = document.querySelectorAll('.user-checkbox:checked').length;
+    const bulkActions = elements.bulkActions;
+    const deleteSelectedBtn = elements.deleteSelectedBtn;
+    const exportSelectedBtn = elements.exportSelectedBtn;
+    
+    if (selectedCount > 0) {
+        bulkActions.style.display = 'block';
+        deleteSelectedBtn.textContent = `حذف المحدد (${selectedCount})`;
+        exportSelectedBtn.textContent = `تصدير المحدد (${selectedCount})`;
+    } else {
+        bulkActions.style.display = 'none';
+    }
+}
+
+// دالة فتح نافذة عرض تفاصيل المستخدم
+async function showUserDetails(userId) {
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) return;
+    
+    try {
+        // الحصول على تفاصيل إضافية
+        const userRef = ref(database, `users/${userId}`);
+        const snapshot = await get(userRef);
+        const userDetails = snapshot.val();
+        
+        // ملء البيانات في النافذة
+        document.getElementById('detail-name').textContent = userDetails.fullName || 'غير محدد';
+        document.getElementById('detail-email').textContent = userDetails.email || 'غير محدد';
+        document.getElementById('detail-phone').textContent = userDetails.phone || 'غير محدد';
+        document.getElementById('detail-class').textContent = userDetails.class || '306';
+        document.getElementById('detail-role').textContent = userDetails.role || 'طالب';
+        document.getElementById('detail-status').textContent = userDetails.status || 'نشط';
+        document.getElementById('detail-created').textContent = formatDate(userDetails.createdAt || new Date().toISOString());
+        document.getElementById('detail-updated').textContent = formatDate(userDetails.updatedAt || userDetails.createdAt || new Date().toISOString());
+        document.getElementById('detail-lastActive').textContent = userDetails.lastActive ? formatDate(userDetails.lastActive) : 'غير معروف';
+        
+        // عرض الملفات المرفوعة
+        const filesRef = ref(database, `users/${userId}/files`);
+        const filesSnapshot = await get(filesRef);
+        let filesHtml = '<p class="text-muted">لا توجد ملفات</p>';
+        
+        if (filesSnapshot.exists()) {
+            const files = [];
+            filesSnapshot.forEach(child => {
+                files.push(child.val());
+            });
+            
+            filesHtml = files.map(file => `
+                <div class="file-item">
+                    <i class="fas fa-file"></i>
+                    <span>${file.name}</span>
+                    <small class="text-muted">${formatDate(file.uploadedAt)}</small>
+                </div>
+            `).join('');
+        }
+        document.getElementById('detail-files').innerHTML = filesHtml;
+        
+        // عرض الأنشطة
+        const activitiesRef = ref(database, `userActivities/${userId}`);
+        const activitiesSnapshot = await get(activitiesRef);
+        let activitiesHtml = '<p class="text-muted">لا توجد أنشطة</p>';
+        
+        if (activitiesSnapshot.exists()) {
+            const activities = [];
+            activitiesSnapshot.forEach(child => {
+                activities.push(child.val());
+            });
+            
+            // ترتيب حسب التاريخ
+            activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            activitiesHtml = activities.slice(0, 10).map(activity => `
+                <div class="activity-item">
+                    <i class="fas fa-circle small ${getActivityColor(activity.type)}"></i>
+                    <span>${getActivityText(activity.type)}</span>
+                    <small class="text-muted">${formatDate(activity.timestamp)}</small>
+                </div>
+            `).join('');
+        }
+        document.getElementById('detail-activities').innerHTML = activitiesHtml;
+        
+        // فتح النافذة
+        elements.userDetailsModal.style.display = 'flex';
+        
+    } catch (error) {
+        console.error('خطأ في عرض تفاصيل المستخدم:', error);
+        showMessage('خطأ في تحميل التفاصيل', 'danger');
+    }
+}
+
+// دالة فتح نافذة تعديل المستخدم
+async function openEditModal(userId) {
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) return;
+    
+    currentEditingUser = user;
+    
+    // ملء النموذج
+    document.getElementById('edit-user-id').value = user.id;
+    document.getElementById('edit-first-name').value = user.firstName || '';
+    document.getElementById('edit-last-name').value = user.lastName || '';
+    document.getElementById('edit-email').value = user.email || '';
+    document.getElementById('edit-phone').value = user.phone || '';
+    document.getElementById('edit-class').value = user.class || '306';
+    document.getElementById('edit-role').value = user.role || 'student';
+    document.getElementById('edit-status').value = user.status || 'active';
+    
+    elements.editUserModal.style.display = 'flex';
+}
+
+// دالة حفظ التعديلات
+async function saveUserEdits(e) {
+    e.preventDefault();
+    
+    const userId = document.getElementById('edit-user-id').value;
+    const firstName = document.getElementById('edit-first-name').value.trim();
+    const lastName = document.getElementById('edit-last-name').value.trim();
+    const email = document.getElementById('edit-email').value.trim();
+    const phone = document.getElementById('edit-phone').value.trim();
+    const userClass = document.getElementById('edit-class').value;
+    const role = document.getElementById('edit-role').value;
+    const status = document.getElementById('edit-status').value;
+    
+    if (!firstName || !lastName || !email) {
+        showMessage('يرجى ملء جميع الحقول المطلوبة', 'warning');
+        return;
+    }
+    
+    const fullName = `${firstName} ${lastName}`;
+    
+    try {
+        const updates = {
+            firstName: firstName,
+            lastName: lastName,
+            fullName: fullName,
+            email: email,
+            phone: phone || null,
+            class: userClass,
+            role: role,
+            status: status,
+            updatedAt: new Date().toISOString()
+        };
+        
+        const userRef = ref(database, `users/${userId}`);
+        await update(userRef, updates);
+        
+        // إذا تغير البريد الإلكتروني، قم بتحديثه في Authentication
+        if (email !== currentEditingUser.email) {
             try {
-                const statusRef = ref(database, 'system/registrationEnabled');
-                const snapshot = await get(statusRef);
-                
-                if (snapshot.exists()) {
-                    registrationEnabled = snapshot.val();
-                    toggleRegistration.checked = registrationEnabled;
-                    registrationStatusElement.textContent = registrationEnabled ? 'مفعلة' : 'معطلة';
-                    
-                    const timeRef = ref(database, 'system/registrationStatusUpdated');
-                    const timeSnapshot = await get(timeRef);
-                    
-                    if (timeSnapshot.exists()) {
-                        const timestamp = timeSnapshot.val();
-                        const date = new Date(timestamp);
-                        lastUpdateElement.textContent = date.toLocaleString('ar-SA');
-                    }
-                } else {
-                    await set(statusRef, true);
-                    await set(ref(database, 'system/registrationStatusUpdated'), new Date().toISOString());
-                    registrationEnabled = true;
-                    toggleRegistration.checked = true;
-                    registrationStatusElement.textContent = 'مفعلة';
-                    lastUpdateElement.textContent = new Date().toLocaleString('ar-SA');
-                }
-            } catch (error) {
-                console.error("خطأ في تحميل حالة التسجيلات:", error);
-                showMessage("⚠️ خطأ في تحميل إعدادات النظام", 'error');
+                // هذا يتطلب إعادة المصادقة في تطبيق حقيقي
+                showMessage('تحديث البريد الإلكتروني يتطلب إعادة تسجيل دخول المستخدم', 'info');
+            } catch (authError) {
+                console.error('خطأ في تحديث البريد الإلكتروني:', authError);
             }
         }
+        
+        showMessage('تم تحديث بيانات المستخدم بنجاح', 'success');
+        closeAllModals();
+        loadAllUsers();
+        loadStatistics();
+        
+    } catch (error) {
+        console.error('خطأ في تحديث المستخدم:', error);
+        showMessage('خطأ في تحديث البيانات', 'danger');
+    }
+}
 
-        // دالة تحديث حالة التسجيلات
-        async function updateRegistrationStatus() {
-            try {
-                registrationEnabled = toggleRegistration.checked;
+// دالة فتح نافذة إعادة تعيين كلمة المرور
+function openResetPasswordModal(userId) {
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) return;
+    
+    document.getElementById('reset-user-id').value = user.id;
+    document.getElementById('reset-user-name').textContent = user.fullName || user.email;
+    document.getElementById('reset-user-email').textContent = user.email;
+    
+    elements.resetPasswordModal.style.display = 'flex';
+}
+
+// دالة إعادة تعيين كلمة المرور
+async function resetUserPassword() {
+    const userId = document.getElementById('reset-user-id').value;
+    const user = allUsers.find(u => u.id === userId);
+    
+    if (!user || !user.email) {
+        showMessage('المستخدم غير موجود', 'danger');
+        return;
+    }
+    
+    try {
+        await sendPasswordResetEmail(auth, user.email);
+        
+        // تسجيل النشاط
+        const activityRef = ref(database, `adminActivities/${Date.now()}`);
+        await set(activityRef, {
+            type: 'password_reset',
+            adminId: currentUser.uid,
+            adminEmail: currentUser.email,
+            userId: userId,
+            userEmail: user.email,
+            timestamp: new Date().toISOString()
+        });
+        
+        showMessage('تم إرسال رابط إعادة التعيين إلى بريد المستخدم', 'success');
+        closeAllModals();
+        
+    } catch (error) {
+        console.error('خطأ في إعادة تعيين كلمة المرور:', error);
+        showMessage('خطأ في إرسال رابط إعادة التعيين', 'danger');
+    }
+}
+
+// دالة فتح نافذة حذف المستخدم
+function openDeleteModal(userId) {
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) return;
+    
+    document.getElementById('delete-user-id').value = user.id;
+    document.getElementById('delete-user-name').textContent = user.fullName || user.email;
+    document.getElementById('delete-user-email').textContent = user.email;
+    
+    elements.deleteUserModal.style.display = 'flex';
+}
+
+// دالة حذف المستخدم
+async function deleteUserAccount() {
+    const userId = document.getElementById('delete-user-id').value;
+    const user = allUsers.find(u => u.id === userId);
+    
+    if (!user) {
+        showMessage('المستخدم غير موجود', 'danger');
+        return;
+    }
+    
+    try {
+        // 1. إرسال رسالة تنبيه للمستخدم
+        const notificationRef = ref(database, `users/${userId}/notifications`);
+        const notificationId = push(notificationRef).key;
+        
+        await set(ref(database, `users/${userId}/notifications/${notificationId}`), {
+            id: notificationId,
+            title: "🚫 حذف حسابك",
+            message: "تم حذف حسابك في منصة شعبة 306 بسبب انتهاك قوانين المنصة. إذا كان هناك خطأ، يرجى التواصل مع الإدارة.",
+            type: "danger",
+            timestamp: new Date().toISOString(),
+            isUrgent: true,
+            sender: "إدارة المنصة"
+        });
+        
+        // 2. سجل الحذف
+        const deletionLogRef = ref(database, `deletedAccounts/${userId}`);
+        await set(deletionLogRef, {
+            userId: userId,
+            email: user.email,
+            name: user.fullName,
+            deletedBy: currentUser.email,
+            deletedAt: new Date().toISOString(),
+            reason: "انتهاك قوانين المنصة",
+            notificationSent: true
+        });
+        
+        // 3. إشعار للصف
+        const classNotificationRef = ref(database, `classes/${classId}/notifications`);
+        const classNotificationId = push(classNotificationRef).key;
+        
+        await set(ref(database, `classes/${classId}/notifications/${classNotificationId}`), {
+            id: classNotificationId,
+            title: "إجراء إداري",
+            message: `تم اتخاذ إجراء إداري ضد مستخدم بسبب انتهاك القوانين`,
+            type: "warning",
+            timestamp: new Date().toISOString(),
+            sender: "الإدارة"
+        });
+        
+        // 4. حذف بيانات المستخدم من قاعدة البيانات
+        const userRef = ref(database, `users/${userId}`);
+        await remove(userRef);
+        
+        // 5. إزالة المستخدم من القائمة المشتركة
+        const classUserRef = ref(database, `classes/${classId}/members/${userId}`);
+        await remove(classUserRef);
+        
+        // 6. حذف الملفات من التخزين
+        try {
+            const storageUserRef = storageRef(storage, `users/${userId}`);
+            const listResult = await listAll(storageUserRef);
+            
+            const deletePromises = listResult.items.map(itemRef => 
+                deleteObject(itemRef).catch(err => console.error('خطأ في حذف الملف:', err))
+            );
+            
+            await Promise.all(deletePromises);
+        } catch (storageError) {
+            console.warn('لم يتم حذف ملفات المستخدم:', storageError);
+        }
+        
+        // 7. تسجيل النشاط
+        const activityRef = ref(database, `adminActivities/${Date.now()}`);
+        await set(activityRef, {
+            type: 'account_deleted',
+            adminId: currentUser.uid,
+            adminEmail: currentUser.email,
+            userId: userId,
+            userEmail: user.email,
+            userName: user.fullName,
+            timestamp: new Date().toISOString(),
+            notificationSent: true
+        });
+        
+        showMessage(`تم حذف حساب ${user.fullName || user.email} وإرسال التنبيه`, 'success');
+        closeAllModals();
+        loadAllUsers();
+        loadStatistics();
+        
+    } catch (error) {
+        console.error('خطأ في حذف المستخدم:', error);
+        showMessage('خطأ في عملية الحذف', 'danger');
+    }
+}
+
+// دالة الحذف الجماعي
+async function deleteSelectedUsers() {
+    const selectedCheckboxes = document.querySelectorAll('.user-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    
+    if (selectedIds.length === 0) {
+        showMessage('يرجى اختيار مستخدم واحد على الأقل', 'warning');
+        return;
+    }
+    
+    document.getElementById('bulk-delete-count').textContent = selectedIds.length;
+    elements.bulkDeleteModal.style.display = 'flex';
+}
+
+// دالة تأكيد الحذف الجماعي
+async function confirmBulkDelete() {
+    const selectedCheckboxes = document.querySelectorAll('.user-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    
+    try {
+        elements.confirmBulkDeleteBtn.disabled = true;
+        elements.confirmBulkDeleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...';
+        
+        for (const userId of selectedIds) {
+            const user = allUsers.find(u => u.id === userId);
+            if (user) {
+                // إرسال إشعار للمستخدم
+                const notificationRef = ref(database, `users/${userId}/notifications`);
+                const notificationId = push(notificationRef).key;
                 
-                const statusRef = ref(database, 'system/registrationEnabled');
-                const timeRef = ref(database, 'system/registrationStatusUpdated');
-                
-                await set(statusRef, registrationEnabled);
-                await set(timeRef, new Date().toISOString());
-                
-                registrationStatusElement.textContent = registrationEnabled ? 'مفعلة' : 'معطلة';
-                lastUpdateElement.textContent = new Date().toLocaleString('ar-SA');
-                
-                showMessage(
-                    registrationEnabled ? 
-                    '✅ تم تفعيل إنشاء الحسابات الجديدة' : 
-                    '⛔ تم تعطيل إنشاء الحسابات الجديدة',
-                    registrationEnabled ? 'success' : 'warning'
-                );
-                
-                // تسجيل النشاط
-                const activityRef = ref(database, `adminActivities/${Date.now()}`);
-                await set(activityRef, {
-                    type: registrationEnabled ? 'enable_registration' : 'disable_registration',
-                    timestamp: new Date().toISOString(),
-                    admin: auth.currentUser.email
+                await set(ref(database, `users/${userId}/notifications/${notificationId}`), {
+                    id: notificationId,
+                    title: "حذف حسابك",
+                    message: "تم حذف حسابك بسبب مخالفة قوانين المنصة",
+                    type: "danger",
+                    timestamp: new Date().toISOString()
                 });
                 
-            } catch (error) {
-                console.error("خطأ في تحديث حالة التسجيلات:", error);
-                showMessage("❌ حدث خطأ في تحديث الحالة", 'error');
-                toggleRegistration.checked = !registrationEnabled;
-            }
-        }
-
-        // دالة تحميل إحصائيات المستخدمين
-        function loadUserStatistics() {
-            const usersRef = ref(database, 'users');
-            
-            onValue(usersRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    const users = [];
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    let todayUsersCount = 0;
-                    
-                    snapshot.forEach((childSnapshot) => {
-                        const user = childSnapshot.val();
-                        user.id = childSnapshot.key;
-                        users.push(user);
-                        
-                        if (user.createdAt) {
-                            const userDate = new Date(user.createdAt);
-                            userDate.setHours(0, 0, 0, 0);
-                            if (userDate.getTime() === today.getTime()) {
-                                todayUsersCount++;
-                            }
-                        }
-                    });
-                    
-                    allUsers = users;
-                    
-                    // تحديث الإحصائيات
-                    totalUsersElement.textContent = users.length;
-                    activeUsersElement.textContent = users.length;
-                    todayUsersElement.textContent = todayUsersCount;
-                    
-                    // تحديث حجم البيانات
-                    const dataSizeKB = JSON.stringify(users).length / 1024;
-                    dataSizeElement.textContent = dataSizeKB > 1024 ? 
-                        `${(dataSizeKB / 1024).toFixed(2)} MB` : `${dataSizeKB.toFixed(2)} KB`;
-                    
-                    // إذا كنا في تبويب المستخدمين، قم بتحديث الجدول
-                    if (currentTab === 'users') {
-                        renderUsersTable();
-                    }
-                    
-                    // تحديث قائمة المستخدمين للإعلانات
-                    updateUsersListForAnnouncements();
-                }
-            }, (error) => {
-                console.error("خطأ في تحميل إحصائيات المستخدمين:", error);
-                showMessage("⚠️ خطأ في تحميل إحصائيات المستخدمين", 'error');
-            });
-        }
-
-        // دالة عرض جدول المستخدمين
-        function renderUsersTable() {
-            const searchTerm = userSearchInput.value.toLowerCase();
-            let filteredUsers = allUsers;
-            
-            if (searchTerm) {
-                filteredUsers = allUsers.filter(user => 
-                    (user.fullName && user.fullName.toLowerCase().includes(searchTerm)) ||
-                    (user.email && user.email.toLowerCase().includes(searchTerm)) ||
-                    (user.firstName && user.firstName.toLowerCase().includes(searchTerm)) ||
-                    (user.lastName && user.lastName.toLowerCase().includes(searchTerm))
-                );
-            }
-            
-            if (filteredUsers.length === 0) {
-                usersTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" style="text-align: center; padding: 30px; color: #777;">
-                            <i class="fas fa-search"></i> لا توجد نتائج مطابقة للبحث
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            let tableHTML = '';
-            
-            filteredUsers.forEach(user => {
-                const userDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString('ar-SA') : 'غير محدد';
-                const firstNameLetter = user.firstName ? user.firstName.charAt(0) : '?';
-                
-                tableHTML += `
-                    <tr>
-                        <td>
-                            <div class="user-cell">
-                                <div class="user-avatar-small">${firstNameLetter}</div>
-                                <div class="user-details">
-                                    <div class="user-name">${user.fullName || 'غير محدد'}</div>
-                                    <div class="user-email">${user.email || 'غير محدد'}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>${user.email || 'غير محدد'}</td>
-                        <td>${user.class || '306'}</td>
-                        <td>${userDate}</td>
-                        <td>
-                            <span class="status-badge status-active">نشط</span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn edit-btn" data-user-id="${user.id}">
-                                    <i class="fas fa-edit"></i> تعديل
-                                </button>
-                                <button class="action-btn reset-btn" data-user-id="${user.id}">
-                                    <i class="fas fa-key"></i> كلمة المرور
-                                </button>
-                                <button class="action-btn delete-btn" data-user-id="${user.id}">
-                                    <i class="fas fa-trash"></i> حذف
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            usersTableBody.innerHTML = tableHTML;
-            
-            // إضافة مستمعي الأحداث للأزرار
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', () => openEditUserModal(btn.dataset.userId));
-            });
-            
-            document.querySelectorAll('.reset-btn').forEach(btn => {
-                btn.addEventListener('click', () => openResetPasswordModal(btn.dataset.userId));
-            });
-            
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', () => openDeleteUserModal(btn.dataset.userId));
-            });
-        }
-
-        // دالة تحديث قائمة المستخدمين للإعلانات
-        function updateUsersListForAnnouncements() {
-            specificUsersSelect.innerHTML = '<option value="">اختر المستخدمين...</option>';
-            
-            allUsers.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user.id;
-                option.textContent = `${user.fullName || user.email} (${user.email})`;
-                specificUsersSelect.appendChild(option);
-            });
-        }
-
-        // دالة فتح نافذة تعديل المستخدم
-        function openEditUserModal(userId) {
-            const user = allUsers.find(u => u.id === userId);
-            if (!user) return;
-            
-            currentUserToEdit = user;
-            
-            document.getElementById('edit-user-id').value = user.id;
-            document.getElementById('edit-user-name').value = user.firstName || '';
-            document.getElementById('edit-user-lastname').value = user.lastName || '';
-            document.getElementById('edit-user-email').value = user.email || '';
-            document.getElementById('edit-user-class').value = user.class || '306';
-            
-            editUserModal.style.display = 'flex';
-        }
-
-        // دالة فتح نافذة إعادة تعيين كلمة المرور
-        function openResetPasswordModal(userId) {
-            const user = allUsers.find(u => u.id === userId);
-            if (!user) return;
-            
-            currentUserToReset = user;
-            document.getElementById('reset-user-email').textContent = user.email;
-            resetPasswordModal.style.display = 'flex';
-        }
-
-        // دالة فتح نافذة حذف المستخدم
-        function openDeleteUserModal(userId) {
-            const user = allUsers.find(u => u.id === userId);
-            if (!user) return;
-            
-            currentUserToDelete = user;
-            document.getElementById('delete-user-name').textContent = user.fullName || user.email;
-            deleteUserModal.style.display = 'flex';
-        }
-
-        // دالة فتح نافذة إعلان جديد
-        function openNewAnnouncementModal() {
-            newAnnouncementModal.style.display = 'flex';
-        }
-
-        // دالة إغلاق جميع النوافذ
-        function closeAllModals() {
-            editUserModal.style.display = 'none';
-            resetPasswordModal.style.display = 'none';
-            deleteUserModal.style.display = 'none';
-            newAnnouncementModal.style.display = 'none';
-            
-            currentUserToEdit = null;
-            currentUserToDelete = null;
-            currentUserToReset = null;
-        }
-
-        // دالة حفظ تعديلات المستخدم
-        async function saveUserEdits() {
-            const userId = document.getElementById('edit-user-id').value;
-            const firstName = document.getElementById('edit-user-name').value.trim();
-            const lastName = document.getElementById('edit-user-lastname').value.trim();
-            const email = document.getElementById('edit-user-email').value.trim();
-            const userClass = document.getElementById('edit-user-class').value.trim();
-            const fullName = `${firstName} ${lastName}`;
-            
-            if (!firstName || !lastName || !email) {
-                showMessage('يرجى ملء جميع الحقول المطلوبة', 'error');
-                return;
-            }
-            
-            const userRef = ref(database, `users/${userId}`);
-            const updates = {
-                firstName: firstName,
-                lastName: lastName,
-                fullName: fullName,
-                email: email,
-                class: userClass,
-                updatedAt: new Date().toISOString()
-            };
-            
-            try {
-                await update(userRef, updates);
-                showMessage('✅ تم تحديث بيانات المستخدم بنجاح', 'success');
-                closeAllModals();
-            } catch (error) {
-                console.error("خطأ في تحديث المستخدم:", error);
-                showMessage('❌ حدث خطأ في تحديث البيانات', 'error');
-            }
-        }
-
-        // دالة إعادة تعيين كلمة مرور المستخدم
-        async function resetUserPassword() {
-            if (!currentUserToReset) return;
-            
-            try {
-                await sendPasswordResetEmail(auth, currentUserToReset.email);
-                showMessage('✅ تم إرسال رابط إعادة تعيين كلمة المرور إلى بريد المستخدم', 'success');
-                
-                const activityRef = ref(database, `adminActivities/${Date.now()}`);
-                await set(activityRef, {
-                    type: 'password_reset_requested',
-                    timestamp: new Date().toISOString(),
-                    byAdmin: true,
-                    userEmail: currentUserToReset.email
-                });
-                
-                closeAllModals();
-            } catch (error) {
-                console.error("خطأ في إعادة تعيين كلمة المرور:", error);
-                showMessage('❌ حدث خطأ في إرسال رابط إعادة التعيين', 'error');
-            }
-        }
-
-        // دالة حذف المستخدم
-        async function deleteUserAccount() {
-            if (!currentUserToDelete) return;
-            
-            const userId = currentUserToDelete.id;
-            
-            try {
+                // حذف البيانات
                 const userRef = ref(database, `users/${userId}`);
                 await remove(userRef);
                 
-                const activityRef = ref(database, `adminActivities/${Date.now()}`);
-                await set(activityRef, {
-                    type: 'account_deleted',
-                    timestamp: new Date().toISOString(),
-                    byAdmin: true,
-                    userEmail: currentUserToDelete.email
-                });
-                
-                showMessage('✅ تم حذف حساب المستخدم بنجاح', 'success');
-                closeAllModals();
-            } catch (error) {
-                console.error("خطأ في حذف المستخدم:", error);
-                showMessage('❌ حدث خطأ في حذف المستخدم', 'error');
+                // إزالة من القائمة المشتركة
+                const classUserRef = ref(database, `classes/${classId}/members/${userId}`);
+                await remove(classUserRef);
             }
         }
+        
+        showMessage(`تم حذف ${selectedIds.length} حساب بنجاح`, 'success');
+        closeAllModals();
+        loadAllUsers();
+        loadStatistics();
+        
+    } catch (error) {
+        console.error('خطأ في الحذف الجماعي:', error);
+        showMessage('خطأ في عملية الحذف', 'danger');
+    } finally {
+        elements.confirmBulkDeleteBtn.disabled = false;
+        elements.confirmBulkDeleteBtn.innerHTML = 'تأكيد الحذف';
+    }
+}
 
-        // دالة إرسال إعلان
-        async function sendAnnouncement() {
-            const title = document.getElementById('announcement-title').value.trim();
-            const message = document.getElementById('announcement-message').value.trim();
-            const type = document.getElementById('announcement-type').value;
-            const recipientsType = document.getElementById('announcement-recipients').value;
-            
-            if (!title || !message) {
-                showMessage('يرجى ملء جميع الحقول المطلوبة', 'error');
-                return;
-            }
-            
-            let recipients = [];
-            
-            if (recipientsType === 'all') {
-                recipients = ['all'];
-            } else if (recipientsType === 'specific') {
-                const selectedUsers = Array.from(specificUsersSelect.selectedOptions).map(opt => opt.value);
-                if (selectedUsers.length === 0) {
-                    showMessage('يرجى اختيار مستخدم واحد على الأقل', 'error');
-                    return;
-                }
-                recipients = selectedUsers;
-            } else if (recipientsType === 'class') {
-                // يمكنك إضافة منطق لاختيار صف محدد
-                recipients = ['class_306'];
-            }
-            
-            const announcementData = {
-                title: title,
-                message: message,
-                type: type,
-                recipients: recipients,
-                recipientsType: recipientsType,
-                sentBy: auth.currentUser.email,
-                sentAt: new Date().toISOString()
-            };
-            
-            try {
-                const announcementRef = ref(database, 'announcements');
-                await push(announcementRef, announcementData);
-                
-                showMessage('✅ تم إرسال الإعلان بنجاح', 'success');
-                
-                // تحديث قائمة الإعلانات
-                loadAnnouncements();
-                
-                closeAllModals();
-                
-                // مسح الحقول
-                document.getElementById('announcement-title').value = '';
-                document.getElementById('announcement-message').value = '';
-            } catch (error) {
-                console.error("خطأ في إرسال الإعلان:", error);
-                showMessage('❌ حدث خطأ في إرسال الإعلان', 'error');
-            }
+// دالة إغلاق جميع النوافذ
+function closeAllModals() {
+    elements.addUserModal.style.display = 'none';
+    elements.editUserModal.style.display = 'none';
+    elements.deleteUserModal.style.display = 'none';
+    elements.resetPasswordModal.style.display = 'none';
+    elements.bulkDeleteModal.style.display = 'none';
+    elements.userDetailsModal.style.display = 'none';
+    
+    // إعادة تعيين النماذج
+    if (elements.addUserForm) elements.addUserForm.reset();
+    if (elements.editUserForm) elements.editUserForm.reset();
+    
+    currentEditingUser = null;
+}
+
+// دالة تحميل حالة التسجيلات
+async function loadRegistrationStatus() {
+    try {
+        const statusRef = ref(database, 'system/registrationEnabled');
+        const snapshot = await get(statusRef);
+        
+        if (snapshot.exists()) {
+            const isEnabled = snapshot.val();
+            elements.registrationToggle.checked = isEnabled;
+            elements.registrationStatus.textContent = isEnabled ? 'مفعل' : 'معطل';
+        } else {
+            await set(statusRef, true);
+            elements.registrationToggle.checked = true;
+            elements.registrationStatus.textContent = 'مفعل';
         }
+    } catch (error) {
+        console.error('خطأ في تحميل حالة التسجيلات:', error);
+    }
+}
 
-        // دالة تحميل الإعلانات
-        function loadAnnouncements() {
-            const announcementsRef = ref(database, 'announcements');
-            
-            onValue(announcementsRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    const announcements = [];
-                    
-                    snapshot.forEach((childSnapshot) => {
-                        const announcement = childSnapshot.val();
-                        announcement.id = childSnapshot.key;
-                        announcements.push(announcement);
-                    });
-                    
-                    // ترتيب حسب التاريخ (الأحدث أولاً)
-                    announcements.sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt));
-                    
-                    displayAnnouncements(announcements);
-                } else {
-                    announcementsList.innerHTML = `
-                        <p style="text-align: center; color: #777; padding: 20px;">
-                            <i class="fas fa-bullhorn"></i> لم يتم إرسال أي إعلانات بعد
-                        </p>
-                    `;
-                }
-            });
+// دالة تحديث حالة التسجيلات
+async function updateRegistrationStatus() {
+    const isEnabled = elements.registrationToggle.checked;
+    
+    try {
+        const statusRef = ref(database, 'system/registrationEnabled');
+        await set(statusRef, isEnabled);
+        
+        const logRef = ref(database, 'system/registrationLog');
+        await push(logRef, {
+            enabled: isEnabled,
+            changedBy: currentUser.email,
+            timestamp: new Date().toISOString()
+        });
+        
+        elements.registrationStatus.textContent = isEnabled ? 'مفعل' : 'معطل';
+        showMessage(`تم ${isEnabled ? 'تفعيل' : 'تعطيل'} التسجيلات الجديدة`, 'success');
+        
+    } catch (error) {
+        console.error('خطأ في تحديث حالة التسجيلات:', error);
+        elements.registrationToggle.checked = !isEnabled;
+        showMessage('خطأ في تحديث الحالة', 'danger');
+    }
+}
+
+// دالة التصدير
+async function exportData() {
+    const selectedCheckboxes = document.querySelectorAll('.user-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    
+    let usersToExport = allUsers;
+    if (selectedIds.length > 0) {
+        usersToExport = allUsers.filter(user => selectedIds.includes(user.id));
+    }
+    
+    // تحضير البيانات
+    const exportData = {
+        exportDate: new Date().toISOString(),
+        exportedBy: currentUser.email,
+        totalUsers: usersToExport.length,
+        users: usersToExport.map(user => ({
+            id: user.id,
+            fullName: user.fullName,
+            email: user.email,
+            phone: user.phone,
+            class: user.class,
+            role: user.role,
+            status: user.status,
+            createdAt: user.createdAt,
+            lastActive: user.lastActive
+        }))
+    };
+    
+    // إنشاء ملف JSON
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    // تحميل الملف
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `users-export-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    // تسجيل النشاط
+    const activityRef = ref(database, `adminActivities/${Date.now()}`);
+    await set(activityRef, {
+        type: 'data_export',
+        adminId: currentUser.uid,
+        count: usersToExport.length,
+        timestamp: new Date().toISOString()
+    });
+    
+    showMessage(`تم تصدير ${usersToExport.length} حساب`, 'success');
+}
+
+// دالات مساعدة
+function getActivityColor(type) {
+    const colors = {
+        'login': 'text-success',
+        'logout': 'text-secondary',
+        'assignment_submitted': 'text-primary',
+        'exam_taken': 'text-info',
+        'profile_updated': 'text-warning'
+    };
+    return colors[type] || 'text-muted';
+}
+
+function getActivityText(type) {
+    const texts = {
+        'login': 'تسجيل دخول',
+        'logout': 'تسجيل خروج',
+        'assignment_submitted': 'تسليم واجب',
+        'exam_taken': 'أداء اختبار',
+        'profile_updated': 'تحديث الملف الشخصي',
+        'dashboard_access': 'زيارة لوحة التحكم'
+    };
+    return texts[type] || type;
+}
+
+// دالة إعداد مستمعي الأحداث
+function setupEventListeners() {
+    // البحث مع تأخير
+    elements.searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            renderUsersTable(allUsers);
+        }, 300);
+    });
+    
+    // الفلاتر
+    elements.filterRole.addEventListener('change', () => renderUsersTable(allUsers));
+    elements.filterStatus.addEventListener('change', () => renderUsersTable(allUsers));
+    elements.filterClass.addEventListener('change', () => renderUsersTable(allUsers));
+    
+    // إعادة تعيين الفلاتر
+    elements.resetFilters.addEventListener('click', () => {
+        elements.searchInput.value = '';
+        elements.filterRole.value = '';
+        elements.filterStatus.value = '';
+        elements.filterClass.value = '';
+        renderUsersTable(allUsers);
+    });
+    
+    // أزرار النوافذ
+    elements.addUserBtn.addEventListener('click', () => {
+        elements.addUserModal.style.display = 'flex';
+    });
+    
+    elements.exportBtn.addEventListener('click', exportData);
+    elements.deleteSelectedBtn.addEventListener('click', deleteSelectedUsers);
+    elements.exportSelectedBtn.addEventListener('click', exportData);
+    
+    // إغلاق النوافذ
+    elements.closeModalBtns.forEach(btn => {
+        btn.addEventListener('click', closeAllModals);
+    });
+    
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            closeAllModals();
         }
-
-        // دالة عرض الإعلانات
-        function displayAnnouncements(announcements) {
-            let html = '';
-            
-            announcements.forEach(announcement => {
-                const date = new Date(announcement.sentAt);
-                const dateString = date.toLocaleString('ar-SA');
-                
-                let typeIcon = 'info-circle';
-                let typeColor = '#3498db';
-                
-                switch(announcement.type) {
-                    case 'warning': typeIcon = 'exclamation-triangle'; typeColor = '#f39c12'; break;
-                    case 'success': typeIcon = 'check-circle'; typeColor = '#27ae60'; break;
-                    case 'danger': typeIcon = 'exclamation-circle'; typeColor = '#e74c3c'; break;
-                }
-                
-                let recipientsText = '';
-                switch(announcement.recipientsType) {
-                    case 'all': recipientsText = 'جميع المستخدمين'; break;
-                    case 'specific': recipientsText = `مستخدمين محددين (${announcement.recipients.length})`; break;
-                    case 'class': recipientsText = 'الصف 306'; break;
-                }
-                
-                html += `
-                    <div style="border-right: 4px solid ${typeColor}; padding: 15px; margin-bottom: 15px; background: #f8f9fa; border-radius: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                            <h4 style="color: var(--primary); margin: 0;">
-                                <i class="fas fa-${typeIcon}" style="color: ${typeColor}; margin-left: 8px;"></i>
-                                ${announcement.title}
-                            </h4>
-                            <span style="font-size: 0.85rem; color: #777;">${dateString}</span>
-                        </div>
-                        <p style="color: #666; margin-bottom: 10px; line-height: 1.6;">${announcement.message}</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #777;">
-                            <span>إلى: ${recipientsText}</span>
-                            <span>مرسل: ${announcement.sentBy}</span>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            announcementsList.innerHTML = html;
-        }
-
-        // دالة إنشاء نسخة احتياطية
-        async function createBackup() {
-            try {
-                backupBtn.disabled = true;
-                backupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإنشاء...';
-                
-                const usersRef = ref(database, 'users');
-                const snapshot = await get(usersRef);
-                
-                if (snapshot.exists()) {
-                    const users = {};
-                    snapshot.forEach((childSnapshot) => {
-                        users[childSnapshot.key] = childSnapshot.val();
-                    });
-                    
-                    const systemRef = ref(database, 'system');
-                    const systemSnapshot = await get(systemRef);
-                    const systemData = systemSnapshot.exists() ? systemSnapshot.val() : {};
-                    
-                    const backupData = {
-                        timestamp: new Date().toISOString(),
-                        users: users,
-                        system: systemData,
-                        backupInfo: {
-                            totalUsers: Object.keys(users).length,
-                            admin: auth.currentUser.email
-                        }
-                    };
-                    
-                    const backupString = JSON.stringify(backupData, null, 2);
-                    const blob = new Blob([backupString], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    const date = new Date().toISOString().split('T')[0];
-                    a.download = `backup-section306-${date}.json`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    
-                    // تحديث وقت النسخة الاحتياطية
-                    await set(ref(database, 'system/lastBackup'), new Date().toISOString());
-                    lastBackupElement.textContent = new Date().toLocaleString('ar-SA');
-                    
-                    showMessage('✅ تم إنشاء النسخة الاحتياطية بنجاح', 'success');
-                } else {
-                    showMessage('⚠️ لا توجد بيانات لإنشاء نسخة احتياطية', 'warning');
-                }
-            } catch (error) {
-                console.error("خطأ في إنشاء النسخة الاحتياطية:", error);
-                showMessage('❌ حدث خطأ في إنشاء النسخة الاحتياطية', 'error');
-            } finally {
-                backupBtn.disabled = false;
-                backupBtn.innerHTML = '<i class="fas fa-save"></i> إنشاء نسخة احتياطية';
-            }
-        }
-
-        // دالة تسجيل الخروج
-        async function logout() {
-            try {
-                if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+    });
+    
+    // تأكيد الإجراءات
+    elements.confirmDeleteBtn.addEventListener('click', deleteUserAccount);
+    elements.confirmResetBtn.addEventListener('click', resetUserPassword);
+    elements.confirmBulkDeleteBtn.addEventListener('click', confirmBulkDelete);
+    
+    // النماذج
+    if (elements.addUserForm) {
+        elements.addUserForm.addEventListener('submit', addNewUser);
+    }
+    
+    if (elements.editUserForm) {
+        elements.editUserForm.addEventListener('submit', saveUserEdits);
+    }
+    
+    // التحكم في التسجيلات
+    elements.registrationToggle.addEventListener('change', updateRegistrationStatus);
+    
+    // تسجيل الخروج
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            if (confirm('هل تريد تسجيل الخروج؟')) {
+                try {
                     await signOut(auth);
                     localStorage.removeItem('currentUser');
-                    showMessage('✅ تم تسجيل الخروج بنجاح', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 1500);
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('خطأ في تسجيل الخروج:', error);
+                    showMessage('خطأ في تسجيل الخروج', 'danger');
                 }
-            } catch (error) {
-                console.error("خطأ في تسجيل الخروج:", error);
-                showMessage('❌ حدث خطأ في تسجيل الخروج', 'error');
             }
-        }
+        });
+    }
+}
 
-        // دالة التبديل بين التبويبات
-        function switchTab(tabName) {
-            // إخفاء جميع التبويبات
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.style.display = 'none';
-            });
-            
-            // إزالة النشط من جميع عناصر القائمة
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // إظهار التبويب المحدد
-            document.getElementById(`${tabName}-tab`).style.display = 'block';
-            
-            // إضافة النشط لعنصر القائمة المحدد
-            document.querySelector(`.nav-item[data-tab="${tabName}"]`).classList.add('active');
-            
-            // تحديث التبويب الحالي
-            currentTab = tabName;
-            
-            // إذا كان تبويب المستخدمين، قم بتحديث الجدول
-            if (tabName === 'users') {
-                renderUsersTable();
-            }
-            
-            // إذا كان تبويب الإعلانات، قم بتحميل الإعلانات
-            if (tabName === 'announcements') {
-                loadAnnouncements();
-            }
-            
-            // إغلاق القائمة في الهاتف
-            if (window.innerWidth <= 768) {
-                sidebar.classList.remove('active');
-            }
-        }
+// دالة إضافة مستخدم جديد
+async function addNewUser(e) {
+    e.preventDefault();
+    
+    const firstName = document.getElementById('first-name').value.trim();
+    const lastName = document.getElementById('last-name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const userClass = document.getElementById('class').value;
+    const role = document.getElementById('role').value;
+    
+    if (!firstName || !lastName || !email) {
+        showMessage('يرجى ملء جميع الحقول المطلوبة', 'warning');
+        return;
+    }
+    
+    // التحقق من صحة البريد الإلكتروني
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showMessage('البريد الإلكتروني غير صحيح', 'warning');
+        return;
+    }
+    
+    try {
+        const fullName = `${firstName} ${lastName}`;
+        const userId = `temp_${Date.now()}`; // سيتم إنشاؤه بواسطة Authentication
+        
+        const userData = {
+            id: userId,
+            firstName: firstName,
+            lastName: lastName,
+            fullName: fullName,
+            email: email,
+            phone: phone || null,
+            class: userClass,
+            role: role,
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            isAdmin: role === 'admin',
+            requiresPasswordReset: true
+        };
+        
+        // في تطبيق حقيقي، هنا يتم إنشاء المستخدم في Authentication
+        showMessage('في بيئة الإنتاج، سيتم إنشاء حساب كامل مع إرسال رابط التعيين', 'info');
+        
+        // تخزين بيانات مؤقتة
+        const tempUsersRef = ref(database, 'tempUsers');
+        await push(tempUsersRef, userData);
+        
+        showMessage('تم حفظ بيانات المستخدم، سيتم إنشاء الحساب الكامل في بيئة الإنتاج', 'success');
+        closeAllModals();
+        loadAllUsers();
+        loadStatistics();
+        
+    } catch (error) {
+        console.error('خطأ في إضافة مستخدم:', error);
+        showMessage('خطأ في إضافة المستخدم', 'danger');
+    }
+}
 
-        // دالة إعداد القائمة المتنقلة
-        function setupMobileMenu() {
-            mobileMenuBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('active');
-            });
-            
-            // إغلاق القائمة عند النقر خارجها
-            document.addEventListener('click', (e) => {
-                if (window.innerWidth <= 768 && 
-                    !sidebar.contains(e.target) && 
-                    !mobileMenuBtn.contains(e.target) && 
-                    sidebar.classList.contains('active')) {
-                    sidebar.classList.remove('active');
-                }
-            });
-            
-            // تحديث عند تغيير حجم النافذة
-            window.addEventListener('resize', () => {
-                if (window.innerWidth > 768) {
-                    sidebar.classList.remove('active');
-                }
-            });
-        }
+// دالة بدء التطبيق
+async function initApp() {
+    try {
+        // انتظار تحميل Firebase
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // تحميل بيانات المدير
+        await loadAdminData();
+        
+        // إعداد مستمعي الأحداث
+        setupEventListeners();
+        
+        // تحديث تلقائي كل دقيقة
+        setInterval(() => {
+            loadStatistics();
+        }, 60000);
+        
+        console.log('✅ نظام إدارة الحسابات جاهز');
+        
+    } catch (error) {
+        console.error('خطأ في بدء التطبيق:', error);
+        showMessage('خطأ في تحميل التطبيق', 'danger');
+    }
+}
 
-        // دالة تهيئة التطبيق
-        async function initApp() {
-            // التحقق من صلاحيات المدير
-            if (!checkAdminStatus()) return;
-            
-            // تحديث حالة Firebase
-            firebaseStatusElement.textContent = '🟢 متصل';
-            firebaseStatusElement.style.color = '#27ae60';
-            
-            // تحديث معلومات النظام
-            systemLastUpdateElement.textContent = new Date().toLocaleString('ar-SA');
-            
-            // تحميل البيانات
-            await loadRegistrationStatus();
-            loadUserStatistics();
-            loadAnnouncements();
-            
-            // إضافة مستمعي الأحداث
-            toggleRegistration.addEventListener('change', updateRegistrationStatus);
-            backupBtn.addEventListener('click', createBackup);
-            logoutBtn.addEventListener('click', logout);
-            
-            // البحث في المستخدمين
-            userSearchInput.addEventListener('input', renderUsersTable);
-            
-            // النوافذ المنبثقة
-            closeModalButtons.forEach(btn => {
-                btn.addEventListener('click', closeAllModals);
-            });
-            
-            window.addEventListener('click', (e) => {
-                if (e.target.classList.contains('modal')) {
-                    closeAllModals();
-                }
-            });
-            
-            // نموذج تعديل المستخدم
-            editUserForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                saveUserEdits();
-            });
-            
-            // إعادة تعيين كلمة المرور
-            confirmResetPasswordBtn.addEventListener('click', resetUserPassword);
-            
-            // حذف المستخدم
-            confirmDeleteUserBtn.addEventListener('click', deleteUserAccount);
-            
-            // إعلان جديد
-            newAnnouncementBtn.addEventListener('click', openNewAnnouncementModal);
-            
-            // تغيير نوع المستلمين
-            announcementRecipients.addEventListener('change', () => {
-                if (announcementRecipients.value === 'specific') {
-                    specificUsersContainer.style.display = 'block';
-                } else {
-                    specificUsersContainer.style.display = 'none';
-                }
-            });
-            
-            // نموذج الإعلان
-            announcementForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                sendAnnouncement();
-            });
-            
-            // التبديل بين التبويبات
-            document.querySelectorAll('.nav-item[data-tab]').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const tabName = item.getAttribute('data-tab');
-                    if (tabName !== 'logout') {
-                        switchTab(tabName);
-                    }
-                });
-            });
-            
-            // إعداد القائمة المتنقلة
-            setupMobileMenu();
-            
-            // تحميل آخر نسخة احتياطية
-            try {
-                const lastBackupRef = ref(database, 'system/lastBackup');
-                const snapshot = await get(lastBackupRef);
-                if (snapshot.exists()) {
-                    const timestamp = snapshot.val();
-                    const date = new Date(timestamp);
-                    lastBackupElement.textContent = date.toLocaleString('ar-SA');
-                }
-            } catch (error) {
-                console.error("خطأ في تحميل آخر نسخة احتياطية:", error);
-            }
-            
-            console.log("✅ لوحة تحكم المدير جاهزة");
-            showMessage('مرحباً بك في لوحة تحكم المدير', 'success');
-        }
-
-        // بدء التطبيق
-        document.addEventListener('DOMContentLoaded', initApp);
-    </script>
+// بدء التطبيق عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', initApp);
+</script>
 </body>
 </html>
