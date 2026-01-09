@@ -8,6 +8,9 @@
         <link rel="shortcut icon" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
 <link rel="icon" type="image/png" sizes="32x32" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
 <link rel="icon" type="image/png" sizes="16x16" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/kdate/dist/kdate.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
 :root {
@@ -1805,12 +1808,6 @@ import {
     push, 
     remove 
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
-import { 
-    getStorage,
-    ref as storageRef,
-    uploadBytesResumable,
-    getDownloadURL
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
 
 // ===============================
 // تكوين Firebase
@@ -1829,13 +1826,11 @@ const firebaseConfig = {
 // ===============================
 // تهيئة Firebase
 // ===============================
-let app, auth, database, storage;
-
+let app, auth, database;
 try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     database = getDatabase(app);
-    storage = getStorage(app);
     console.log("✅ Firebase تم التهيئة بنجاح");
 } catch (error) {
     console.error("❌ خطأ في تهيئة Firebase:", error);
@@ -1849,14 +1844,45 @@ let userId = null;
 let currentUser = null;
 let userName = "";
 let userFullName = "";
+let userNickname = "";
 let userEmail = "";
 const classId = 'section306';
 let originalLogoText = "شعبة 306";
 let allEvents = [];
 let currentCalendarMonth = new Date().getMonth();
 let currentCalendarYear = new Date().getFullYear();
-let notificationSound = null;
-let lastNotificationTime = 0;
+let notificationDropdownVisible = false;
+
+// ===============================
+// نظام منع تكرار الإشعارات
+// ===============================
+let lastNotificationHash = {};
+let notificationCooldown = {};
+
+function cleanupOldNotifications() {
+    const now = Date.now();
+    const fiveMinutes = 5 * 60 * 1000;
+    
+    for (const key in lastNotificationHash) {
+        if (now - lastNotificationHash[key] > fiveMinutes) {
+            delete lastNotificationHash[key];
+        }
+    }
+}
+
+function getNotificationHash(notificationData) {
+    // إنشاء مفتاح فريد لكل إشعار
+    const base = `${notificationData.type}_${notificationData.action || 'create'}`;
+    
+    // إضافة المعرفات ذات الصلة
+    if (notificationData.assignmentId) return `${base}_assignment_${notificationData.assignmentId}`;
+    if (notificationData.examId) return `${base}_exam_${notificationData.examId}`;
+    if (notificationData.eventId) return `${base}_event_${notificationData.eventId}`;
+    
+    // إضافة جزء من الرسالة كمفتاح
+    const messagePart = notificationData.message.substring(0, 30).replace(/\s+/g, '_');
+    return `${base}_${messagePart}_${Date.now().toString().slice(-6)}`;
+}
 
 // ===============================
 // CSS إضافي للتحسينات
@@ -1984,51 +2010,10 @@ const additionalStyles = `
         font-size: 1rem;
     }
     
-    /* تحسين المعرض */
-    .media-container {
-        position: relative;
-        width: 100%;
-        height: 180px;
-        overflow: hidden;
-        border-radius: 8px 8px 0 0;
-    }
-    
-    .media-container img,
-    .media-container video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        cursor: pointer;
-        transition: transform 0.3s ease;
-    }
-    
-    .media-container img:hover,
-    .media-container video:hover {
-        transform: scale(1.05);
-    }
-    
-    .file-type-badge {
-        position: absolute;
-        top: 8px;
-        left: 8px;
-        background: rgba(0,0,0,0.7);
-        color: white;
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        z-index: 2;
-    }
-    
-    .file-size {
-        font-size: 0.75rem;
-        color: #666;
-        margin-top: 3px;
-    }
-    
     /* إشعارات منبثقة محسنة */
-    .notification-toast {
+    .notification-popup {
         position: fixed;
-        top: 20px;
+        top: 100px;
         right: 20px;
         background: white;
         border-radius: 10px;
@@ -2039,15 +2024,23 @@ const additionalStyles = `
         overflow: hidden;
         border-right: 4px solid var(--primary);
         transform: translateX(120%);
-        transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
         font-family: 'Tajawal', sans-serif;
     }
     
-    .notification-toast.show {
-        transform: translateX(0);
+    @keyframes slideInRight {
+        to { transform: translateX(0); }
     }
     
-    .toast-header {
+    @keyframes slideOutRight {
+        to { transform: translateX(120%); }
+    }
+    
+    .notification-popup.hiding {
+        animation: slideOutRight 0.4s forwards;
+    }
+    
+    .notification-header {
         display: flex;
         align-items: center;
         padding: 15px;
@@ -2055,7 +2048,7 @@ const additionalStyles = `
         color: white;
     }
     
-    .toast-icon {
+    .notification-icon {
         font-size: 1.3rem;
         margin-left: 12px;
         width: 36px;
@@ -2067,13 +2060,13 @@ const additionalStyles = `
         justify-content: center;
     }
     
-    .toast-title {
+    .notification-title {
         flex: 1;
         font-weight: bold;
         font-size: 1rem;
     }
     
-    .toast-close {
+    .notification-close {
         background: none;
         border: none;
         color: white;
@@ -2083,18 +2076,18 @@ const additionalStyles = `
         padding: 5px;
     }
     
-    .toast-close:hover {
+    .notification-close:hover {
         opacity: 1;
     }
     
-    .toast-body {
+    .notification-body {
         padding: 15px;
         color: #333;
         line-height: 1.5;
         font-size: 0.95rem;
     }
     
-    .toast-footer {
+    .notification-footer {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -2105,87 +2098,228 @@ const additionalStyles = `
         color: #666;
     }
     
-    .toast-time {
+    .notification-time {
         display: flex;
         align-items: center;
         gap: 5px;
     }
     
-    .toast-time i {
-        font-size: 0.8rem;
+    /* تحرير الجدول */
+    .schedule-edit-form {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: var(--radius);
+        margin-top: 20px;
+        border: 2px dashed #ddd;
     }
     
-    /* مؤشر الإشعارات */
-    .notification-bell {
-        position: relative;
-        cursor: pointer;
-        transition: transform 0.3s ease;
+    .schedule-edit-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 15px;
     }
     
-    .notification-bell:hover {
-        transform: scale(1.1);
-    }
-    
-    .notification-count {
-        position: absolute;
-        top: -8px;
-        left: -8px;
-        background: var(--danger);
-        color: white;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        font-size: 0.75rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-    }
-    
-    /* زر التحكم في الصوت */
-    .sound-control {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
+    /* زر الإشعارات - تحسين */
+    .notification-btn {
+        background: rgba(255,255,255,0.2);
+        border: none;
         width: 45px;
         height: 45px;
-        background: white;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        cursor: pointer;
-        z-index: 1000;
-        transition: all 0.3s ease;
-    }
-    
-    .sound-control:hover {
-        transform: scale(1.1);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-    }
-    
-    .sound-control.muted {
-        background: #f8f9fa;
-        color: #999;
-    }
-    
-    /* إشعارات شخصية */
-    .notification-item.personal {
-        border-right: 3px solid var(--accent);
-        background: rgba(26, 188, 156, 0.05);
-    }
-    
-    .personal-badge {
-        position: absolute;
-        top: 5px;
-        left: 5px;
-        background: var(--accent);
+        font-size: 1.3rem;
         color: white;
-        padding: 2px 6px;
-        border-radius: 10px;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        z-index: 1001;
+    }
+    
+    .notification-btn:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+    }
+    
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: var(--danger);
+        color: white;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 0.7rem;
         font-weight: bold;
+        border: 2px solid var(--primary);
+    }
+    
+    /* الإشعارات المنبثقة */
+    .notification-dropdown {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        width: 350px;
+        max-height: 500px;
+        overflow-y: auto;
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        z-index: 9999;
+        display: none;
+        animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+        from { 
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .notification-dropdown.show {
+        display: block;
+    }
+    
+    .notification-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+    
+    .notification-header h3 {
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .clear-notifications {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: var(--transition);
+    }
+    
+    .clear-notifications:hover {
+        background: rgba(255,255,255,0.3);
+    }
+    
+    .notification-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .notification-item {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        gap: 10px;
+        transition: var(--transition);
+        cursor: pointer;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .notification-item:hover {
+        background: #f9f9f9;
+    }
+    
+    .notification-item.unread {
+        background: #f0f7ff;
+    }
+    
+    .notification-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .notification-icon.assignment {
+        background: rgba(52,152,219,0.1);
+        color: var(--secondary);
+    }
+    
+    .notification-icon.exam {
+        background: rgba(231,76,60,0.1);
+        color: var(--danger);
+    }
+    
+    .notification-icon.event {
+        background: rgba(46,204,113,0.1);
+        color: var(--success);
+    }
+    
+    .notification-icon.info {
+        background: rgba(52,152,219,0.1);
+        color: var(--secondary);
+    }
+    
+    .notification-content {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .notification-title {
+        font-weight: 500;
+        margin-bottom: 3px;
+        color: var(--primary);
+        font-size: 0.95rem;
+    }
+    
+    .notification-message {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 3px;
+        word-break: break-word;
+    }
+    
+    .notification-time {
+        font-size: 0.75rem;
+        color: #888;
+    }
+    
+    .notification-sender {
+        font-size: 0.75rem;
+        color: #666;
+        margin-top: 2px;
+    }
+    
+    .notification-empty {
+        padding: 40px 20px;
+        text-align: center;
+        color: #888;
+    }
+    
+    .notification-empty i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #ddd;
     }
     
     /* اسم المستخدم بلون القبعة */
@@ -2193,58 +2327,64 @@ const additionalStyles = `
         color: var(--accent) !important;
         font-weight: bold;
         text-shadow: 0 2px 4px rgba(26, 188, 156, 0.2);
+        transition: var(--transition);
     }
     
-    /* تحسينات عامة */
-    .empty-state {
-        text-align: center;
-        padding: 40px 20px;
-        color: #666;
+    /* علامة خاصة للإشعارات */
+    .personal-badge {
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        background: var(--accent);
+        color: white;
+        font-size: 0.6rem;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-weight: bold;
     }
     
-    .empty-state i {
-        font-size: 3rem;
-        margin-bottom: 15px;
-        color: #ddd;
+    /* إظهار اللقب في الهيدر */
+    .user-nickname {
+        position: absolute;
+        top: 50px;
+        right: 20px;
+        background: var(--accent);
+        color: white;
+        padding: 3px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1000;
+    }
+    
+    .scrolled .user-nickname {
+        opacity: 1;
     }
     
     /* للشاشات الصغيرة */
     @media (max-width: 768px) {
-        .notification-toast {
-            top: 10px;
+        .notification-popup {
+            top: 70px;
             right: 10px;
             left: 10px;
             max-width: none;
         }
         
-        .sound-control {
-            bottom: 70px;
+        .notification-dropdown {
+            position: fixed;
+            top: 70px;
+            right: 10px;
             left: 10px;
+            width: auto;
+            max-width: calc(100% - 20px);
         }
         
-        .calendar-grid {
-            gap: 2px;
-        }
-        
-        .calendar-day {
-            min-height: 45px;
-            padding: 5px 2px;
-            font-size: 0.75rem;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .notification-toast {
-            min-width: 280px;
-        }
-        
-        .toast-header {
-            padding: 12px;
-        }
-        
-        .toast-body {
-            padding: 12px;
-            font-size: 0.9rem;
+        .user-nickname {
+            top: 45px;
+            right: 15px;
+            font-size: 0.7rem;
         }
     }
 </style>
@@ -2271,6 +2411,19 @@ function showAlert(title, message, type = 'info') {
 }
 
 function formatDate(dateString) {
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleString('ar-SA', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    } catch (error) {
+        return dateString;
+    }
+}
+
+function formatDateTime(dateString) {
     try {
         const date = new Date(dateString);
         return date.toLocaleString('ar-SA', {
@@ -2307,178 +2460,135 @@ function updateLoadingMessage(message) {
 // ===============================
 // نظام الصوت المحسن
 // ===============================
-let audioContext = null;
-let soundCooldown = 0;
-
-function playNotificationSound(type = 'default') {
-    // التحقق من كتم الصوت
-    if (localStorage.getItem('notificationSoundMuted') === 'true') {
-        return;
-    }
-    
-    // التحقق من التبريد (منع التكرار)
-    const now = Date.now();
-    if (now - soundCooldown < 1000) { // ثانية واحدة بين الأصوات
-        return;
-    }
-    soundCooldown = now;
-    
+function playNotificationSound() {
     try {
-        // استخدم HTML5 Audio بدلاً من Web Audio API
+        // إنشاء عنصر صوت
         const audio = new Audio();
+        audio.volume = 0.5;
         
-        // أصوات مختلفة حسب النوع
-        const sounds = {
-            'default': 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==',
-            'success': 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==',
-            'warning': 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==',
-            'error': 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA=='
-        };
+        // محاولة إنشاء صوت باستخدام Web Audio API
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
         
-        audio.src = sounds[type] || sounds.default;
-        audio.volume = 0.3; // صوت هادئ
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
         
-        // تشغيل الصوت
-        audio.play().catch(error => {
-            console.log('تعذر تشغيل الصوت:', error);
-        });
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
         
     } catch (error) {
-        console.log('خطأ في تشغيل الصوت:', error);
+        console.log("خطأ في تشغيل الصوت:", error);
+        // بديل مع HTML5 Audio
+        try {
+            const fallbackAudio = new Audio();
+            fallbackAudio.volume = 0.3;
+            fallbackAudio.play().catch(() => {});
+        } catch (fallbackError) {
+            console.log("فشلت المحاولة البديلة:", fallbackError);
+        }
     }
 }
 
 // ===============================
-// نظام الإشعارات المنبثقة المحسن
+// نظام الإشعارات المنبثقة
 // ===============================
-let activeToasts = new Set();
-
-function showNotificationToast(notification) {
-    // التحقق من وقت آخر إشعار
-    const now = Date.now();
-    if (now - lastNotificationTime < 2000) { // إشعارين فقط في الثانية
-        setTimeout(() => showNotificationToast(notification), 1000);
-        return;
+function showNotificationPopup(title, message, type = 'info', duration = 5000) {
+    // إذا كان المستخدم ليس في الصفحة الرئيسية، لا تعرض الإشعارات
+    if (document.hidden) return;
+    
+    // تشغيل الصوت فقط للإشعارات العامة
+    if (type !== 'private') {
+        playNotificationSound();
     }
-    lastNotificationTime = now;
     
-    const toastId = 'toast-' + Date.now();
+    // إنشاء إشعار منبثق
+    const notification = document.createElement('div');
+    notification.className = 'notification-popup';
+    notification.setAttribute('data-type', type);
     
-    // إنشاء عنصر الإشعار
-    const toast = document.createElement('div');
-    toast.id = toastId;
-    toast.className = 'notification-toast';
+    const icon = getNotificationIcon(type);
+    const time = new Date().toLocaleString('ar-SA', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
     
-    const icon = getNotificationIcon(notification.type);
-    const time = formatDate(notification.timestamp || new Date());
-    
-    toast.innerHTML = `
-        <div class="toast-header">
-            <div class="toast-icon">
+    notification.innerHTML = `
+        <div class="notification-header">
+            <div class="notification-icon">
                 <i class="fas fa-${icon}"></i>
             </div>
-            <div class="toast-title">${notification.title}</div>
-            <button class="toast-close" onclick="closeToast('${toastId}')">
+            <div class="notification-title">${title}</div>
+            <button class="notification-close">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div class="toast-body">
-            ${notification.message}
+        <div class="notification-body">
+            ${message}
         </div>
-        <div class="toast-footer">
-            <div class="toast-time">
+        <div class="notification-footer">
+            <div class="notification-time">
                 <i class="far fa-clock"></i>
                 <span>${time}</span>
             </div>
-            <div class="toast-sender">
+            <div class="notification-sender">
                 <i class="fas fa-user"></i>
-                <span>${notification.sender || 'النظام'}</span>
+                <span>${userNickname || userName || 'النظام'}</span>
             </div>
         </div>
     `;
     
     // إضافة إلى DOM
-    const container = document.getElementById('notification-toast-container') || createToastContainer();
-    container.appendChild(toast);
+    document.body.appendChild(notification);
     
-    // إضافة إلى القائمة النشطة
-    activeToasts.add(toastId);
-    
-    // تشغيل الصوت
-    playNotificationSound(notification.type);
-    
-    // عرض مع تأثير
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 10);
-    
-    // إغلاق تلقائي بعد 5 ثواني
-    setTimeout(() => {
-        closeToast(toastId);
-    }, 5000);
-    
-    return toastId;
-}
-
-function createToastContainer() {
-    const container = document.createElement('div');
-    container.id = 'notification-toast-container';
-    container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 10000;';
-    document.body.appendChild(container);
-    return container;
-}
-
-function closeToast(toastId) {
-    const toast = document.getElementById(toastId);
-    if (toast) {
-        toast.classList.remove('show');
+    // إضافة حدث الإغلاق
+    const closeBtn = notification.querySelector('.notification-close');
+    closeBtn.addEventListener('click', () => {
+        notification.classList.add('hiding');
         setTimeout(() => {
-            if (toast.parentElement) {
-                toast.remove();
+            if (notification.parentElement) {
+                notification.remove();
             }
-            activeToasts.delete(toastId);
         }, 400);
-    }
-}
-
-// ===============================
-// نظام التحكم في الصوت
-// ===============================
-function setupSoundControl() {
-    const soundControl = document.createElement('div');
-    soundControl.id = 'sound-control';
-    soundControl.className = 'sound-control';
-    soundControl.innerHTML = '<i class="fas fa-volume-up"></i>';
-    
-    // التحقق من الحالة المحفوظة
-    if (localStorage.getItem('notificationSoundMuted') === 'true') {
-        soundControl.classList.add('muted');
-        soundControl.innerHTML = '<i class="fas fa-volume-mute"></i>';
-    }
-    
-    // حدث النقر
-    soundControl.addEventListener('click', () => {
-        const isMuted = soundControl.classList.contains('muted');
-        
-        if (isMuted) {
-            // تفعيل الصوت
-            soundControl.classList.remove('muted');
-            soundControl.innerHTML = '<i class="fas fa-volume-up"></i>';
-            localStorage.setItem('notificationSoundMuted', 'false');
-            playNotificationSound('success');
-        } else {
-            // كتم الصوت
-            soundControl.classList.add('muted');
-            soundControl.innerHTML = '<i class="fas fa-volume-mute"></i>';
-            localStorage.setItem('notificationSoundMuted', 'true');
-        }
     });
     
-    document.body.appendChild(soundControl);
+    // إغلاق تلقائي بعد المدة المحددة
+    setTimeout(() => {
+        if (notification.parentElement && !notification.classList.contains('hiding')) {
+            notification.classList.add('hiding');
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 400);
+        }
+    }, duration);
+    
+    return notification;
+}
+
+function getNotificationIcon(type) {
+    const icons = {
+        'assignment': 'tasks',
+        'exam': 'clipboard-list',
+        'event': 'calendar',
+        'success': 'check-circle',
+        'warning': 'exclamation-triangle',
+        'error': 'exclamation-circle',
+        'info': 'info-circle',
+        'private': 'user-secret'
+    };
+    return icons[type] || 'bell';
 }
 
 // ===============================
-// إدارة تأثير التمرير في الهيدر
+// تأثير التمرير في الهيدر مع إضافة اللقب
 // ===============================
 function initScrollEffect() {
     const header = document.getElementById('main-header');
@@ -2486,17 +2596,67 @@ function initScrollEffect() {
     
     if (!header || !logoText) return;
     
+    // إضافة عنصر اللقب
+    const nicknameElement = document.createElement('div');
+    nicknameElement.className = 'user-nickname';
+    nicknameElement.id = 'user-nickname';
+    nicknameElement.textContent = userNickname || userName;
+    header.appendChild(nicknameElement);
+    
     window.addEventListener('scroll', () => {
         if (window.scrollY > 50) {
             header.classList.add('scrolled');
-            if (userFullName) {
-                logoText.textContent = userFullName;
+            // تغيير النص إلى اسم المستخدم عند التمرير
+            if (userFullName && userFullName !== "مستخدم") {
+                logoText.textContent = userFullName.split(' ')[0]; // الاسم الأول فقط
             }
         } else {
             header.classList.remove('scrolled');
+            // إعادة النص إلى "شعبة 306"
             logoText.textContent = originalLogoText;
         }
     });
+}
+
+// ===============================
+// إدارة الإشعارات المنبثقة (dropdown)
+// ===============================
+function initNotificationDropdown() {
+    const notificationBtn = document.getElementById('notification-btn');
+    const notificationDropdown = document.getElementById('notification-dropdown');
+    
+    if (!notificationBtn || !notificationDropdown) return;
+    
+    // النقر على زر الإشعارات
+    notificationBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        notificationDropdownVisible = !notificationDropdownVisible;
+        
+        if (notificationDropdownVisible) {
+            notificationDropdown.classList.add('show');
+        } else {
+            notificationDropdown.classList.remove('show');
+        }
+    });
+    
+    // إغلاق الإشعارات عند النقر خارجها
+    document.addEventListener('click', (e) => {
+        if (!notificationDropdown.contains(e.target) && !notificationBtn.contains(e.target)) {
+            notificationDropdownVisible = false;
+            notificationDropdown.classList.remove('show');
+        }
+    });
+    
+    // منع إغلاق الإشعارات عند النقر داخلها
+    notificationDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+    
+    // زر مسح جميع الإشعارات
+    const clearNotificationsBtn = document.getElementById('clear-notifications');
+    if (clearNotificationsBtn) {
+        clearNotificationsBtn.addEventListener('click', clearAllNotifications);
+    }
 }
 
 // ===============================
@@ -2521,7 +2681,10 @@ function checkAuthStatus() {
             await loadUserData();
             showUserInterface();
             initScrollEffect();
-            setupSoundControl();
+            initNotificationDropdown();
+            
+            // طلب إذن الإشعارات
+            requestNotificationPermission();
             
             // تحميل الإشعارات
             loadAllNotifications();
@@ -2542,7 +2705,7 @@ function checkAuthStatus() {
                 showAlert("معلومات", "يتم استخدام البيانات المحلية مؤقتاً", "warning");
                 showUserInterface();
                 initScrollEffect();
-                setupSoundControl();
+                initNotificationDropdown();
             } catch (e) {
                 redirectToLogin();
             }
@@ -2550,6 +2713,19 @@ function checkAuthStatus() {
             redirectToLogin();
         }
     });
+}
+
+// ===============================
+// طلب إذن الإشعارات
+// ===============================
+function requestNotificationPermission() {
+    if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                showNotificationPopup("تم تفعيل الإشعارات", "سيتم إعلامك بجميع المستجدات", "success", 3000);
+            }
+        });
+    }
 }
 
 // ===============================
@@ -2564,14 +2740,16 @@ async function loadUserData() {
         
         if (snapshot.exists()) {
             const userData = snapshot.val();
-            userFullName = userData.fullName || userData.displayName || userData.firstName + ' ' + userData.lastName || 'مستخدم';
+            userFullName = userData.fullName || userData.displayName || 
+                          (userData.firstName ? `${userData.firstName} ${userData.lastName || ''}`.trim() : 'مستخدم');
             userName = userData.firstName || userData.displayName || 'مستخدم';
+            userNickname = userData.nickname || userData.displayName || userData.firstName || 'مستخدم';
             updateUserDisplay();
             await addUserToClass();
-            await logUserActivity('dashboard_access');
         } else {
             userFullName = currentUser.displayName || currentUser.email || 'مستخدم';
             userName = currentUser.displayName || currentUser.email || 'مستخدم';
+            userNickname = currentUser.displayName || currentUser.email || 'مستخدم';
             updateUserDisplay();
             await createUserInDatabase();
         }
@@ -2580,6 +2758,7 @@ async function loadUserData() {
         console.warn("⚠️ لم يتم تحميل بيانات المستخدم:", error);
         userFullName = currentUser.displayName || currentUser.email || 'مستخدم';
         userName = currentUser.displayName || currentUser.email || 'مستخدم';
+        userNickname = currentUser.displayName || currentUser.email || 'مستخدم';
         updateUserDisplay();
     }
 }
@@ -2599,6 +2778,7 @@ async function createUserInDatabase() {
             fullName: currentUser.displayName || '',
             firstName: currentUser.displayName ? currentUser.displayName.split(' ')[0] : 'مستخدم',
             lastName: currentUser.displayName ? currentUser.displayName.split(' ').slice(1).join(' ') : '',
+            nickname: currentUser.displayName ? currentUser.displayName.split(' ')[0] : 'مستخدم',
             role: "student",
             class: "306",
             createdAt: new Date().toISOString(),
@@ -2619,6 +2799,7 @@ async function createUserInDatabase() {
 function updateUserDisplay() {
     const userDisplay = document.getElementById('user-display-name');
     const welcomeMessage = document.getElementById('welcome-message');
+    const nicknameElement = document.getElementById('user-nickname');
     
     if (userDisplay) {
         userDisplay.textContent = originalLogoText;
@@ -2633,7 +2814,11 @@ function updateUserDisplay() {
         else if (hour < 18) greeting = 'مساء الخير';
         else greeting = 'مساء الخير';
         
-        welcomeMessage.textContent = `${greeting} ${userName}، في شعبة 306`;
+        welcomeMessage.textContent = `${greeting} ${userNickname || userName}، في شعبة 306`;
+    }
+    
+    if (nicknameElement) {
+        nicknameElement.textContent = userNickname || userName;
     }
 }
 
@@ -2646,17 +2831,22 @@ function showUserInterface() {
         loadingScreen.style.display = 'none';
     }
     
+    // إظهار جميع عناصر الواجهة
     document.getElementById('main-header').style.display = 'block';
     document.getElementById('main-nav').style.display = 'block';
     document.getElementById('main-content').style.display = 'block';
     document.getElementById('main-footer').style.display = 'block';
     
+    // تهيئة التنقل
     initNavigation();
+    
+    // تحميل لوحة التحكم
     loadDashboard();
     
+    // إظهار رسالة ترحيب بعد تأخير بسيط
     setTimeout(() => {
-        showAlert("مرحباً", `أهلاً وسهلاً بك ${userName}!`, "success");
-    }, 500);
+        showNotificationPopup("مرحباً", `أهلاً وسهلاً بك ${userNickname || userName}!`, "success", 3000);
+    }, 1000);
 }
 
 // ===============================
@@ -2690,9 +2880,9 @@ async function addUserToClass() {
                 activeUsers: { [userId]: new Date().toISOString() }
             });
             
+            // إنشاء الهياكل الفرعية
             await set(ref(database, `classes/${classId}/assignments`), {});
             await set(ref(database, `classes/${classId}/exams`), {});
-            await set(ref(database, `classes/${classId}/gallery`), {});
             await set(ref(database, `classes/${classId}/events`), {});
             await set(ref(database, `classes/${classId}/notifications`), {});
             
@@ -2718,25 +2908,6 @@ async function addUserToClass() {
 }
 
 // ===============================
-// تسجيل نشاط المستخدم
-// ===============================
-async function logUserActivity(activityType) {
-    if (!userId || !database) return;
-    
-    try {
-        const activityRef = ref(database, `userActivities/${userId}/${Date.now()}`);
-        await set(activityRef, {
-            type: activityType,
-            timestamp: new Date().toISOString(),
-            user: userName,
-            email: userEmail
-        });
-    } catch (error) {
-        console.warn("⚠️ لم يتم تسجيل النشاط:", error);
-    }
-}
-
-// ===============================
 // إدارة التنقل
 // ===============================
 function initNavigation() {
@@ -2748,15 +2919,18 @@ function initNavigation() {
             e.preventDefault();
             const pageId = link.dataset.page;
             
+            // إخفاء جميع الصفحات
             pages.forEach(p => p.classList.remove('active'));
             navLinks.forEach(l => l.classList.remove('active'));
             
+            // إظهار الصفحة المحددة
             const page = document.getElementById(pageId);
             if (page) {
                 page.classList.add('active');
                 link.classList.add('active');
             }
             
+            // تحميل محتوى الصفحة
             switch(pageId) {
                 case 'dashboard':
                     loadDashboard();
@@ -2786,13 +2960,13 @@ function initNavigation() {
         });
     });
 
+    // حدث تسجيل الخروج
     document.getElementById('logout-btn')?.addEventListener('click', async () => {
         if (confirm('هل تريد تسجيل الخروج؟')) {
             try {
-                await logUserActivity('logout');
                 await signOut(auth);
                 localStorage.removeItem('currentUser');
-                showAlert("تم تسجيل الخروج", "تم تسجيل الخروج بنجاح!", "success");
+                showNotificationPopup("تم تسجيل الخروج", "تم تسجيل الخروج بنجاح!", "success", 2000);
                 
                 setTimeout(() => {
                     window.location.href = "index.html";
@@ -2800,10 +2974,70 @@ function initNavigation() {
                 
             } catch (error) {
                 console.error("❌ خطأ تسجيل الخروج:", error);
-                showAlert("خطأ", "تعذر تسجيل الخروج", "danger");
+                showNotificationPopup("خطأ", "تعذر تسجيل الخروج", "error", 3000);
             }
         }
     });
+}
+
+// ===============================
+// نظام إضافة الإشعارات المحسن
+// ===============================
+async function addNotification(notificationData) {
+    if (!userId || !database) return;
+    
+    try {
+        // التحقق من تجنب التكرار
+        const notificationHash = getNotificationHash(notificationData);
+        const now = Date.now();
+        const lastSent = lastNotificationHash[notificationHash] || 0;
+        
+        // وقت التبريد للإشعارات (10 ثواني للإشعارات العامة، 30 ثانية للإشعارات الخاصة)
+        const cooldownTime = notificationData.isPrivate ? 30000 : 10000;
+        
+        if (now - lastSent < cooldownTime) {
+            console.log("⏸️ تخطي إشعار مكرر حديثاً:", notificationHash);
+            return;
+        }
+        
+        // تحديث وقت آخر إشعار
+        lastNotificationHash[notificationHash] = now;
+        
+        // تنظيف المصفوفة القديمة بشكل دوري
+        if (Object.keys(lastNotificationHash).length > 100) {
+            cleanupOldNotifications();
+        }
+        
+        const notificationsRef = ref(database, `classes/${classId}/notifications`);
+        const newNotificationRef = push(notificationsRef);
+        
+        await set(newNotificationRef, {
+            ...notificationData,
+            id: newNotificationRef.key,
+            timestamp: new Date().toISOString(),
+            readBy: {},
+            action: notificationData.action || 'create',
+            relatedId: notificationData.relatedId || notificationData.assignmentId || notificationData.examId || notificationData.eventId,
+            isPrivate: notificationData.isPrivate || false,
+            privateFor: notificationData.privateFor || null
+        });
+        
+        // فقط الإشعارات العامة تُظهر إشعاراً منبثقاً
+        if (!notificationData.isPrivate && !notificationData.privateFor) {
+            showNotificationPopup(
+                notificationData.title,
+                notificationData.message,
+                notificationData.type || 'info',
+                5000
+            );
+        }
+        
+        return newNotificationRef.key;
+        
+    } catch (error) {
+        console.error("❌ خطأ في إضافة الإشعار:", error);
+        return null;
+    }
 }
 
 // ===============================
@@ -2822,10 +3056,16 @@ async function loadAllNotifications() {
             ...value
         }));
         
-        // تصفية الإشعارات العامة فقط أو الموجهة لهذا المستخدم
-        const relevantNotifications = notifications.filter(notification => 
-            !notification.targetUserId || notification.targetUserId === userId
-        );
+        // تصفية الإشعارات:
+        // 1. الإشعارات العامة (isPrivate = false)
+        // 2. الإشعارات الخاصة بالشخص نفسه (privateFor = userId)
+        // 3. الإشعارات الموجهة لهذا المستخدم (targetUserId = userId)
+        const relevantNotifications = notifications.filter(notification => {
+            if (notification.isPrivate) {
+                return notification.privateFor === userId;
+            }
+            return !notification.targetUserId || notification.targetUserId === userId;
+        });
         
         renderNotifications(relevantNotifications);
         checkNewNotifications(relevantNotifications);
@@ -2833,17 +3073,27 @@ async function loadAllNotifications() {
 }
 
 function checkNewNotifications(notifications) {
-    // التحقق من الإشعارات الجديدة (آخر 30 ثانية)
-    const thirtySecondsAgo = Date.now() - 30000;
-    const newNotifications = notifications.filter(notification => {
-        const notificationTime = new Date(notification.timestamp).getTime();
-        return notificationTime > thirtySecondsAgo && 
-               !notification.readBy?.[userId];
-    });
+    // التحقق من الإشعارات الجديدة (آخر 5 دقائق)
+    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
     
-    // عرض الإشعارات الجديدة
-    newNotifications.forEach(notification => {
-        showNotificationToast(notification);
+    notifications.forEach(notification => {
+        const notificationTime = new Date(notification.timestamp).getTime();
+        
+        // فقط الإشعارات العامة تظهر منبثقة
+        const shouldShowPopup = !notification.isPrivate && 
+                               !notification.privateFor && 
+                               !notification.readBy?.[userId] &&
+                               notification.senderId !== userId &&
+                               notificationTime > fiveMinutesAgo;
+        
+        if (shouldShowPopup) {
+            showNotificationPopup(
+                notification.title,
+                notification.message,
+                notification.type || 'info',
+                5000
+            );
+        }
     });
 }
 
@@ -2853,13 +3103,16 @@ function renderNotifications(notifications) {
     
     if (!notificationList || !notificationCount) return;
     
-    // ترتيب حسب الوقت
+    // ترتيب حسب الوقت (الأحدث أولاً)
     const sortedNotifications = notifications.sort((a, b) => 
         new Date(b.timestamp || b.time) - new Date(a.timestamp || a.time)
     );
     
-    // حساب الإشعارات غير المقروءة
-    const unreadCount = sortedNotifications.filter(n => !n.readBy || !n.readBy[userId]).length;
+    // حساب الإشعارات غير المقروءة (العامة فقط)
+    const unreadCount = sortedNotifications.filter(n => 
+        (!n.readBy || !n.readBy[userId]) && !n.isPrivate && !n.privateFor
+    ).length;
+    
     notificationCount.textContent = unreadCount;
     notificationCount.style.display = unreadCount > 0 ? 'flex' : 'none';
     
@@ -2872,20 +3125,30 @@ function renderNotifications(notifications) {
     } else {
         notificationList.innerHTML = sortedNotifications.map(notification => {
             const isRead = notification.readBy && notification.readBy[userId];
-            const isPersonal = notification.targetUserId === userId;
+            const isPrivate = notification.isPrivate || notification.privateFor;
+            const iconClass = getNotificationIcon(notification.type);
             
             return `
-                <div class="notification-item ${isRead ? '' : 'unread'} ${isPersonal ? 'personal' : ''}" 
+                <div class="notification-item ${isRead ? '' : 'unread'} ${isPrivate ? 'private' : ''}" 
                      data-id="${notification.id}" 
-                     data-type="class">
+                     data-type="${isPrivate ? 'private' : 'class'}"
+                     onclick="markNotificationAsRead('${notification.id}')">
                     <div class="notification-icon ${notification.type || 'info'}">
-                        <i class="fas fa-${getNotificationIcon(notification.type)}"></i>
-                        ${isPersonal ? '<span class="personal-badge">خاص</span>' : ''}
+                        <i class="fas fa-${iconClass}"></i>
+                        ${isPrivate ? '<span class="personal-badge">خاص</span>' : ''}
                     </div>
                     <div class="notification-content">
-                        <div class="notification-title">${notification.title}</div>
+                        <div class="notification-title">
+                            ${notification.title}
+                            ${isPrivate ? ' <small style="color: var(--accent);">(خاص)</small>' : ''}
+                        </div>
                         <div class="notification-message">${notification.message}</div>
-                        <div class="notification-time">${formatDate(notification.timestamp || notification.time)}</div>
+                        <div class="notification-time">
+                            ${formatDateTime(notification.timestamp || notification.time)}
+                            ${notification.action === 'delete' ? 
+                                ' <span style="color: var(--danger); font-size: 0.7rem;">(تم الحذف)</span>' : 
+                                ''}
+                        </div>
                         <div class="notification-sender">
                             <small><i class="fas fa-user"></i> ${notification.sender || 'النظام'}</small>
                         </div>
@@ -2894,44 +3157,42 @@ function renderNotifications(notifications) {
             `;
         }).join('');
     }
-    
-    // إضافة مستمعي الأحداث
-    document.querySelectorAll('.notification-item').forEach(item => {
-        item.addEventListener('click', async () => {
-            const notificationId = item.dataset.id;
-            await markNotificationAsRead(notificationId);
-            item.classList.remove('unread');
-            updateNotificationCount();
-        });
-    });
 }
 
-function getNotificationIcon(type) {
-    const icons = {
-        assignment: 'tasks',
-        exam: 'clipboard-list',
-        event: 'calendar',
-        success: 'check-circle',
-        warning: 'exclamation-triangle',
-        danger: 'exclamation-circle',
-        info: 'info-circle'
-    };
-    return icons[type] || 'bell';
-}
-
-async function markNotificationAsRead(notificationId) {
+window.markNotificationAsRead = async function(notificationId) {
     if (!userId || !database) return;
     
     try {
         const notificationRef = ref(database, `classes/${classId}/notifications/${notificationId}/readBy/${userId}`);
         await set(notificationRef, true);
+        
+        // تحديث العداد
+        updateNotificationCount();
+        
     } catch (error) {
         console.error("❌ خطأ في تعليم الإشعار كمقروء:", error);
+    }
+};
+
+async function clearAllNotifications() {
+    if (!confirm('هل تريد مسح جميع الإشعارات؟')) {
+        return;
+    }
+    
+    try {
+        const notificationsRef = ref(database, `classes/${classId}/notifications`);
+        await remove(notificationsRef);
+        
+        showNotificationPopup("تم المسح", "تم مسح جميع الإشعارات", "success", 3000);
+        
+    } catch (error) {
+        console.error("❌ خطأ في مسح الإشعارات:", error);
+        showNotificationPopup("خطأ", "تعذر مسح الإشعارات", "error", 3000);
     }
 }
 
 function updateNotificationCount() {
-    const unreadItems = document.querySelectorAll('.notification-item.unread');
+    const unreadItems = document.querySelectorAll('.notification-item.unread:not(.private)');
     const notificationCount = document.getElementById('notification-count');
     
     if (notificationCount) {
@@ -2941,7 +3202,7 @@ function updateNotificationCount() {
 }
 
 // ===============================
-// نظام الواجبات المشتركة
+// نظام الواجبات المشتركة (معدل)
 // ===============================
 async function loadAssignments() {
     if (!userId || !database) return;
@@ -2962,6 +3223,77 @@ async function loadAssignments() {
         renderAssignments(assignments, userSubmissions);
         updateAssignmentStats(assignments, userSubmissions);
     });
+    
+    // إضافة معالج حدث لنموذج إضافة واجب
+    const addAssignmentForm = document.getElementById('add-assignment-form');
+    if (addAssignmentForm) {
+        addAssignmentForm.addEventListener('submit', addAssignment);
+    }
+}
+
+async function addAssignment(e) {
+    e.preventDefault();
+    
+    if (!userId || !database) {
+        showNotificationPopup("خطأ", "يرجى تسجيل الدخول أولاً", "error", 3000);
+        return;
+    }
+    
+    const title = document.getElementById('assignment-title').value.trim();
+    const subject = document.getElementById('assignment-subject').value;
+    const dueDate = document.getElementById('assignment-due-date').value;
+    const description = document.getElementById('assignment-description').value.trim();
+    
+    if (!title || !subject || !dueDate) {
+        showNotificationPopup("خطأ", "يرجى ملء جميع الحقول المطلوبة", "error", 3000);
+        return;
+    }
+    
+    try {
+        const assignmentsRef = ref(database, `classes/${classId}/assignments`);
+        const newAssignmentRef = push(assignmentsRef);
+        const assignmentId = newAssignmentRef.key;
+        
+        // الحصول على عدد أعضاء الصف
+        const classRef = ref(database, `classes/${classId}`);
+        const classSnapshot = await get(classRef);
+        const classData = classSnapshot.val() || {};
+        const totalMembers = classData.memberCount || 1;
+        
+        await set(newAssignmentRef, {
+            id: assignmentId,
+            title,
+            subject,
+            dueDate,
+            description,
+            addedBy: userNickname || userName || 'مستخدم',
+            addedById: userId,
+            createdAt: new Date().toISOString(),
+            totalMembers: totalMembers,
+            submittedCount: 0
+        });
+        
+        // إضافة إشعار عام للمستخدمين
+        await addNotification({
+            title: 'واجب جديد',
+            message: `تم إضافة واجب جديد: "${title}" للمادة ${subject}`,
+            type: 'assignment',
+            assignmentId: assignmentId,
+            sender: userNickname || 'مستخدم',
+            senderId: userId,
+            action: 'create'
+        });
+        
+        // إعادة تعيين النموذج
+        e.target.reset();
+        
+        // عرض إشعار النجاح
+        showNotificationPopup("تم الإضافة", `تم إضافة الواجب "${title}" للجميع`, "success", 3000);
+        
+    } catch (error) {
+        console.error("❌ خطأ في إضافة الواجب:", error);
+        showNotificationPopup("خطأ", "تعذر إضافة الواجب", "error", 3000);
+    }
 }
 
 function renderAssignments(assignments, userSubmissions) {
@@ -2989,7 +3321,8 @@ function renderAssignments(assignments, userSubmissions) {
         
         assignmentsList.innerHTML = sortedAssignments.map(assignment => {
             const timeRemaining = getTimeRemaining(assignment.dueDate);
-            const isUrgent = timeRemaining.includes('اليوم') || timeRemaining.includes('غداً');
+            const isUrgent = timeRemaining.includes('اليوم') || timeRemaining.includes('غداً') || 
+                           (timeRemaining.includes('يوم') && parseInt(timeRemaining) <= 3);
             
             return `
                 <div class="assignment-item ${isUrgent ? 'urgent' : 'pending'}">
@@ -3045,62 +3378,75 @@ function updateAssignmentStats(assignments, userSubmissions) {
 }
 
 window.submitAssignment = async function(assignmentId) {
-    if (!userId || !database) return;
-    
-    const assignmentRef = ref(database, `classes/${classId}/assignments/${assignmentId}`);
-    const userAssignmentRef = ref(database, `users/${userId}/assignments/${assignmentId}`);
-    const assignmentSnapshot = await get(assignmentRef);
-    
-    if (!assignmentSnapshot.exists()) {
-        showAlert('خطأ', 'الواجب غير موجود', 'danger');
+    if (!userId || !database) {
+        showNotificationPopup("خطأ", "يرجى تسجيل الدخول أولاً", "error", 3000);
         return;
     }
     
-    const assignment = assignmentSnapshot.val();
-    
-    // التحقق مما إذا كان قد تم تسليم الواجب مسبقاً
-    const userAssignmentSnapshot = await get(userAssignmentRef);
-    if (userAssignmentSnapshot.exists()) {
-        showAlert('معلومات', 'لقد قمت بتسليم هذا الواجب مسبقاً', 'info');
-        return;
+    try {
+        const assignmentRef = ref(database, `classes/${classId}/assignments/${assignmentId}`);
+        const userAssignmentRef = ref(database, `users/${userId}/assignments/${assignmentId}`);
+        
+        const assignmentSnapshot = await get(assignmentRef);
+        if (!assignmentSnapshot.exists()) {
+            showNotificationPopup("خطأ", "الواجب غير موجود", "error", 3000);
+            return;
+        }
+        
+        const assignment = assignmentSnapshot.val();
+        
+        // التحقق مما إذا كان قد تم تسليم الواجب مسبقاً
+        const userAssignmentSnapshot = await get(userAssignmentRef);
+        if (userAssignmentSnapshot.exists()) {
+            showNotificationPopup("معلومات", "لقد قمت بتسليم هذا الواجب مسبقاً", "info", 3000);
+            return;
+        }
+        
+        // إنشاء تسليم المستخدم
+        const submissionData = {
+            assignmentId: assignmentId,
+            title: assignment.title,
+            subject: assignment.subject,
+            dueDate: assignment.dueDate,
+            description: assignment.description || '',
+            addedBy: assignment.addedBy || 'مجهول',
+            submissionDate: new Date().toLocaleString('ar-SA'),
+            submittedAt: new Date().toISOString(),
+            submittedAtTimestamp: new Date().getTime(),
+            grade: null,
+            status: 'submitted'
+        };
+        
+        // حفظ التسليم
+        await set(userAssignmentRef, submissionData);
+        
+        // تحديث عدد المسلمين
+        await update(assignmentRef, {
+            submittedCount: (assignment.submittedCount || 0) + 1
+        });
+        
+        // إضافة إشعار خاص (لا يظهر للجميع)
+        await addNotification({
+            title: 'تم تسليم واجب',
+            message: `لقد قمت بتسليم واجب: "${assignment.title}"`,
+            type: 'success',
+            sender: 'نظام التسليم',
+            senderId: 'system',
+            isPrivate: true,
+            privateFor: userId
+        });
+        
+        // عرض إشعار خاص للمستخدم فقط
+        showNotificationPopup("تم التسليم", `تم تسليم واجب "${assignment.title}" بنجاح!`, "success", 3000);
+        
+        // تحديث القوائم
+        loadAssignments();
+        loadSubmissions();
+        
+    } catch (error) {
+        console.error("❌ خطأ في تسليم الواجب:", error);
+        showNotificationPopup("خطأ", "تعذر تسليم الواجب", "error", 3000);
     }
-    
-    // إنشاء تسليم المستخدم
-    const submissionData = {
-        assignmentId: assignmentId,
-        title: assignment.title,
-        subject: assignment.subject,
-        dueDate: assignment.dueDate,
-        description: assignment.description || '',
-        addedBy: assignment.addedBy || 'مجهول',
-        submissionDate: new Date().toLocaleString('ar-SA'),
-        submittedAt: new Date().toISOString(),
-        submittedAtTimestamp: new Date().getTime(),
-        grade: null,
-        status: 'submitted'
-    };
-    
-    // حفظ التسليم
-    await set(userAssignmentRef, submissionData);
-    
-    // تحديث عدد المسلمين
-    await update(assignmentRef, {
-        submittedCount: (assignment.submittedCount || 0) + 1
-    });
-    
-    // إظهار إشعار
-    showNotificationToast({
-        title: 'تم تسليم واجب',
-        message: `تم تسليم واجب: "${assignment.title}" بنجاح!`,
-        type: 'success',
-        timestamp: new Date().toISOString()
-    });
-    
-    showAlert('تم التسليم', 'تم تسليم الواجب بنجاح!', 'success');
-    
-    // تحديث القوائم
-    loadAssignments();
-    loadSubmissions();
 };
 
 window.deleteAssignment = async function(assignmentId) {
@@ -3108,31 +3454,42 @@ window.deleteAssignment = async function(assignmentId) {
         return;
     }
     
-    const assignmentRef = ref(database, `classes/${classId}/assignments/${assignmentId}`);
-    const assignmentSnapshot = await get(assignmentRef);
-    
-    if (!assignmentSnapshot.exists()) {
-        showAlert('خطأ', 'الواجب غير موجود', 'danger');
-        return;
+    try {
+        const assignmentRef = ref(database, `classes/${classId}/assignments/${assignmentId}`);
+        const assignmentSnapshot = await get(assignmentRef);
+        
+        if (!assignmentSnapshot.exists()) {
+            showNotificationPopup("خطأ", "الواجب غير موجود", "error", 3000);
+            return;
+        }
+        
+        const assignment = assignmentSnapshot.val();
+        
+        if (assignment.addedById !== userId) {
+            showNotificationPopup("خطأ", "لا يمكنك حذف واجب لم تقم بإضافته", "error", 3000);
+            return;
+        }
+        
+        // إضافة إشعار حذف قبل الحذف الفعلي
+        await addNotification({
+            title: 'تم حذف واجب',
+            message: `تم حذف الواجب: "${assignment.title}"`,
+            type: 'warning',
+            sender: userNickname || 'مستخدم',
+            senderId: userId,
+            action: 'delete',
+            assignmentId: assignmentId
+        });
+        
+        await remove(assignmentRef);
+        
+        // إشعار خاص للمستخدم فقط
+        showNotificationPopup("تم الحذف", `تم حذف الواجب "${assignment.title}"`, "success", 3000);
+        
+    } catch (error) {
+        console.error("❌ خطأ في حذف الواجب:", error);
+        showNotificationPopup("خطأ", "تعذر حذف الواجب", "error", 3000);
     }
-    
-    const assignment = assignmentSnapshot.val();
-    
-    if (assignment.addedById !== userId) {
-        showAlert('خطأ', 'لا يمكنك حذف واجب لم تقم بإضافته', 'danger');
-        return;
-    }
-    
-    await remove(assignmentRef);
-    
-    showNotificationToast({
-        title: 'تم حذف واجب',
-        message: `تم حذف الواجب: "${assignment.title}"`,
-        type: 'warning',
-        timestamp: new Date().toISOString()
-    });
-    
-    showAlert('تم الحذف', 'تم حذف الواجب بنجاح!', 'success');
 };
 
 // ===============================
@@ -3207,7 +3564,7 @@ function renderSubmissions(submissions) {
 }
 
 // ===============================
-// نظام الاختبارات المشتركة
+// نظام الاختبارات المشتركة (معدل)
 // ===============================
 async function loadExams() {
     if (!userId || !database) return;
@@ -3221,7 +3578,116 @@ async function loadExams() {
         renderExams(exams);
         updateExamsStats(exams);
     });
+    
+    // إضافة معالج حدث لنموذج إضافة اختبار
+    const addExamForm = document.getElementById('add-exam-form');
+    if (addExamForm) {
+        addExamForm.addEventListener('submit', addExam);
+    }
 }
+
+async function addExam(e) {
+    e.preventDefault();
+    
+    if (!userId || !database) {
+        showNotificationPopup("خطأ", "يرجى تسجيل الدخول أولاً", "error", 3000);
+        return;
+    }
+    
+    const title = document.getElementById('exam-title').value.trim();
+    const subject = document.getElementById('exam-subject').value;
+    const date = document.getElementById('exam-date').value;
+    const time = document.getElementById('exam-time').value;
+    const location = document.getElementById('exam-location')?.value || '';
+    const description = document.getElementById('exam-description')?.value || '';
+    
+    if (!title || !subject || !date || !time) {
+        showNotificationPopup("خطأ", "يرجى ملء جميع الحقول المطلوبة", "error", 3000);
+        return;
+    }
+    
+    try {
+        const examsRef = ref(database, `classes/${classId}/exams`);
+        const newExamRef = push(examsRef);
+        const examId = newExamRef.key;
+        
+        await set(newExamRef, {
+            id: examId,
+            title,
+            subject,
+            date,
+            time,
+            location,
+            description,
+            addedBy: userNickname || userName || 'مستخدم',
+            addedById: userId,
+            createdAt: new Date().toISOString()
+        });
+        
+        // إضافة إشعار عام
+        await addNotification({
+            title: 'اختبار جديد',
+            message: `تم إضافة اختبار جديد: "${title}" للمادة ${subject}`,
+            type: 'exam',
+            sender: userNickname || 'مستخدم',
+            senderId: userId,
+            action: 'create',
+            examId: examId
+        });
+        
+        // إعادة تعيين النموذج
+        e.target.reset();
+        
+        // عرض إشعار النجاح
+        showNotificationPopup("تم الإضافة", `تم إضافة الاختبار "${title}" للجميع`, "success", 3000);
+        
+    } catch (error) {
+        console.error("❌ خطأ في إضافة الاختبار:", error);
+        showNotificationPopup("خطأ", "تعذر إضافة الاختبار", "error", 3000);
+    }
+}
+
+window.deleteExam = async function(examId) {
+    if (!confirm('هل أنت متأكد من حذف هذا الاختبار؟')) {
+        return;
+    }
+    
+    try {
+        const examRef = ref(database, `classes/${classId}/exams/${examId}`);
+        const examSnapshot = await get(examRef);
+        
+        if (!examSnapshot.exists()) {
+            showNotificationPopup("خطأ", "الاختبار غير موجود", "error", 3000);
+            return;
+        }
+        
+        const exam = examSnapshot.val();
+        
+        if (exam.addedById !== userId) {
+            showNotificationPopup("خطأ", "لا يمكنك حذف اختبار لم تقم بإضافته", "error", 3000);
+            return;
+        }
+        
+        // إشعار حذف قبل الحذف
+        await addNotification({
+            title: 'تم حذف اختبار',
+            message: `تم حذف الاختبار: "${exam.title}"`,
+            type: 'warning',
+            sender: userNickname || 'مستخدم',
+            senderId: userId,
+            action: 'delete',
+            examId: examId
+        });
+        
+        await remove(examRef);
+        
+        showNotificationPopup("تم الحذف", `تم حذف الاختبار "${exam.title}"`, "success", 3000);
+        
+    } catch (error) {
+        console.error("❌ خطأ في حذف الاختبار:", error);
+        showNotificationPopup("خطأ", "تعذر حذف الاختبار", "error", 3000);
+    }
+};
 
 function renderExams(exams) {
     const examsList = document.getElementById('exams-list');
@@ -3275,7 +3741,14 @@ function renderExams(exams) {
                         </div>
                         ${exam.description ? `<p style="margin-top: 10px; color: #666; font-size: 0.9rem;">${exam.description}</p>` : ''}
                     </div>
-                    <span class="badge ${badgeClass}">${status}</span>
+                    <div>
+                        <span class="badge ${badgeClass}">${status}</span>
+                        ${exam.addedById === userId ? 
+                            `<button class="btn btn-sm btn-danger" onclick="deleteExam('${exam.id}')" style="margin-right: 5px;">
+                                <i class="fas fa-trash"></i>
+                            </button>` : 
+                            ''}
+                    </div>
                 </div>
             `;
         }).join('');
@@ -3295,56 +3768,8 @@ function updateExamsStats(exams) {
     }
 }
 
-// إضافة اختبار جديد
-document.getElementById('add-exam-form')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    if (!userId || !database) {
-        showAlert('خطأ', 'يرجى تسجيل الدخول أولاً', 'danger');
-        return;
-    }
-    
-    const title = document.getElementById('exam-title').value;
-    const subject = document.getElementById('exam-subject').value;
-    const date = document.getElementById('exam-date').value;
-    const time = document.getElementById('exam-time').value;
-    const location = document.getElementById('exam-location')?.value || '';
-    const description = document.getElementById('exam-description')?.value || '';
-    
-    if (!title || !subject || !date || !time) {
-        showAlert('خطأ', 'يرجى ملء جميع الحقول المطلوبة', 'danger');
-        return;
-    }
-    
-    const examsRef = ref(database, `classes/${classId}/exams`);
-    const newExamRef = push(examsRef);
-    
-    await set(newExamRef, {
-        id: newExamRef.key,
-        title,
-        subject,
-        date,
-        time,
-        location,
-        description,
-        addedBy: userName || userEmail || 'مستخدم',
-        addedById: userId,
-        createdAt: new Date().toISOString()
-    });
-    
-    showNotificationToast({
-        title: 'اختبار جديد',
-        message: `تم إضافة اختبار جديد: "${title}"`,
-        type: 'info',
-        timestamp: new Date().toISOString()
-    });
-    
-    e.target.reset();
-    showAlert('تم الإضافة', 'تم إضافة الاختبار للجميع بنجاح!', 'success');
-});
-
 // ===============================
-// الجدول الدراسي المشترك
+// الجدول الدراسي المشترك مع التعديل
 // ===============================
 async function loadSchedule() {
     if (!userId || !database) return;
@@ -3355,15 +3780,21 @@ async function loadSchedule() {
         const data = snapshot.val() || getDefaultSchedule();
         renderSchedule(data);
     });
+    
+    // إضافة معالج حدث لتعديل الجدول
+    const editScheduleForm = document.getElementById('edit-schedule-form');
+    if (editScheduleForm) {
+        editScheduleForm.addEventListener('submit', editSchedule);
+    }
 }
 
 function getDefaultSchedule() {
     return {
-        "الأحد": ["الرياضيات", "اللغة العربية", "اللغة الإنجليزية", "الفيزياء", "الكيمياء", "التاريخ"],
-        "الإثنين": ["اللغة العربية", "الرياضيات", "الفيزياء", "الكيمياء", "اللغة الإنجليزية", "التاريخ"],
-        "الثلاثاء": ["اللغة الإنجليزية", "الرياضيات", "الكيمياء", "الفيزياء", "اللغة العربية", "التاريخ"],
-        "الأربعاء": ["الفيزياء", "الكيمياء", "الرياضيات", "اللغة العربية", "اللغة الإنجليزية", "التاريخ"],
-        "الخميس": ["الكيمياء", "الفيزياء", "اللغة العربية", "الرياضيات", "التاريخ", "اللغة الإنجليزية"]
+        "الأحد": ["الرياضيات", "الموطنة الرقمية", "اللغة الإنجليزية", "الفيزياء", "الكيمياء", "الجغرافيا"],
+        "الإثنين": ["المواطنة الرقمية", "الرياضيات", "الفيزياء", "الكيمياء", "اللغة الإنجليزية", "الجغرافيا"],
+        "الثلاثاء": ["اللغة الإنجليزية", "الرياضيات", "الكيمياء", "الفيزياء", "المواطنة الرقمية", "الجغرافيا"],
+        "الأربعاء": ["الفيزياء", "الكيمياء", "الرياضيات", "اللغة العربية", "اللغة الإنجليزية", "الجغرافيا"],
+        "الخميس": ["المهارات الحياتية", "الفيزياء", "المهارات الإدارية", "الرياضيات", "الدراسات اللإسلامية", "اللغة الإنجليزية"]
     };
 }
 
@@ -3371,15 +3802,132 @@ function renderSchedule(schedule) {
     const scheduleBody = document.getElementById('schedule-body');
     const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"];
     
-    if (scheduleBody) {
-        scheduleBody.innerHTML = days.map(day => `
-            <tr>
-                <td><strong>${day}</strong></td>
-                ${(schedule[day] || Array(6).fill('')).map(subject => `
-                    <td>${subject || '-'}</td>
-                `).join('')}
-            </tr>
-        `).join('');
+    if (!scheduleBody) return;
+    
+    scheduleBody.innerHTML = days.map(day => `
+        <tr>
+            <td><strong>${day}</strong></td>
+            ${(schedule[day] || Array(6).fill('')).map((subject, index) => `
+                <td data-day="${day}" data-period="${index + 1}">
+                    ${subject || '-'}
+                </td>
+            `).join('')}
+        </tr>
+    `).join('');
+    
+    // إضافة نموذج تعديل الجدول
+    const scheduleCard = document.querySelector('#schedule .card');
+    if (scheduleCard && !document.getElementById('edit-schedule-form')) {
+        const editFormHTML = `
+            <div class="schedule-edit-form">
+                <h3><i class="fas fa-edit"></i> تعديل الجدول الدراسي</h3>
+                <form id="edit-schedule-form">
+                    <div class="schedule-edit-grid">
+                        <div class="form-group">
+                            <label for="edit-day">اليوم</label>
+                            <select id="edit-day" class="form-control" required>
+                                <option value="">اختر اليوم</option>
+                                <option value="الأحد">الأحد</option>
+                                <option value="الإثنين">الإثنين</option>
+                                <option value="الثلاثاء">الثلاثاء</option>
+                                <option value="الأربعاء">الأربعاء</option>
+                                <option value="الخميس">الخميس</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-period">الحصة</label>
+                            <select id="edit-period" class="form-control" required>
+                                <option value="">اختر الحصة</option>
+                                <option value="1">الحصة الأولى</option>
+                                <option value="2">الحصة الثانية</option>
+                                <option value="3">الحصة الثالثة</option>
+                                <option value="4">الحصة الرابعة</option>
+                                <option value="5">الحصة الخامسة</option>
+                                <option value="6">الحصة السادسة</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-subject">المادة</label>
+                            <select id="edit-subject" class="form-control" required>
+                                <option value="">اختر المادة</option>
+                                <option value="الرياضيات">الرياضيات</option>
+                                <option value="المواطنة الرقمية">الموطنة الرقمية </option>
+                                <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                                <option value="الفيزياء">الفيزياء</option>
+                                <option value="المهارات الحياتية">المهارات الحياتية</option>
+                                <option value="الجغرافيا">الجغرافيا</option>
+                                <option value="المهارات الإدارية">المهارات الإدارية</option>
+                                <option value="الدراسات الإسلامية">الدراسات الإسلامية</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-save"></i> حفظ التغييرات للجميع
+                    </button>
+                </form>
+            </div>
+        `;
+        
+        scheduleCard.insertAdjacentHTML('beforeend', editFormHTML);
+        
+        // إضافة معالج الحدث للنموذج
+        document.getElementById('edit-schedule-form').addEventListener('submit', editSchedule);
+    }
+}
+
+async function editSchedule(e) {
+    e.preventDefault();
+    
+    if (!userId || !database) {
+        showNotificationPopup("خطأ", "يرجى تسجيل الدخول أولاً", "error", 3000);
+        return;
+    }
+    
+    const day = document.getElementById('edit-day').value;
+    const period = parseInt(document.getElementById('edit-period').value);
+    const subject = document.getElementById('edit-subject').value;
+    
+    if (!day || !period || !subject) {
+        showNotificationPopup("خطأ", "يرجى ملء جميع الحقول", "error", 3000);
+        return;
+    }
+    
+    try {
+        const scheduleRef = ref(database, `classes/${classId}/schedule`);
+        const scheduleSnapshot = await get(scheduleRef);
+        let schedule = scheduleSnapshot.exists() ? scheduleSnapshot.val() : getDefaultSchedule();
+        
+        // تحديث المادة في اليوم والحصة المحددة
+        if (!schedule[day]) {
+            schedule[day] = Array(6).fill('');
+        }
+        schedule[day][period - 1] = subject;
+        
+        // حفظ الجدول المحدث
+        await set(scheduleRef, schedule);
+        
+        // إضافة إشعار عام
+        await addNotification({
+            title: 'تم تعديل الجدول',
+            message: `تم تعديل جدول ${day} - الحصة ${period} إلى ${subject}`,
+            type: 'info',
+            sender: userNickname || 'مستخدم',
+            senderId: userId,
+            action: 'update'
+        });
+        
+        // إعادة تعيين النموذج
+        e.target.reset();
+        
+        // عرض إشعار النجاح
+        showNotificationPopup("تم التعديل", `تم تعديل الجدول الدراسي بنجاح`, "success", 3000);
+        
+        // تحديث عرض الجدول
+        renderSchedule(schedule);
+        
+    } catch (error) {
+        console.error("❌ خطأ في تعديل الجدول:", error);
+        showNotificationPopup("خطأ", "تعذر تعديل الجدول", "error", 3000);
     }
 }
 
@@ -3391,7 +3939,10 @@ function loadCalculator() {
         loadSavedWeightedScore();
     }
     
-    document.getElementById('calculate-weighted')?.addEventListener('click', calculateWeighted);
+    const calculateBtn = document.getElementById('calculate-weighted');
+    if (calculateBtn) {
+        calculateBtn.addEventListener('click', calculateWeighted);
+    }
 }
 
 async function loadSavedWeightedScore() {
@@ -3446,624 +3997,1065 @@ function calculateWeighted() {
 async function saveWeightedScore(score, qiyas, tahseeli, gpa) {
     if (!userId || !database) return;
     
-    const userRef = ref(database, `users/${userId}`);
-    await update(userRef, {
-        weightedScore: score,
-        qiyasScore: qiyas,
-        tahseeliScore: tahseeli,
-        gpaScore: gpa,
-        lastCalculated: new Date().toISOString()
-    });
+    try {
+        const userRef = ref(database, `users/${userId}`);
+        await update(userRef, {
+            weightedScore: score,
+            qiyasScore: qiyas,
+            tahseeliScore: tahseeli,
+            gpaScore: gpa,
+            lastCalculated: new Date().toISOString()
+        });
+    } catch (error) {
+        console.warn("⚠️ لم يتم حفظ النسبة:", error);
+    }
 }
 
 // ===============================
 // المعرض المشترك
 // ===============================
-async function loadGallery() {
-    if (!userId || !database) return;
-    
-    const galleryRef = ref(database, `classes/${classId}/gallery`);
-    
-    onValue(galleryRef, (snapshot) => {
-        const data = snapshot.val() || {};
-        const items = Object.values(data);
-        renderGallery(items);
-    });
-}
-
-function renderGallery(items) {
-    const galleryContainer = document.getElementById('images-gallery');
-    const totalPhotos = document.getElementById('total-photos-badge');
-    
-    if (!galleryContainer) return;
-    
-    const totalFiles = items.length;
-    if (totalPhotos) totalPhotos.textContent = `${totalFiles} ملف مشترك`;
-    
-    if (totalFiles === 0) {
-        galleryContainer.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-images"></i>
-                <p>لا توجد ملفات مشتركة حالياً</p>
-            </div>`;
-    } else {
-        const sortedItems = items.sort((a, b) => 
-            new Date(b.createdAt) - new Date(a.createdAt)
-        );
-        
-        galleryContainer.innerHTML = `
-            <div class="gallery-grid">
-                ${sortedItems.map(item => {
-                    const fileSize = item.fileSize ? formatFileSize(item.fileSize) : '';
-                    const fileType = item.fileType || (item.url.includes('video') ? 'video' : 'image');
-                    
-                    return `
-                    <div class="gallery-item">
-                        <div class="media-container">
-                            <div class="file-type-badge">${fileType === 'video' ? '🎬' : '🖼️'}</div>
-                            ${fileType === 'video' ? 
-                                `<video controls onclick="openMediaModal('${item.url}', '${item.title}', 'video')">
-                                    <source src="${item.url}" type="video/mp4">
-                                    متصفحك لا يدعم تشغيل الفيديو
-                                </video>` :
-                                `<img src="${item.url}" alt="${item.title}" 
-                                     onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200/cccccc/666666?text=خطأ+في+تحميل+الصورة';"
-                                     onclick="openMediaModal('${item.url}', '${item.title}', 'image')">`
-                            }
-                        </div>
-                        <div class="gallery-info">
-                            <h4>${item.title}</h4>
-                            <p>${item.description || ''}</p>
-                            <small>
-                                <i class="fas fa-${fileType === 'video' ? 'video' : 'image'}"></i> 
-                                ${fileType === 'video' ? 'فيديو' : 'صورة'}
-                                ${fileSize ? `<span class="file-size">(${fileSize})</span>` : ''}
-                                <span style="margin: 0 5px;">•</span>
-                                <i class="fas fa-user"></i> ${item.addedBy || 'مجهول'} 
-                                <span style="margin: 0 5px;">•</span>
-                                <i class="fas fa-calendar"></i> ${formatDate(item.uploadDate || item.createdAt)}
-                            </small>
-                        </div>
-                    </div>
-                    `;
-                }).join('')}
-            </div>`;
-    }
-}
-
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-// رفع صورة
-document.getElementById('upload-image-form')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    if (!userId || !database || !storage) {
-        showAlert('خطأ', 'يرجى تسجيل الدخول أولاً', 'danger');
-        return;
-    }
-    
-    const title = document.getElementById('image-title').value.trim();
-    const fileInput = document.getElementById('image-file');
-    const description = document.getElementById('image-description')?.value.trim() || '';
-    
-    if (!title || !fileInput.files.length) {
-        showAlert('خطأ', 'يرجى إدخال العنوان واختيار ملف', 'danger');
-        return;
-    }
-    
-    const file = fileInput.files[0];
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 
-                       'video/mp4', 'video/avi', 'video/mov', 'video/wmv'];
-    
-    if (!validTypes.includes(file.type.toLowerCase())) {
-        showAlert('خطأ', 'نوع الملف غير مدعوم', 'danger');
-        return;
-    }
-    
-    const maxSize = 15 * 1024 * 1024;
-    if (file.size > maxSize) {
-        showAlert('خطأ', 'حجم الملف كبير جداً. الحد الأقصى 15MB', 'danger');
-        return;
-    }
-    
-    const uploadBtn = e.target.querySelector('button[type="submit"]');
-    const originalText = uploadBtn.innerHTML;
-    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع...';
-    uploadBtn.disabled = true;
-    
-    try {
-        const fileType = file.type.includes('video') ? 'video' : 'image';
-        const storageReference = storageRef(storage, `gallery/${classId}/${Date.now()}_${file.name.replace(/\s/g, '_')}`);
-        const uploadTask = uploadBytesResumable(storageReference, file);
-        
-        uploadTask.on('state_changed',
-            null,
-            (error) => {
-                console.error("❌ خطأ في رفع الملف:", error);
-                showAlert('خطأ', 'فشل رفع الملف', 'danger');
-                uploadBtn.innerHTML = originalText;
-                uploadBtn.disabled = false;
-            },
-            async () => {
-                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                
-                const galleryRef = ref(database, `classes/${classId}/gallery`);
-                const newItemRef = push(galleryRef);
-                
-                await set(newItemRef, {
-                    id: newItemRef.key,
-                    title,
-                    url: downloadURL,
-                    fileType: fileType,
-                    fileName: file.name,
-                    fileSize: file.size,
-                    description,
-                    addedBy: userName || userEmail || 'مستخدم',
-                    addedById: userId,
-                    uploadDate: new Date().toLocaleString('ar-SA'),
-                    createdAt: new Date().toISOString(),
-                    timestamp: new Date().getTime()
-                });
-                
-                showNotificationToast({
-                    title: fileType === 'video' ? 'فيديو جديد' : 'صورة جديدة',
-                    message: `تمت إضافة ${fileType === 'video' ? 'فيديو' : 'صورة'}: "${title}"`,
-                    type: 'info',
-                    timestamp: new Date().toISOString()
-                });
-                
-                e.target.reset();
-                uploadBtn.innerHTML = originalText;
-                uploadBtn.disabled = false;
-                showAlert('تم الرفع', `تم رفع ${fileType === 'video' ? 'الفيديو' : 'الصورة'} بنجاح!`, 'success');
-                
-                loadGallery();
-            }
-        );
-        
-    } catch (error) {
-        console.error("❌ خطأ في رفع الملف:", error);
-        uploadBtn.innerHTML = originalText;
-        uploadBtn.disabled = false;
-        showAlert('خطأ', 'تعذر رفع الملف', 'danger');
-    }
-});
-
-window.openMediaModal = function(url, title, type) {
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.95);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-        padding: 20px;
-    `;
-    
-    let content = '';
-    if (type === 'video') {
-        content = `
-            <video controls autoplay style="max-width: 90%; max-height: 80vh;">
-                <source src="${url}" type="video/mp4">
-                متصفحك لا يدعم تشغيل الفيديو
-            </video>
+function loadGallery() {
+    const galleryPage = document.getElementById('gallery');
+    if (galleryPage) {
+        galleryPage.innerHTML = `
+            <a a style="text-decoration:none" href="gallery.html"><div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-images"></i> المعرض</h2>
+                    <span class="badge">انتقال</span>
+                </div>
+                <div class="empty-state" style="padding: 40px;">
+                    <i class="fas fa-images"></i>
+                    <p>انقر للانتقال لهذا القسم</p>
+                    <p style="font-size: 0.9rem; color: #888; margin-top: 10px;">
+                        قسم مجهز بأفضل الامكانيات على الاطلاق
+                    </p>
+                </div>
+            </div></a>
         `;
-    } else {
-        content = `<img src="${url}" alt="${title}" style="max-width: 90%; max-height: 80vh; border-radius: 10px;">`;
     }
-    
-    modal.innerHTML = `
-        <div style="position: relative; text-align: center;">
-            ${content}
-            <button onclick="this.parentElement.parentElement.remove()" 
-                    style="position: absolute; top: -40px; left: -40px; background: #e74c3c; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                ✕
-            </button>
-            <div style="color: white; text-align: center; margin-top: 15px; font-size: 18px;">${title}</div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    modal.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') modal.remove();
-    });
-    
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.remove();
-    });
-    
-    modal.focus();
-    modal.setAttribute('tabindex', '0');
-};
-
-// ===============================
-// التقويم
-// ===============================
-async function loadCalendar() {
-    createCalendarLayout();
-    loadEvents();
 }
 
-function createCalendarLayout() {
+// ===============================
+// التقويم الهجري - نسخة مبسطة وعملية
+// ===============================
+
+// بيانات التقويم
+let currentHijriYear = 1447;
+let currentHijriMonth = 8; // ربيع الأول (0-11)
+let events = [];
+
+// أسماء الأشهر والأيام
+const HIJRI_MONTHS = [
+    'المحرم', 'صفر', 'ربيع الأول', 'ربيع الآخر',
+    'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان',
+    'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'
+];
+
+const DAY_NAMES = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+// تهيئة التقويم
+function initializeCalendar() {
+    createCalendarUI();
+    loadCalendarData();
+    setCurrentHijriDate();
+}
+
+// إنشاء واجهة التقويم
+function createCalendarUI() {
     const calendarPage = document.getElementById('calendar');
     if (!calendarPage) return;
     
-    calendarPage.innerHTML = '';
-    
-    const calendarHTML = `
-        <div class="calendar-layout">
-            <div class="calendar-section">
-                <div class="card">
-                    <div class="card-header">
-                        <h2><i class="far fa-calendar-alt"></i> تقويم الأحداث</h2>
-                        <span class="badge">أحداث مشتركة</span>
+    calendarPage.innerHTML = `
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <div class="month-navigation">
+                    <button id="prevYear" class="nav-btn">
+                        <i class="fas fa-angle-double-right"></i> السنة السابقة
+                    </button>
+                    <button id="prevMonth" class="nav-btn">
+                        <i class="fas fa-angle-right"></i> الشهر السابق
+                    </button>
+                    
+                    <div class="current-month">
+                        <h2 id="monthYearDisplay"></h2>
+                        <div class="hijri-today" id="todayDisplay"></div>
                     </div>
-                    <div class="calendar-container" id="calendar-container"></div>
+                    
+                    <button id="nextMonth" class="nav-btn">
+                        الشهر التالي <i class="fas fa-angle-left"></i>
+                    </button>
+                    <button id="nextYear" class="nav-btn">
+                        السنة التالية <i class="fas fa-angle-double-left"></i>
+                    </button>
+                </div>
+                
+                <div class="calendar-actions">
+                    <button id="goToday" class="btn-action">
+                        <i class="fas fa-calendar-day"></i> العودة لليوم
+                    </button>
+                    <button id="addQuickEvent" class="btn-action primary">
+                        <i class="fas fa-plus"></i> إضافة حدث
+                    </button>
                 </div>
             </div>
             
-            <div class="events-section">
-                <div class="card">
-                    <div class="card-header">
-                        <h2><i class="fas fa-info-circle"></i> تفاصيل الأحداث</h2>
+            <div class="calendar-wrapper">
+                <!-- التقويم -->
+                <div class="calendar-main">
+                    <div class="week-days">
+                        ${DAY_NAMES.map(day => `<div class="week-day ${day === 'الجمعة' ? 'friday' : ''}">${day}</div>`).join('')}
                     </div>
-                    <div id="event-details-container" style="padding: 15px;">
-                        <div class="empty-state" id="no-event-selected">
-                            <i class="far fa-calendar"></i>
-                            <p>انقر على يوم في التقويم لعرض الأحداث</p>
-                        </div>
-                        <div id="events-list" style="display: none;"></div>
-                    </div>
+                    <div class="month-days" id="monthDays"></div>
                 </div>
                 
-                <div class="card" style="margin-top: 20px;">
-                    <div class="card-header">
-                        <h2><i class="fas fa-plus-circle"></i> إضافة حدث جديد</h2>
+                <!-- لوحة الأحداث -->
+                <div class="events-sidebar">
+                    <div class="events-header">
+                        <h3><i class="fas fa-calendar-check"></i> أحداث اليوم</h3>
+                        <span class="badge" id="eventsCount">0 حدث</span>
                     </div>
-                    <form id="add-event-form" style="padding: 15px;">
-                        <div class="form-group">
-                            <label for="event-title">عنوان الحدث *</label>
-                            <input type="text" id="event-title" class="form-control" placeholder="أدخل عنوان الحدث" required>
+                    <div class="events-list" id="eventsList">
+                        <div class="empty-events">
+                            <i class="far fa-calendar-times"></i>
+                            <p>لا توجد أحداث لهذا اليوم</p>
                         </div>
-                        <div class="form-group">
-                            <label for="event-date">تاريخ الحدث *</label>
-                            <input type="date" id="event-date" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="event-type">نوع الحدث *</label>
-                            <select id="event-type" class="form-control" required>
-                                <option value="">اختر نوع الحدث</option>
-                                <option value="اختبار">اختبار</option>
-                                <option value="واجب">واجب</option>
-                                <option value="مناسبة">مناسبة</option>
-                                <option value="إجازة">إجازة</option>
-                                <option value="اجتماع">اجتماع</option>
-                                <option value="موعد نهائي">موعد نهائي</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="event-description">وصف الحدث (اختياري)</label>
-                            <textarea id="event-description" class="form-control" placeholder="أدخل وصف للحدث" rows="3"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
-                            <i class="fas fa-plus"></i> إضافة الحدث للجميع
-                        </button>
-                    </form>
+                    </div>
+                    
+                    <div class="add-event-form">
+                        <h4><i class="fas fa-plus-circle"></i> إضافة حدث جديد</h4>
+                        <form id="eventForm">
+                            <div class="form-group">
+                                <input type="text" id="eventTitle" placeholder="عنوان الحدث" required>
+                            </div>
+                            <div class="form-row">
+                                <select id="eventDay" class="form-control">
+                                    ${Array.from({length: 30}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
+                                </select>
+                                <select id="eventMonth" class="form-control">
+                                    ${HIJRI_MONTHS.map((month, i) => `<option value="${i}">${month}</option>`).join('')}
+                                </select>
+                                <input type="number" id="eventYear" value="1447" min="1300" max="1500" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <select id="eventType" class="form-control">
+                                    <option value="عام">عام</option>
+                                    <option value="اختبار">اختبار</option>
+                                    <option value="واجب">واجب</option>
+                                    <option value="مناسبة">مناسبة</option>
+                                    <option value="إجازة">إجازة</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <textarea id="eventDesc" placeholder="وصف الحدث (اختياري)" rows="2"></textarea>
+                            </div>
+                            <button type="submit" class="btn-submit">
+                                <i class="fas fa-save"></i> حفظ الحدث
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     `;
     
-    calendarPage.innerHTML = calendarHTML;
-    
+    // إضافة المستمعين للأحداث
+    setupEventListeners();
     generateCalendar();
-    
-    document.getElementById('add-event-form')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await addEvent();
-    });
 }
 
-async function loadEvents() {
-    if (!userId || !database) return;
-    
-    const eventsRef = ref(database, `classes/${classId}/events`);
-    
-    onValue(eventsRef, (snapshot) => {
-        const data = snapshot.val() || {};
-        allEvents = Object.values(data);
-        updateCalendarEvents(allEvents);
-    });
-}
-
+// توليد التقويم
 function generateCalendar() {
-    const year = currentCalendarYear;
-    const month = currentCalendarMonth;
+    const monthDays = document.getElementById('monthDays');
+    if (!monthDays) return;
     
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
+    // حساب عدد أيام الشهر الهجري
+    const daysInMonth = getHijriMonthDays(currentHijriYear, currentHijriMonth);
     
-    const calendarContainer = document.getElementById('calendar-container');
-    if (!calendarContainer) return;
+    // حساب أول يوم في الشهر (0 = الأحد)
+    const firstDay = getFirstDayOfMonth(currentHijriYear, currentHijriMonth);
     
-    const monthNames = [
-        'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-        'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-    ];
+    // تحديث عنوان الشهر
+    updateMonthDisplay();
     
-    let calendarHTML = `
-        <div class="month-navigation">
-            <button id="prev-month">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            <span class="current-month">${monthNames[month]} ${year}</span>
-            <button id="next-month">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-        </div>
-        
-        <div class="calendar-grid">
-            <div class="calendar-day-header">الأحد</div>
-            <div class="calendar-day-header">الإثنين</div>
-            <div class="calendar-day-header">الثلاثاء</div>
-            <div class="calendar-day-header">الأربعاء</div>
-            <div class="calendar-day-header">الخميس</div>
-            <div class="calendar-day-header">الجمعة</div>
-            <div class="calendar-day-header">السبت</div>
-    `;
+    let calendarHTML = '';
     
-    for (let i = 0; i < firstDay.getDay(); i++) {
-        calendarHTML += '<div class="calendar-day empty"></div>';
+    // إضافة أيام فارغة قبل بداية الشهر
+    for (let i = 0; i < firstDay; i++) {
+        calendarHTML += '<div class="day empty"></div>';
     }
     
-    const today = new Date();
-    const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
+    // إضافة أيام الشهر
+    const today = getTodayHijri();
     
     for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-        const dayEvents = allEvents.filter(event => event.date === dateStr);
-        const isToday = isCurrentMonth && day === today.getDate();
+        const dayEvents = getEventsForDay(day);
+        const isToday = today.year === currentHijriYear && 
+                       today.month === currentHijriMonth + 1 && 
+                       today.day === day;
         
         calendarHTML += `
-            <div class="calendar-day ${dayEvents.length > 0 ? 'has-event' : ''} ${isToday ? 'selected' : ''}" 
-                 data-date="${dateStr}" 
-                 id="day-${dateStr}"
-                 onclick="showDayEvents('${dateStr}')">
-                <div class="day-number">${day}</div>
-                ${dayEvents.length > 0 ? 
-                    `<div class="event-indicator" title="${dayEvents.length} حدث">${dayEvents.length}</div>` : 
-                    ''}
-                ${isToday ? '<div style="font-size: 0.7rem; color: var(--accent);">اليوم</div>' : ''}
+            <div class="day ${isToday ? 'today' : ''} ${dayEvents.length > 0 ? 'has-event' : ''}" 
+                 data-day="${day}"
+                 onclick="selectDay(${day})">
+                <div class="day-header">
+                    <span class="day-number">${day}</span>
+                    ${isToday ? '<span class="today-badge">اليوم</span>' : ''}
+                </div>
+                ${dayEvents.length > 0 ? `
+                    <div class="event-indicators">
+                        ${dayEvents.slice(0, 3).map(event => `
+                            <span class="event-dot" style="background: ${getEventColor(event.type)}" 
+                                  title="${event.title}"></span>
+                        `).join('')}
+                        ${dayEvents.length > 3 ? `<span class="more-events">+${dayEvents.length - 3}</span>` : ''}
+                    </div>
+                ` : ''}
+                <div class="gregorian-date">${convertToGregorian(day)}</div>
             </div>
         `;
     }
     
-    const totalCells = 42;
-    const filledCells = firstDay.getDay() + daysInMonth;
+    // إضافة أيام فارغة بعد نهاية الشهر
+    const totalCells = 42; // 6 أسابيع × 7 أيام
+    const filledCells = firstDay + daysInMonth;
     for (let i = filledCells; i < totalCells; i++) {
-        calendarHTML += '<div class="calendar-day empty"></div>';
+        calendarHTML += '<div class="day empty"></div>';
     }
     
-    calendarHTML += '</div>';
-    calendarContainer.innerHTML = calendarHTML;
+    monthDays.innerHTML = calendarHTML;
     
-    document.getElementById('prev-month')?.addEventListener('click', () => {
-        currentCalendarMonth--;
-        if (currentCalendarMonth < 0) {
-            currentCalendarMonth = 11;
-            currentCalendarYear--;
+    // اختيار اليوم الحالي
+    if (today.year === currentHijriYear && today.month === currentHijriMonth + 1) {
+        selectDay(today.day);
+    }
+}
+
+// إعداد مستمعي الأحداث
+function setupEventListeners() {
+    // التنقل بين الأشهر
+    document.getElementById('prevMonth')?.addEventListener('click', () => {
+        currentHijriMonth--;
+        if (currentHijriMonth < 0) {
+            currentHijriMonth = 11;
+            currentHijriYear--;
         }
         generateCalendar();
     });
     
-    document.getElementById('next-month')?.addEventListener('click', () => {
-        currentCalendarMonth++;
-        if (currentCalendarMonth > 11) {
-            currentCalendarMonth = 0;
-            currentCalendarYear++;
+    document.getElementById('nextMonth')?.addEventListener('click', () => {
+        currentHijriMonth++;
+        if (currentHijriMonth > 11) {
+            currentHijriMonth = 0;
+            currentHijriYear++;
         }
         generateCalendar();
+    });
+    
+    // التنقل بين السنين
+    document.getElementById('prevYear')?.addEventListener('click', () => {
+        currentHijriYear--;
+        generateCalendar();
+    });
+    
+    document.getElementById('nextYear')?.addEventListener('click', () => {
+        currentHijriYear++;
+        generateCalendar();
+    });
+    
+    // العودة لليوم
+    document.getElementById('goToday')?.addEventListener('click', () => {
+        const today = getTodayHijri();
+        currentHijriYear = today.year;
+        currentHijriMonth = today.month - 1;
+        generateCalendar();
+    });
+    
+    // إضافة حدث سريع
+    document.getElementById('addQuickEvent')?.addEventListener('click', () => {
+        const today = getTodayHijri();
+        document.getElementById('eventDay').value = today.day;
+        document.getElementById('eventMonth').value = today.month - 1;
+        document.getElementById('eventYear').value = today.year;
+        document.getElementById('eventTitle').focus();
+    });
+    
+    // نموذج إضافة حدث
+    document.getElementById('eventForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        addNewEvent();
     });
 }
 
-function updateCalendarEvents(events) {
-    events.forEach(event => {
-        const dateStr = event.date;
-        const dayElement = document.getElementById(`day-${dateStr}`);
-        if (dayElement) {
-            const dayEvents = events.filter(e => e.date === dateStr);
-            dayElement.classList.toggle('has-event', dayEvents.length > 0);
-            
-            if (dayEvents.length > 0) {
-                const indicator = dayElement.querySelector('.event-indicator');
-                if (indicator) {
-                    indicator.textContent = dayEvents.length;
+// تحديث عرض الشهر والسنة
+function updateMonthDisplay() {
+    const display = document.getElementById('monthYearDisplay');
+    if (display) {
+        display.textContent = `${HIJRI_MONTHS[currentHijriMonth]} ${currentHijriYear} هـ`;
+    }
+    
+    const todayDisplay = document.getElementById('todayDisplay');
+    if (todayDisplay) {
+        const today = getTodayHijri();
+        todayDisplay.innerHTML = `
+            <i class="fas fa-star-and-crescent"></i>
+            اليوم: ${today.day} ${HIJRI_MONTHS[today.month - 1]} ${today.year} هـ
+        `;
+    }
+}
+
+// اختيار يوم
+window.selectDay = function(day) {
+    // إزالة التحديد من جميع الأيام
+    document.querySelectorAll('.day').forEach(d => d.classList.remove('selected'));
+    
+    // إضافة التحديد لليوم المختار
+    const selectedDay = document.querySelector(`.day[data-day="${day}"]:not(.empty)`);
+    if (selectedDay) {
+        selectedDay.classList.add('selected');
+        displayEventsForDay(day);
+    }
+};
+
+// عرض أحداث يوم معين
+function displayEventsForDay(day) {
+    const eventsList = document.getElementById('eventsList');
+    const eventsCount = document.getElementById('eventsCount');
+    const dayEvents = getEventsForDay(day);
+    
+    if (!eventsList || !eventsCount) return;
+    
+    if (dayEvents.length === 0) {
+        eventsList.innerHTML = `
+            <div class="empty-events">
+                <i class="far fa-calendar-times"></i>
+                <p>لا توجد أحداث ليوم ${day}</p>
+                <button onclick="addEventForDay(${day})" class="btn-add">
+                    <i class="fas fa-plus"></i> إضافة حدث لهذا اليوم
+                </button>
+            </div>
+        `;
+        eventsCount.textContent = '0 حدث';
+    } else {
+        eventsList.innerHTML = dayEvents.map(event => `
+            <div class="event-item" style="border-left-color: ${getEventColor(event.type)}">
+                <div class="event-header">
+                    <h5>${event.title}</h5>
+                    <span class="event-type">${event.type}</span>
+                </div>
+                ${event.description ? `<p class="event-desc">${event.description}</p>` : ''}
+                <div class="event-footer">
+                    <span><i class="fas fa-user"></i> ${event.addedBy || 'مستخدم'}</span>
+                    <span><i class="fas fa-clock"></i> ${formatTime(event.createdAt)}</span>
+                    <button onclick="deleteEvent('${event.id}')" class="btn-delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        eventsCount.textContent = `${dayEvents.length} حدث`;
+    }
+    
+    // تحديث نموذج الإضافة
+    document.getElementById('eventDay').value = day;
+    document.getElementById('eventMonth').value = currentHijriMonth;
+    document.getElementById('eventYear').value = currentHijriYear;
+}
+
+// إضافة حدث ليوم معين
+window.addEventForDay = function(day) {
+    document.getElementById('eventDay').value = day;
+    document.getElementById('eventMonth').value = currentHijriMonth;
+    document.getElementById('eventYear').value = currentHijriYear;
+    document.getElementById('eventTitle').focus();
+};
+
+// إضافة حدث جديد
+function addNewEvent() {
+    const title = document.getElementById('eventTitle').value.trim();
+    const day = parseInt(document.getElementById('eventDay').value);
+    const month = parseInt(document.getElementById('eventMonth').value);
+    const year = parseInt(document.getElementById('eventYear').value);
+    const type = document.getElementById('eventType').value;
+    const description = document.getElementById('eventDesc').value.trim();
+    
+    if (!title) {
+        alert('الرجاء إدخال عنوان الحدث');
+        return;
+    }
+    
+    const eventId = Date.now().toString();
+    const newEvent = {
+        id: eventId,
+        title,
+        hijriDate: `${year}-${month + 1}-${day}`,
+        type,
+        description,
+        addedBy: userNickname || 'مستخدم',
+        addedById: userId,
+        createdAt: new Date().toISOString()
+    };
+    
+    events.push(newEvent);
+    
+    // حفظ في localStorage (مؤقت)
+    saveEventsToStorage();
+    
+    // إعادة توليد التقويم
+    generateCalendar();
+    
+    // عرض الأحداث لليوم
+    selectDay(day);
+    
+    // إعادة تعيين النموذج
+    document.getElementById('eventForm').reset();
+    document.getElementById('eventDay').value = day;
+    document.getElementById('eventMonth').value = month;
+    document.getElementById('eventYear').value = year;
+    
+    // رسالة نجاح
+    showMessage('تم إضافة الحدث بنجاح', 'success');
+}
+
+// حذف حدث
+window.deleteEvent = function(eventId) {
+    if (!confirm('هل أنت متأكد من حذف هذا الحدث؟')) return;
+    
+    events = events.filter(event => event.id !== eventId);
+    saveEventsToStorage();
+    generateCalendar();
+    
+    const selectedDay = document.querySelector('.day.selected')?.dataset.day;
+    if (selectedDay) {
+        displayEventsForDay(parseInt(selectedDay));
+    }
+    
+    showMessage('تم حذف الحدث', 'success');
+};
+
+// الحصول على أحداث يوم معين
+function getEventsForDay(day) {
+    return events.filter(event => {
+        const [year, month, eventDay] = event.hijriDate.split('-').map(Number);
+        return year === currentHijriYear && 
+               month === currentHijriMonth + 1 && 
+               eventDay === day;
+    });
+}
+
+// الحصول على لون الحدث
+function getEventColor(type) {
+    const colors = {
+        'اختبار': '#f44336',
+        'واجب': '#2196f3',
+        'مناسبة': '#9c27b0',
+        'إجازة': '#4caf50',
+        'اجتماع': '#ff9800',
+        'عام': '#607d8b'
+    };
+    return colors[type] || '#607d8b';
+}
+
+// ===============================
+// دوال التقويم الهجري
+// ===============================
+
+// الحصول على التاريخ الهجري الحالي
+function getTodayHijri() {
+    const today = new Date();
+    
+    // حساب تقريبي (يمكن استبداله بمكتبة دقيقة)
+    // 1 محرم 1447 هـ = 19 يوليو 2025 م
+    const referenceDate = new Date(2025, 6, 19); // 19 يوليو 2025
+    const diffDays = Math.floor((today - referenceDate) / (1000 * 60 * 60 * 24));
+    
+    // حساب التقريبي للهجري (354 يوم في السنة)
+    let hijriDays = 1 + diffDays; // بدأنا من اليوم الأول
+    let hijriYear = 1447;
+    let hijriMonth = 1;
+    let hijriDay = 1;
+    
+    while (hijriDays > 0) {
+        const daysInYear = isHijriLeapYear(hijriYear) ? 355 : 354;
+        
+        if (hijriDays > daysInYear) {
+            hijriDays -= daysInYear;
+            hijriYear++;
+        } else {
+            // حساب الشهر
+            for (let month = 1; month <= 12; month++) {
+                const daysInMonth = getHijriMonthDays(hijriYear, month - 1);
+                if (hijriDays > daysInMonth) {
+                    hijriDays -= daysInMonth;
+                    hijriMonth++;
                 } else {
-                    const dayNumber = dayElement.querySelector('.day-number')?.textContent || '';
-                    const todayBadge = dayElement.innerHTML.includes('اليوم') ? '<div style="font-size: 0.7rem; color: var(--accent);">اليوم</div>' : '';
-                    dayElement.innerHTML = `
-                        <div class="day-number">${dayNumber}</div>
-                        <div class="event-indicator" title="${dayEvents.length} حدث">${dayEvents.length}</div>
-                        ${todayBadge}
-                    `;
+                    hijriDay = hijriDays;
+                    hijriDays = 0;
+                    break;
                 }
             }
         }
+    }
+    
+    return {
+        year: hijriYear,
+        month: hijriMonth,
+        day: hijriDay
+    };
+}
+
+// التحقق من السنة الكبيسة
+function isHijriLeapYear(year) {
+    // السنة الكبيسة في التقويم الهجري تأتي كل 2-3 سنوات
+    const cycle = year % 30;
+    const leapYears = [2, 5, 7, 10, 13, 16, 18, 21, 24, 26, 29];
+    return leapYears.includes(cycle);
+}
+
+// الحصول على عدد أيام الشهر الهجري
+function getHijriMonthDays(year, month) {
+    // الأشهر الفردية (1,3,5,7,9,11) عادة 30 يوم
+    // الأشهر الزوجية (2,4,6,8,10) عادة 29 يوم
+    // ذو الحجة (12) 30 يوم في السنة الكبيسة، وإلا 29
+    
+    const monthNum = month + 1;
+    
+    if (monthNum === 12) { // ذو الحجة
+        return isHijriLeapYear(year) ? 30 : 29;
+    }
+    
+    return (monthNum % 2 === 1) ? 30 : 29;
+}
+
+// الحصول على أول يوم في الشهر
+function getFirstDayOfMonth(year, month) {
+    // حساب تقريبي
+    const today = new Date();
+    const hijriToday = getTodayHijri();
+    
+    if (year === hijriToday.year && month === hijriToday.month - 1) {
+        const dayOfWeek = today.getDay(); // 0 = الأحد
+        const firstDay = (dayOfWeek - (hijriToday.day - 1)) % 7;
+        return firstDay >= 0 ? firstDay : firstDay + 7;
+    }
+    
+    // حساب تقريبي لأشهر أخرى
+    const daysSince = Math.floor((year - 1) * 354.367 + month * 29.53);
+    return (daysSince + 5) % 7; // 5 لأن الهجرة كانت يوم الخميس
+}
+
+// تحويل التاريخ الهجري إلى ميلادي (تقريبي)
+function convertToGregorian(hijriDay) {
+    // حساب تقريبي
+    const referenceDate = new Date(2025, 6, 19); // 1 محرم 1447
+    
+    // حساب إجمالي الأيام من 1 محرم 1447
+    let totalDays = 0;
+    for (let month = 0; month < currentHijriMonth; month++) {
+        totalDays += getHijriMonthDays(currentHijriYear, month);
+    }
+    totalDays += (hijriDay - 1);
+    
+    // إضافة الأيام للتاريخ المرجعي
+    const gregorianDate = new Date(referenceDate);
+    gregorianDate.setDate(referenceDate.getDate() + totalDays);
+    
+    return `${gregorianDate.getDate()}/${gregorianDate.getMonth() + 1}`;
+}
+
+// تعيين التاريخ الهجري الحالي
+function setCurrentHijriDate() {
+    const today = getTodayHijri();
+    currentHijriYear = today.year;
+    currentHijriMonth = today.month - 1;
+}
+
+// ===============================
+// دوال التخزين والمساعدة
+// ===============================
+
+// تحميل البيانات
+function loadCalendarData() {
+    // تحميل من localStorage (مؤقت)
+    const savedEvents = localStorage.getItem(`hijri_events_${classId}`);
+    if (savedEvents) {
+        events = JSON.parse(savedEvents);
+    }
+    
+    // إذا كان هناك eventsRef من Firebase، استخدمه
+    if (typeof eventsRef !== 'undefined') {
+        // كود تحميل من Firebase
+    }
+}
+
+// حفظ الأحداث
+function saveEventsToStorage() {
+    localStorage.setItem(`hijri_events_${classId}`, JSON.stringify(events));
+}
+
+// تنسيق الوقت
+function formatTime(isoString) {
+    const date = new Date(isoString);
+    return date.toLocaleTimeString('ar-SA', {
+        hour: '2-digit',
+        minute: '2-digit'
     });
 }
 
-window.showDayEvents = function(dateStr) {
-    const noEventElement = document.getElementById('no-event-selected');
-    const eventsListElement = document.getElementById('events-list');
-    
-    const dayEvents = allEvents.filter(event => event.date === dateStr);
-    
-    if (dayEvents.length === 0) {
-        if (noEventElement) noEventElement.style.display = 'block';
-        if (eventsListElement) {
-            eventsListElement.style.display = 'none';
-            eventsListElement.innerHTML = '';
-        }
-        return;
-    }
-    
-    if (noEventElement) noEventElement.style.display = 'none';
-    
-    const eventsHTML = `
-        <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--light);">
-            <h3 style="color: var(--primary); margin-bottom: 5px;">
-                <i class="far fa-calendar-check"></i> أحداث ${formatDate(dateStr)}
-            </h3>
-            <span class="badge">${dayEvents.length} حدث</span>
-        </div>
-        <div>
-            ${dayEvents.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map(event => {
-                const eventColor = getEventColor(event.type);
-                return `
-                <div style="background: ${eventColor.background}; border-right: 4px solid ${eventColor.color}; 
-                     padding: 12px; margin-bottom: 10px; border-radius: 8px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div style="flex: 1;">
-                            <h4 style="color: var(--primary); margin-bottom: 5px;">${event.title}</h4>
-                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 8px;">${event.description || 'لا يوجد وصف'}</p>
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.85rem; color: #777;">
-                                <span><i class="fas fa-calendar"></i> ${event.date}</span>
-                                <span><i class="fas fa-user"></i> ${event.addedBy || 'مجهول'}</span>
-                                <span style="background: ${eventColor.color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">
-                                    ${event.type}
-                                </span>
-                            </div>
-                        </div>
-                        ${event.addedById === userId ? 
-                            `<button class="btn btn-sm btn-danger" onclick="deleteEvent('${event.id}')" style="padding: 5px 10px; font-size: 0.8rem;">
-                                <i class="fas fa-trash"></i>
-                            </button>` : 
-                            ''}
-                    </div>
-                </div>
-                `;
-            }).join('')}
-        </div>
+// عرض رسالة
+function showMessage(message, type = 'info') {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    messageDiv.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+        ${message}
     `;
     
-    if (eventsListElement) {
-        eventsListElement.innerHTML = eventsHTML;
-        eventsListElement.style.display = 'block';
-    }
+    document.body.appendChild(messageDiv);
     
-    document.querySelectorAll('.calendar-day').forEach(day => {
-        day.classList.remove('selected');
-    });
-    
-    const selectedDay = document.getElementById(`day-${dateStr}`);
-    if (selectedDay) {
-        selectedDay.classList.add('selected');
-    }
-};
-
-function getEventColor(type) {
-    const colors = {
-        'اختبار': { background: '#ffebee', color: '#c62828' },
-        'واجب': { background: '#e8f5e9', color: '#2e7d32' },
-        'مناسبة': { background: '#fff3e0', color: '#ef6c00' },
-        'إجازة': { background: '#e3f2fd', color: '#1565c0' },
-        'اجتماع': { background: '#f3e5f5', color: '#7b1fa2' },
-        'موعد نهائي': { background: '#fff8e1', color: '#ff8f00' }
-    };
-    return colors[type] || { background: '#f5f5f5', color: '#757575' };
+    setTimeout(() => {
+        messageDiv.remove();
+    }, 3000);
 }
 
-async function addEvent() {
-    if (!userId || !database) {
-        showAlert('خطأ', 'يرجى تسجيل الدخول أولاً', 'danger');
-        return;
-    }
-    
-    const title = document.getElementById('event-title').value.trim();
-    const date = document.getElementById('event-date').value;
-    const type = document.getElementById('event-type').value;
-    const description = document.getElementById('event-description').value.trim();
-    
-    if (!title || !date || !type) {
-        showAlert('خطأ', 'يرجى ملء الحقول المطلوبة', 'danger');
-        return;
-    }
-    
-    const eventsRef = ref(database, `classes/${classId}/events`);
-    const newEventRef = push(eventsRef);
-    const eventId = newEventRef.key;
-    
-    await set(newEventRef, {
-        id: eventId,
-        title,
-        date,
-        type,
-        description,
-        addedBy: userName || userEmail || 'مستخدم',
-        addedById: userId,
-        createdAt: new Date().toISOString(),
-        timestamp: new Date().getTime()
-    });
-    
-    showNotificationToast({
-        title: 'حدث جديد',
-        message: `تم إضافة حدث جديد: "${title}"`,
-        type: 'info',
-        timestamp: new Date().toISOString()
-    });
-    
-    document.getElementById('add-event-form').reset();
-    showAlert('تم الإضافة', 'تم إضافة الحدث للجميع بنجاح!', 'success');
-    
-    loadEvents();
-    showDayEvents(date);
+// ===============================
+// CSS المطلوب
+// ===============================
+const calendarCSS = `
+.calendar-container {
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: 100vh;
 }
 
-window.deleteEvent = async function(eventId) {
-    if (!confirm('هل أنت متأكد من حذف هذا الحدث؟')) {
-        return;
-    }
-    
-    try {
-        const eventRef = ref(database, `classes/${classId}/events/${eventId}`);
-        await remove(eventRef);
-        
-        showAlert('تم الحذف', 'تم حذف الحدث بنجاح!', 'success');
-        
-        loadEvents();
-        const noEventElement = document.getElementById('no-event-selected');
-        const eventsListElement = document.getElementById('events-list');
-        
-        if (noEventElement) noEventElement.style.display = 'block';
-        if (eventsListElement) eventsListElement.style.display = 'none';
-        
-    } catch (error) {
-        console.error("❌ خطأ في حذف الحدث:", error);
-        showAlert('خطأ', 'تعذر حذف الحدث', 'danger');
-    }
-};
+.calendar-header {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
 
+.month-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.current-month {
+    text-align: center;
+    flex-grow: 1;
+}
+
+.current-month h2 {
+    color: #2c3e50;
+    margin: 0;
+}
+
+.hijri-today {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.nav-btn {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: #495057;
+}
+
+.nav-btn:hover {
+    background: #e9ecef;
+    border-color: #ced4da;
+}
+
+.calendar-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-action {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #6c757d;
+    color: white;
+}
+
+.btn-action.primary {
+    background: #007bff;
+}
+
+.btn-action:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.calendar-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 20px;
+}
+
+@media (max-width: 992px) {
+    .calendar-wrapper {
+        grid-template-columns: 1fr;
+    }
+}
+
+.calendar-main {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.week-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.week-day {
+    text-align: center;
+    padding: 10px;
+    font-weight: bold;
+    color: #495057;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
+.week-day.friday {
+    background: #d4edda;
+    color: #155724;
+}
+
+.month-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.day {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    padding: 10px;
+    min-height: 100px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.day:hover {
+    background: #f8f9fa;
+    border-color: #007bff;
+}
+
+.day.today {
+    background: #e3f2fd;
+    border-color: #2196f3;
+}
+
+.day.has-event {
+    background: #f1f8e9;
+}
+
+.day.selected {
+    background: #fff3e0;
+    border-color: #ff9800;
+}
+
+.day.empty {
+    background: #f8f9fa;
+    cursor: default;
+}
+
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.day-number {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.today-badge {
+    background: #2196f3;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.event-indicators {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin: 5px 0;
+}
+
+.event-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.more-events {
+    font-size: 0.7rem;
+    color: #6c757d;
+}
+
+.gregorian-date {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    font-size: 0.7rem;
+    color: #6c757d;
+}
+
+.events-sidebar {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.events-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.events-header h3 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.badge {
+    background: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.events-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.empty-events {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.empty-events i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #dee2e6;
+}
+
+.btn-add {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.event-item {
+    background: #f8f9fa;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-left: 4px solid #007bff;
+}
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.event-header h5 {
+    margin: 0;
+    color: #2c3e50;
+    flex: 1;
+}
+
+.event-type {
+    background: #e9ecef;
+    color: #495057;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}
+
+.event-desc {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.event-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 3px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.add-event-form {
+    border-top: 2px solid #f8f9fa;
+    padding-top: 20px;
+}
+
+.add-event-form h4 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.form-control {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.btn-submit {
+    width: 100%;
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.btn-submit:hover {
+    background: #0056b3;
+}
+
+.message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.message.success {
+    border-left: 4px solid #28a745;
+    color: #155724;
+    background: #d4edda;
+}
+
+.message.error {
+    border-left: 4px solid #dc3545;
+    color: #721c24;
+    background: #f8d7da;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message {
+    animation: fadeIn 0.3s ease;
+}
+`;
+
+// إضافة الأنماط
+if (!document.querySelector('#hijri-calendar-css')) {
+    const style = document.createElement('style');
+    style.id = 'hijri-calendar-css';
+    style.textContent = calendarCSS;
+    document.head.appendChild(style);
+}
+
+// ===============================
+// التصدير والتهيئة
+// ===============================
+window.initializeCalendar = initializeCalendar;
+window.getTodayHijri = getTodayHijri;
+
+// تهيئة تلقائية عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('calendar')) {
+        initializeCalendar();
+    }
+});
 // ===============================
 // تحميل لوحة التحكم
 // ===============================
 async function loadDashboard() {
     if (!userId || !database) return;
     
-    loadAllNotifications();
     await updateDashboardStats();
 }
 
@@ -4210,10 +5202,21 @@ document.addEventListener('DOMContentLoaded', () => {
     checkAuthStatus();
 });
 
-// دالات عامة للوصول من HTML
-window.closeToast = closeToast;
+// ===============================
+// تصدير الدوال للاستخدام العام
+// ===============================
+window.showNotification = addNotification;
+window.showNotificationPopup = showNotificationPopup;
 window.playNotificationSound = playNotificationSound;
+window.clearAllNotifications = clearAllNotifications;
+window.markNotificationAsRead = markNotificationAsRead;
+window.submitAssignment = submitAssignment;
+window.deleteAssignment = deleteAssignment;
+window.deleteExam = deleteExam;
+window.deleteEvent = deleteEvent;
+window.showDayEvents = showDayEvents;
 </script>
+
 
 </body>
 </html>

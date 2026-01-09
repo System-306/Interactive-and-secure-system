@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طلب Token من المتصفح</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2a3c7f, #3d52a0);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(to right, #2c3e50, #4a6491);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 26px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .header h1 i {
+            font-size: 30px;
+            color: #4fc3f7;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .status-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-right: 5px solid #4a6491;
+        }
+        
+        .status-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .status-icon {
+            font-size: 22px;
+        }
+        
+        .status-message {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .token-display {
+            background-color: #f8f9fa;
+            border: 2px dashed #4a6491;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-family: monospace;
+            font-size: 18px;
+            word-break: break-all;
+            letter-spacing: 1px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .token-input-section {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #eee;
+        }
+        
+        .token-input-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 17px;
+        }
+        
+        .token-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 17px;
+            transition: all 0.3s ease;
+            font-family: monospace;
+        }
+        
+        .token-input:focus {
+            border-color: #4a6491;
+            box-shadow: 0 0 0 3px rgba(74, 100, 145, 0.2);
+            outline: none;
+        }
+        
+        .buttons-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 16px 25px;
+            font-size: 17px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #4a6491, #2c3e50);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #3a5479, #1c2e40);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(to right, #6c757d, #495057);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(to right, #5a6268, #343a40);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-success {
+            background: linear-gradient(to right, #28a745, #218838);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(to right, #218838, #1e7e34);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+            background-color: #f9f9f9;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                max-width: 95%;
+            }
+            
+            .buttons-container {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-browser"></i> طلب Token من المتصفح</h1>
+            <p>جاري البحث عن Token في ذاكرة المتصفح...</p>
+        </div>
+        
+        <div class="content">
+            <div class="status-container">
+                <h3 class="status-title">
+                    <i class="fas fa-search status-icon"></i> حالة البحث عن Token
+                </h3>
+                
+                <div id="autoSearchStatus" class="status-message status-warning">
+                    <i class="fas fa-spinner fa-spin"></i> جاري البحث في ذاكرة المتصفح...
+                </div>
+                
+                <div id="foundTokenSection" class="hidden">
+                    <div class="token-display">
+                        Token الموجود: <span id="foundTokenValue"></span>
+                    </div>
+                    <p style="margin-top: 10px; color: #155724;">
+                        <i class="fas fa-check-circle"></i> تم العثور على Token في ذاكرة المتصفح
+                    </p>
+                </div>
+                
+                <div id="noTokenSection" class="hidden">
+                    <p style="color: #721c24; margin-top: 10px;">
+                        <i class="fas fa-exclamation-circle"></i> لم يتم العثور على Token في ذاكرة المتصفح
+                    </p>
+                </div>
+            </div>
+            
+            <div class="token-input-section">
+                <h3><i class="fas fa-edit"></i> إدخال Token يدويًا</h3>
+                
+                <div class="form-group">
+                    <label for="manualToken">أدخل Token جديد:</label>
+                    <input type="text" 
+                           id="manualToken" 
+                           class="token-input" 
+                           placeholder="أدخل Token هنا...">
+                </div>
+                
+                <div class="buttons-container">
+                    <button type="button" id="saveTokenBtn" class="btn btn-primary">
+                        <i class="fas fa-save"></i> حفظ Token في المتصفح
+                    </button>
+                    
+                    <button type="button" id="clearTokenBtn" class="btn btn-secondary">
+                        <i class="fas fa-trash"></i> حذف Token الموجود
+                    </button>
+                    
+                    <button type="button" id="useTokenBtn" class="btn btn-success hidden">
+                        <i class="fas fa-check"></i> استخدام هذا Token
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>هذه الصفحة تحاول الوصول إلى Token الموجود في ذاكرة المتصفح (localStorage / cookies)</p>
+            <p style="font-size: 12px; margin-top: 5px;">
+                <i class="fas fa-info-circle"></i> Token يخزن فقط في متصفحك الحالي ولن يتم إرساله لأي مكان
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const autoSearchStatus = document.getElementById('autoSearchStatus');
+            const foundTokenSection = document.getElementById('foundTokenSection');
+            const foundTokenValue = document.getElementById('foundTokenValue');
+            const noTokenSection = document.getElementById('noTokenSection');
+            const manualTokenInput = document.getElementById('manualToken');
+            const saveTokenBtn = document.getElementById('saveTokenBtn');
+            const clearTokenBtn = document.getElementById('clearTokenBtn');
+            const useTokenBtn = document.getElementById('useTokenBtn');
+            
+            // المتغيرات التي تحاكي الوصول إلى Token من المتصفح
+            const STORAGE_KEY = 'user_auth_token';
+            const COOKIE_NAME = 'app_token';
+            
+            // محاكاة البحث في أماكن مختلفة من المتصفح
+            function searchForToken() {
+                // البحث في localStorage
+                let token = localStorage.getItem(STORAGE_KEY);
+                
+                // إذا لم يوجد في localStorage، البحث في cookies
+                if (!token) {
+                    token = getCookie(COOKIE_NAME);
+                }
+                
+                // محاكاة وجود token افتراضي (لأغراض العرض فقط)
+                // في تطبيق حقيقي، احذف هذا الجزء
+                const hasDemoToken = Math.random() > 0.5; // 50% فرصة وجود token
+                
+                // عرض النتيجة بعد تأخير محاكاة للبحث
+                setTimeout(() => {
+                    if (token) {
+                        // عثرنا على token
+                        autoSearchStatus.innerHTML = '<i class="fas fa-check-circle"></i> تم العثور على Token في ذاكرة المتصفح';
+                        autoSearchStatus.className = 'status-message status-success';
+                        
+                        foundTokenValue.textContent = maskToken(token);
+                        foundTokenSection.classList.remove('hidden');
+                        
+                        // تعبئة الحقل اليدوي
+                        manualTokenInput.value = token;
+                        useTokenBtn.classList.remove('hidden');
+                    } else if (hasDemoToken) {
+                        // محاكاة وجود token افتراضي (لأغراض العرض)
+                        const demoToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMTIzNDU2Nzg5MCJ9';
+                        autoSearchStatus.innerHTML = '<i class="fas fa-check-circle"></i> تم العثور على Token في ذاكرة المتصفح';
+                        autoSearchStatus.className = 'status-message status-success';
+                        
+                        foundTokenValue.textContent = maskToken(demoToken);
+                        foundTokenSection.classList.remove('hidden');
+                        
+                        // تعبئة الحقل اليدوي
+                        manualTokenInput.value = demoToken;
+                        useTokenBtn.classList.remove('hidden');
+                    } else {
+                        // لم نعثر على token
+                        autoSearchStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> لم يتم العثور على Token في ذاكرة المتصفح';
+                        autoSearchStatus.className = 'status-message status-error';
+                        noTokenSection.classList.remove('hidden');
+                    }
+                }, 1500);
+            }
+            
+            // دالة لإخفاء جزء من Token للعرض (لأغراض الأمان)
+            function maskToken(token) {
+                if (!token || token.length < 10) return token;
+                const start = token.substring(0, 10);
+                const end = token.substring(token.length - 5);
+                return `${start}...${end}`;
+            }
+            
+            // دالة للحصول على cookie
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+            
+            // دالة لحفظ cookie
+            function setCookie(name, value, days) {
+                const d = new Date();
+                d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+                const expires = `expires=${d.toUTCString()}`;
+                document.cookie = `${name}=${value};${expires};path=/`;
+            }
+            
+            // بدء البحث عن Token
+            searchForToken();
+            
+            // حفظ Token في المتصفح
+            saveTokenBtn.addEventListener('click', function() {
+                const token = manualTokenInput.value.trim();
+                
+                if (!token) {
+                    alert('الرجاء إدخال Token قبل الحفظ');
+                    manualTokenInput.focus();
+                    return;
+                }
+                
+                // حفظ في localStorage
+                localStorage.setItem(STORAGE_KEY, token);
+                
+                // حفظ في cookies أيضًا
+                setCookie(COOKIE_NAME, token, 30);
+                
+                // تحديث العرض
+                autoSearchStatus.innerHTML = '<i class="fas fa-check-circle"></i> تم حفظ Token بنجاح في ذاكرة المتصفح';
+                autoSearchStatus.className = 'status-message status-success';
+                
+                foundTokenValue.textContent = maskToken(token);
+                foundTokenSection.classList.remove('hidden');
+                noTokenSection.classList.add('hidden');
+                useTokenBtn.classList.remove('hidden');
+                
+                alert('تم حفظ Token بنجاح في ذاكرة المتصفح!');
+            });
+            
+            // حذف Token من المتصفح
+            clearTokenBtn.addEventListener('click', function() {
+                if (confirm('هل أنت متأكد من حذف Token الموجود في المتصفح؟')) {
+                    // حذف من localStorage
+                    localStorage.removeItem(STORAGE_KEY);
+                    
+                    // حذف cookie
+                    document.cookie = `${COOKIE_NAME}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+                    
+                    // إعادة تعيين العرض
+                    autoSearchStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> لم يتم العثور على Token في ذاكرة المتصفح';
+                    autoSearchStatus.className = 'status-message status-error';
+                    
+                    foundTokenSection.classList.add('hidden');
+                    noTokenSection.classList.remove('hidden');
+                    manualTokenInput.value = '';
+                    useTokenBtn.classList.add('hidden');
+                    
+                    alert('تم حذف Token من ذاكرة المتصفح!');
+                }
+            });
+            
+            // استخدام Token المحدد
+            useTokenBtn.addEventListener('click', function() {
+                const token = manualTokenInput.value.trim();
+                
+                if (!token) {
+                    alert('الرجاء إدخال Token أولاً');
+                    return;
+                }
+                
+                // محاكاة استخدام Token
+                alert(`سيتم الآن استخدام Token للوصول إلى النظام:\n\n${maskToken(token)}`);
+                
+                // في تطبيق حقيقي، هنا يمكنك إرسال Token إلى الخادم أو استخدامه للوصول لواجهة برمجة التطبيقات
+                console.log('Token المستخدم:', token);
+                
+                // توجيه المستخدم أو إجراء آخر
+                window.location.href = '#';
+            });
+            
+            // عند تغيير حقل Token اليدوي
+            manualTokenInput.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    useTokenBtn.classList.remove('hidden');
+                } else {
+                    useTokenBtn.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
