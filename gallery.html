@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>معرض الصور المشفر - شعبة 306</title>
     
     <!-- الخطوط -->
@@ -10,17 +10,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <link rel="shortcut icon" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
-<link rel="icon" type="image/png" sizes="32x32" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
-<link rel="icon" type="image/png" sizes="16x16" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
+    <link rel="icon" type="image/png" sizes="32x32" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
+    <link rel="icon" type="image/png" sizes="16x16" href="img/WhatsApp Image 2025-12-31 at 4.21.28 AM.jpeg">
 
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         /* المتغيرات */
         :root {
@@ -43,10 +36,12 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         html {
             scroll-behavior: smooth;
+            font-size: 16px;
         }
         
         body {
@@ -55,30 +50,32 @@
             min-height: 100vh;
             color: var(--dark);
             line-height: 1.6;
+            padding: 0;
+            overflow-x: hidden;
         }
         
         /* الحاوية الرئيسية */
         .app-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
         }
         
         /* الهيدر */
         .main-header {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            padding: 20px 30px;
-            border-radius: var(--radius);
+            padding: 15px;
             box-shadow: var(--shadow);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
+            flex-direction: column;
+            gap: 15px;
             color: white;
             position: sticky;
-            top: 20px;
+            top: 0;
             z-index: 1000;
             animation: slideDown 0.5s ease;
+            width: 100%;
+            border-radius: 0;
         }
         
         @keyframes slideDown {
@@ -95,70 +92,100 @@
         .logo-section {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
+            width: 100%;
         }
         
         .logo-icon {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background: rgba(255,255,255,0.2);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
-            border: 3px solid white;
+            font-size: 1.5rem;
+            border: 2px solid white;
+            flex-shrink: 0;
+        }
+        
+        .logo-text {
+            flex: 1;
+            min-width: 0;
         }
         
         .logo-text h1 {
             margin: 0;
-            font-size: 1.8rem;
+            font-size: 1.4rem;
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .logo-text p {
             margin: 5px 0 0;
             opacity: 0.9;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         /* قسم المستخدم */
         .user-section {
             display: flex;
             align-items: center;
-            gap: 20px;
+            justify-content: space-between;
+            width: 100%;
+            gap: 10px;
         }
         
         .user-info {
-            text-align: left;
+            text-align: right;
+            flex: 1;
+            min-width: 0;
         }
         
         .user-info .welcome {
-            font-size: 1rem;
+            font-size: 0.9rem;
             opacity: 0.9;
         }
         
         .user-info .user-name {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--accent);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* المحتوى الرئيسي */
+        .main-content {
+            padding: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
         }
         
         /* الأزرار */
         .btn {
-            padding: 12px 25px;
+            padding: 12px 20px;
             border: none;
             border-radius: var(--radius);
             font-family: 'Tajawal', sans-serif;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: var(--transition);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             text-decoration: none;
+            touch-action: manipulation;
+            user-select: none;
         }
         
         .btn-primary {
@@ -168,19 +195,18 @@
         
         .btn-primary:hover {
             background: #16a085;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(26, 188, 156, 0.3);
+            transform: translateY(-2px);
         }
         
         .btn-secondary {
             background: rgba(255,255,255,0.2);
             color: white;
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.3);
         }
         
         .btn-secondary:hover {
             background: rgba(255,255,255,0.3);
-            transform: translateY(-3px);
+            transform: translateY(-2px);
         }
         
         .btn-danger {
@@ -190,8 +216,7 @@
         
         .btn-danger:hover {
             background: #c0392b;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(231, 76, 60, 0.3);
+            transform: translateY(-2px);
         }
         
         .btn-success {
@@ -201,8 +226,7 @@
         
         .btn-success:hover {
             background: #219653;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(39, 174, 96, 0.3);
+            transform: translateY(-2px);
         }
         
         .btn-warning {
@@ -212,58 +236,19 @@
         
         .btn-warning:hover {
             background: #e67e22;
-            transform: translateY(-3px);
+            transform: translateY(-2px);
         }
         
         .btn-sm {
-            padding: 8px 15px;
-            font-size: 0.9rem;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            gap: 6px;
         }
         
         .btn-lg {
-            padding: 15px 30px;
-            font-size: 1.1rem;
-        }
-        
-        /* التنقل */
-        .main-nav {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .nav-link {
-            background: white;
             padding: 15px 25px;
-            border-radius: var(--radius);
-            text-decoration: none;
-            color: var(--dark);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: var(--transition);
-            border: 2px solid transparent;
-            font-weight: 500;
-            box-shadow: var(--shadow);
-        }
-        
-        .nav-link:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-hover);
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-        
-        .nav-link.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-        
-        .nav-link i {
-            font-size: 1.2rem;
+            font-size: 1.05rem;
+            width: 100%;
         }
         
         /* البطاقات */
@@ -272,39 +257,44 @@
             border-radius: var(--radius);
             overflow: hidden;
             box-shadow: var(--shadow);
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             transition: var(--transition);
             animation: fadeIn 0.6s ease;
+            width: 100%;
         }
         
         .card:hover {
             box-shadow: var(--shadow-hover);
-            transform: translateY(-5px);
         }
         
         .card-header {
-            padding: 25px;
+            padding: 20px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .card-header h2 {
             margin: 0;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
+            flex: 1;
+            min-width: 200px;
         }
         
         .badge {
             background: rgba(255,255,255,0.2);
-            padding: 6px 15px;
+            padding: 5px 12px;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
+            white-space: nowrap;
         }
         
         .badge.success { background: var(--success); }
@@ -314,18 +304,19 @@
         .badge.accent { background: var(--accent); }
         
         .card-body {
-            padding: 25px;
+            padding: 20px;
         }
         
         /* الرسائل التنبيهية */
         .alert {
-            padding: 20px;
+            padding: 15px;
             border-radius: var(--radius);
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             display: flex;
-            align-items: center;
-            gap: 20px;
+            align-items: flex-start;
+            gap: 15px;
             animation: slideIn 0.5s ease;
+            width: 100%;
         }
         
         @keyframes slideIn {
@@ -364,55 +355,66 @@
         }
         
         .alert-icon {
-            font-size: 2rem;
+            font-size: 1.5rem;
             opacity: 0.8;
+            flex-shrink: 0;
         }
         
         /* النماذج */
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+            width: 100%;
         }
         
         .form-group label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 600;
             color: var(--secondary);
-            font-size: 1.05rem;
+            font-size: 1rem;
         }
         
         .form-control {
             width: 100%;
-            padding: 15px 20px;
+            padding: 12px 15px;
             border: 2px solid #e0e0e0;
             border-radius: var(--radius);
             font-family: 'Tajawal', sans-serif;
             font-size: 1rem;
             transition: var(--transition);
             background: white;
+            touch-action: manipulation;
         }
         
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
         
         textarea.form-control {
-            min-height: 120px;
+            min-height: 100px;
             resize: vertical;
         }
         
         /* خيارات رفع الصور */
         .upload-options {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin: 30px 0;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .upload-options {
+                grid-template-columns: 1fr;
+            }
         }
         
         .upload-option {
             position: relative;
+            width: 100%;
         }
         
         .upload-btn {
@@ -420,55 +422,58 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 40px 20px;
-            border: 3px dashed #ddd;
+            padding: 25px 15px;
+            border: 2px dashed #ddd;
             border-radius: var(--radius);
             background: #f8f9fa;
             cursor: pointer;
             transition: var(--transition);
             text-align: center;
             height: 100%;
+            width: 100%;
+            touch-action: manipulation;
         }
         
-        .upload-btn:hover {
+        .upload-btn:hover, .upload-btn:active {
             border-color: var(--primary);
             background: white;
-            transform: translateY(-5px);
+            transform: translateY(-2px);
         }
         
         .upload-btn i {
-            font-size: 3.5rem;
+            font-size: 2.5rem;
             color: var(--primary);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             transition: var(--transition);
         }
         
         .upload-btn:hover i {
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
         
         .upload-btn span {
             font-weight: 700;
             color: var(--secondary);
-            font-size: 1.1rem;
-            margin-bottom: 10px;
+            font-size: 1rem;
+            margin-bottom: 8px;
         }
         
         .upload-btn small {
             color: #666;
-            font-size: 0.95rem;
-            line-height: 1.5;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
         
         /* معاينة الصورة */
         .preview-section {
-            margin: 30px 0;
-            padding: 25px;
+            margin: 20px 0;
+            padding: 20px;
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: var(--radius);
             border: 2px dashed #ced4da;
             display: none;
             animation: fadeIn 0.5s ease;
+            width: 100%;
         }
         
         .preview-section.active {
@@ -479,34 +484,30 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #dee2e6;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .preview-header h3 {
             color: var(--secondary);
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         
         .preview-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-        
-        @media (max-width: 768px) {
-            .preview-content {
-                grid-template-columns: 1fr;
-            }
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
         
         .image-preview {
             width: 100%;
-            max-height: 300px;
+            max-height: 250px;
             border-radius: var(--radius);
             object-fit: contain;
             background: white;
@@ -517,16 +518,18 @@
         
         .image-info {
             background: white;
-            padding: 20px;
+            padding: 15px;
             border-radius: var(--radius);
             border: 2px solid #dee2e6;
+            width: 100%;
         }
         
         .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 12px 0;
+            padding: 10px 0;
             border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
         }
         
         .info-row:last-child {
@@ -539,16 +542,33 @@
         }
         
         .info-value {
-            font-family: 'Courier New', monospace;
+            font-family: 'Tajawal', monospace;
             color: var(--dark);
+            text-align: left;
+            direction: ltr;
         }
         
-        /* معرض الصور */
+        /* معرض الصور - تصميم جديد متجاوب */
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 30px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+                gap: 12px;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(45%, 1fr));
+                gap: 15px;
+            }
         }
         
         .gallery-item {
@@ -561,6 +581,7 @@
             display: flex;
             flex-direction: column;
             animation: fadeInUp 0.6s ease;
+            width: 100%;
         }
         
         @keyframes fadeInUp {
@@ -575,125 +596,144 @@
         }
         
         .gallery-item:hover {
-            transform: translateY(-10px);
+            transform: translateY(-5px);
             box-shadow: var(--shadow-hover);
             border-color: var(--primary);
         }
         
         .gallery-header {
-            padding: 20px;
+            padding: 15px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             position: relative;
         }
         
         .gallery-title {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             word-break: break-word;
+            line-height: 1.4;
         }
         
         .gallery-meta {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             opacity: 0.9;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .gallery-author, .gallery-date {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         
         .gallery-body {
-            padding: 25px;
+            padding: 15px;
             flex: 1;
             display: flex;
             flex-direction: column;
             background: #f8f9fa;
-            min-height: 250px;
+            min-height: 150px;
         }
         
-        .encoded-preview {
+        /* الصورة المباشرة - تم تفعيل العرض التلقائي */
+        .image-display {
             width: 100%;
-            height: 150px;
-            overflow-y: auto;
-            background: white;
-            border: 2px solid #dee2e6;
+            height: 200px;
+            overflow: hidden;
             border-radius: var(--radius);
-            padding: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.75rem;
-            line-height: 1.5;
-            color: #666;
-            text-align: left;
-            direction: ltr;
-            word-break: break-all;
-            margin-bottom: 20px;
-            position: relative;
+            margin-bottom: 15px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #dee2e6;
         }
         
-        .encoded-preview::before {
-            content: 'النص المشفر';
-            position: absolute;
-            top: -12px;
-            right: 15px;
-            background: var(--accent);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-family: 'Tajawal', sans-serif;
-            font-weight: 600;
-            direction: rtl;
+        .image-display img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: calc(var(--radius) - 2px);
+            background: white;
+            padding: 5px;
+        }
+        
+        .image-display .loading-image {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         
         .gallery-description {
             color: #666;
-            font-size: 0.95rem;
-            margin: 15px 0;
-            line-height: 1.7;
+            font-size: 0.9rem;
+            margin: 12px 0;
+            line-height: 1.6;
+            word-break: break-word;
         }
         
         .gallery-stats {
-            display: flex;
-            gap: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
             margin-top: auto;
-            padding-top: 15px;
-            border-top: 2px dashed #dee2e6;
+            padding-top: 12px;
+            border-top: 1px dashed #dee2e6;
         }
         
         .stat {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
+            gap: 6px;
+            font-size: 0.85rem;
             color: var(--secondary);
         }
         
         .stat i {
             color: var(--primary);
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
         
         .gallery-footer {
-            padding: 20px;
+            padding: 15px;
             background: #f8f9fa;
-            border-top: 2px solid #eee;
+            border-top: 1px solid #eee;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 12px;
         }
         
         .gallery-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .gallery-actions .btn {
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+        }
+        
+        @media (max-width: 480px) {
+            .gallery-actions {
+                flex-direction: column;
+            }
+            
+            .gallery-actions .btn {
+                width: 100%;
+                min-width: unset;
+            }
         }
         
         /* نافذة عرض الصورة */
@@ -708,7 +748,7 @@
             justify-content: center;
             align-items: center;
             z-index: 2000;
-            padding: 20px;
+            padding: 10px;
             animation: fadeIn 0.3s ease;
         }
         
@@ -717,13 +757,14 @@
         }
         
         .modal-content {
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 95%;
+            max-height: 95%;
             background: white;
             border-radius: var(--radius);
             overflow: hidden;
             position: relative;
             animation: scaleIn 0.3s ease;
+            width: 100%;
         }
         
         @keyframes scaleIn {
@@ -732,43 +773,53 @@
         }
         
         .modal-header {
-            padding: 20px;
+            padding: 15px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1;
         }
         
         .modal-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 600;
+            flex: 1;
+            margin-right: 10px;
+            word-break: break-word;
         }
         
         .modal-close {
             background: rgba(255,255,255,0.2);
             border: none;
             color: white;
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             transition: var(--transition);
+            flex-shrink: 0;
+            touch-action: manipulation;
         }
         
-        .modal-close:hover {
+        .modal-close:hover, .modal-close:active {
             background: var(--danger);
             transform: rotate(90deg);
         }
         
         .modal-body {
-            padding: 30px;
+            padding: 20px;
             text-align: center;
             background: #f8f9fa;
+            max-height: 70vh;
+            overflow-y: auto;
         }
         
         .modal-image {
@@ -776,43 +827,44 @@
             max-height: 60vh;
             border-radius: var(--radius);
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            border: 5px solid white;
+            border: 3px solid white;
         }
         
         .modal-footer {
-            padding: 20px;
+            padding: 15px;
             background: #f8f9fa;
-            border-top: 2px solid #eee;
+            border-top: 1px solid #eee;
             text-align: center;
             color: #666;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
         
         /* الحالة الفارغة */
         .empty-state {
-            padding: 60px 30px;
+            padding: 40px 20px;
             text-align: center;
             color: #666;
             background: white;
             border-radius: var(--radius);
-            border: 3px dashed #dee2e6;
-            margin: 30px 0;
+            border: 2px dashed #dee2e6;
+            margin: 20px 0;
+            width: 100%;
         }
         
         .empty-state i {
-            font-size: 4rem;
+            font-size: 3rem;
             color: #ddd;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .empty-state h3 {
             color: #999;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
         }
         
         .empty-state p {
-            font-size: 1.1rem;
+            font-size: 1rem;
             max-width: 600px;
             margin: 0 auto;
         }
@@ -835,13 +887,13 @@
         }
         
         .spinner {
-            width: 60px;
-            height: 60px;
-            border: 5px solid rgba(255,255,255,0.3);
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s linear infinite;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
         @keyframes spin {
@@ -849,9 +901,10 @@
         }
         
         .loading-text {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             text-align: center;
             animation: pulse 1.5s ease-in-out infinite;
+            padding: 0 20px;
         }
         
         @keyframes pulse {
@@ -862,19 +915,20 @@
         /* التذييل */
         .main-footer {
             text-align: center;
-            padding: 30px;
-            margin-top: 50px;
+            padding: 20px;
+            margin-top: 30px;
             color: var(--secondary);
             background: white;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            border-radius: 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
             border-top: 5px solid var(--primary);
+            width: 100%;
         }
         
         .footer-text {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             opacity: 0.8;
-            margin: 10px 0;
+            margin: 8px 0;
         }
         
         .footer-highlight {
@@ -887,7 +941,7 @@
             display: none !important;
         }
         
-        /* الحقول المخفية */
+        /* حقول الإدخال المخفية */
         #file-input,
         #url-input {
             display: none;
@@ -896,94 +950,72 @@
         /* شريط التقدم */
         .progress-bar {
             width: 100%;
-            height: 8px;
+            height: 6px;
             background: #e0e0e0;
-            border-radius: 4px;
+            border-radius: 3px;
             overflow: hidden;
-            margin: 20px 0;
+            margin: 15px 0;
         }
         
         .progress {
             height: 100%;
             background: linear-gradient(90deg, var(--primary), var(--accent));
-            border-radius: 4px;
+            border-radius: 3px;
             transition: width 0.3s ease;
             width: 0%;
         }
         
-        /* للشاشات الصغيرة */
-        @media (max-width: 992px) {
-            .app-container {
-                padding: 15px;
-            }
-            
-            .main-header {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-                padding: 20px;
-            }
-            
-            .user-section {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .gallery-grid {
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                gap: 20px;
-            }
-            
-            .upload-options {
-                grid-template-columns: 1fr;
-            }
+        /* زر التبديل لشريط التنقل */
+        .nav-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
         }
         
         @media (max-width: 768px) {
+            .nav-toggle {
+                display: block;
+            }
+            
             .main-nav {
-                justify-content: center;
-            }
-            
-            .nav-link {
-                padding: 12px 20px;
-                font-size: 0.95rem;
-            }
-            
-            .gallery-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .preview-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .gallery-footer {
+                display: none;
                 flex-direction: column;
-                align-items: stretch;
+                gap: 10px;
+                width: 100%;
             }
             
-            .gallery-actions {
-                justify-content: center;
+            .main-nav.active {
+                display: flex;
             }
         }
         
-        @media (max-width: 480px) {
-            .app-container {
-                padding: 10px;
-            }
-            
-            .card-header h2 {
-                font-size: 1.3rem;
-            }
-            
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .gallery-actions {
-                flex-direction: column;
-            }
+        /* فلاتر المعرض */
+        .gallery-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .filter-btn {
+            padding: 8px 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
         
         /* تأثيرات إضافية */
@@ -1001,15 +1033,54 @@
             75% { transform: translateX(5px); }
         }
         
-        /* رمز ال QR (إضافي) */
-        .qr-code {
-            width: 150px;
-            height: 150px;
-            margin: 20px auto;
-            padding: 10px;
-            background: white;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+        /* لمس لتحسين الأداء على الهواتف */
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .upload-btn, .modal-close {
+                min-height: 44px;
+            }
+            
+            .form-control {
+                min-height: 44px;
+            }
+        }
+        
+        /* تحسينات للأجهزة الصغيرة جداً */
+        @media (max-width: 360px) {
+            html {
+                font-size: 14px;
+            }
+            
+            .logo-text h1 {
+                font-size: 1.2rem;
+            }
+            
+            .card-header h2 {
+                font-size: 1.1rem;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+            }
+        }
+        
+        /* تعتيم عند فتح النافذة */
+        body.modal-open {
+            overflow: hidden;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1999;
+            display: none;
+        }
+        
+        .modal-open .modal-overlay {
+            display: block;
         }
     </style>
 </head>
@@ -1048,8 +1119,11 @@
                 </div>
                 <div class="logo-text">
                     <h1 id="user-display-name">معرض الصور المشفر</h1>
-                    <p>شعبة 306 - نظام تخزين الصور كنصوص مشفرة</p>
+                    <p>شعبة 306 - عرض الصور مباشرة بدون فك تلقائي</p>
                 </div>
+                <button class="nav-toggle" id="nav-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
             
             <div class="user-section">
@@ -1057,12 +1131,14 @@
                     <div class="welcome" id="welcome-message">مرحباً!</div>
                     <div class="user-name" id="user-name">مستخدم</div>
                 </div>
-            
+                <button class="btn btn-danger btn-sm" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> خروج
+                </button>
             </div>
         </header>
         
         <!-- المحتوى الرئيسي -->
-        <main id="main-content">
+        <main class="main-content" id="main-content">
             <!-- رسائل التنبيهات -->
             <div id="alerts-container"></div>
             
@@ -1080,14 +1156,13 @@
                             <h3 style="margin-bottom: 10px; color: #0c5460;">معلومات عن نظام التشفير</h3>
                             <p style="margin-bottom: 8px;">✨ <strong>كيف يعمل النظام:</strong></p>
                             <ol style="margin-right: 20px; margin-bottom: 0;">
-                                <li>تقوم باختيار صورة من جهازك أو كاميرتك</li>
-                                <li>يقوم النظام تلقائياً بتحويل الصورة إلى نص مشفر (Base64)</li>
-                                <li>يتم ضغط الصورة لتقليل حجم النص المشفر</li>
-                                <li>يتم حفظ النص فقط في قاعدة البيانات (بدون ملفات صور)</li>
-                                <li>عند العرض، يتم فك تشفير النص إلى الصورة الأصلية</li>
+                                <li>اختر صورة من جهازك أو كاميرتك</li>
+                                <li>يقوم النظام بتحويل الصورة إلى نص مشفر (Base64)</li>
+                                <li>يتم حفظ النص فقط في قاعدة البيانات</li>
+                                <li>عند العرض، يتم عرض الصورة مباشرة بدون أي ضغطات</li>
                             </ol>
                             <p style="margin-top: 15px; font-style: italic; color: #0c5460;">
-                                <i class="fas fa-lock"></i> هذا النظام آمن ولا يخزن الصور كملفات!
+                                <i class="fas fa-lock"></i> نظام آمن يعرض الصور تلقائياً!
                             </p>
                         </div>
                     </div>
@@ -1097,10 +1172,10 @@
                         <div class="form-group">
                             <label for="image-title"><i class="fas fa-heading"></i> عنوان الصورة *</label>
                             <input type="text" id="image-title" class="form-control" 
-                                   placeholder="أدخل عنواناً معبراً للصورة (مثال: صورة اجتماع الفصل)" 
+                                   placeholder="أدخل عنواناً معبراً للصورة" 
                                    required>
                             <small style="color: #666; margin-top: 5px; display: block;">
-                                اختر عنواناً يصف محتوى الصورة لمساعدة الآخرين
+                                اختر عنواناً يصف محتوى الصورة
                             </small>
                         </div>
                         
@@ -1109,7 +1184,7 @@
                             <label for="image-description"><i class="fas fa-align-left"></i> وصف الصورة (اختياري)</label>
                             <textarea id="image-description" class="form-control" 
                                       placeholder="أدخل وصفاً تفصيلياً للصورة..." 
-                                      rows="4"></textarea>
+                                      rows="3"></textarea>
                         </div>
                         
                         <!-- خيارات الرفع -->
@@ -1121,7 +1196,7 @@
                                     <div class="upload-btn" id="camera-btn">
                                         <i class="fas fa-camera"></i>
                                         <span>التقاط صورة</span>
-                                        <small>استخدم كاميرا الجهاز لالتقاط صورة جديدة</small>
+                                        <small>استخدم كاميرا الجهاز</small>
                                     </div>
                                 </div>
                                 
@@ -1130,7 +1205,7 @@
                                     <div class="upload-btn" id="gallery-btn">
                                         <i class="fas fa-folder-open"></i>
                                         <span>اختيار من المعرض</span>
-                                        <small>اختر صورة موجودة على جهازك</small>
+                                        <small>اختر صورة من جهازك</small>
                                     </div>
                                 </div>
                                 
@@ -1139,7 +1214,7 @@
                                     <div class="upload-btn" id="url-btn">
                                         <i class="fas fa-link"></i>
                                         <span>رابط صورة</span>
-                                        <small>أدخل رابط صورة من الإنترنت</small>
+                                        <small>أدخل رابط من الإنترنت</small>
                                     </div>
                                 </div>
                             </div>
@@ -1169,46 +1244,32 @@
                                 </button>
                             </div>
                             <div class="preview-content">
-                                <div>
-                                    <img class="image-preview" id="image-preview" src="" alt="معاينة الصورة">
-                                </div>
+                                <img class="image-preview" id="image-preview" src="" alt="معاينة الصورة">
                                 <div class="image-info">
-                                    <div class="info-row">
-                                        <span class="info-label">اسم الملف:</span>
-                                        <span class="info-value" id="info-filename">غير معروف</span>
-                                    </div>
                                     <div class="info-row">
                                         <span class="info-label">نوع الملف:</span>
                                         <span class="info-value" id="info-filetype">غير معروف</span>
                                     </div>
                                     <div class="info-row">
-                                        <span class="info-label">الحجم الأصلي:</span>
+                                        <span class="info-label">الحجم:</span>
                                         <span class="info-value" id="info-originalsize">0 KB</span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">الحجم بعد الضغط:</span>
-                                        <span class="info-value" id="info-compressedsize">0 KB</span>
                                     </div>
                                     <div class="info-row">
                                         <span class="info-label">الأبعاد:</span>
                                         <span class="info-value" id="info-dimensions">0 × 0</span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">نسبة التوفير:</span>
-                                        <span class="info-value" id="info-saving">0%</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- زر النشر -->
-                        <div style="margin-top: 30px;">
+                        <div style="margin-top: 20px;">
                             <button type="submit" class="btn btn-primary btn-lg" id="publish-btn" 
-                                    style="width: 100%; padding: 18px; font-size: 1.1rem;">
-                                <i class="fas fa-lock"></i> تشفير ونشر الصورة للجميع
+                                    style="width: 100%;">
+                                <i class="fas fa-lock"></i> تشفير ونشر الصورة
                             </button>
-                            <small style="color: #666; margin-top: 15px; display: block; text-align: center;">
-                                <i class="fas fa-shield-alt"></i> سيتم تشفير الصورة وتخزينها كنص في قاعدة البيانات
+                            <small style="color: #666; margin-top: 10px; display: block; text-align: center;">
+                                <i class="fas fa-shield-alt"></i> سيتم تشفير الصورة وحفظها كنص
                             </small>
                         </div>
                     </form>
@@ -1222,12 +1283,20 @@
                     <span class="badge primary" id="gallery-count">جاري التحميل...</span>
                 </div>
                 <div class="card-body">
+                    <!-- فلاتر -->
+                    <div class="gallery-filters" id="gallery-filters">
+                        <button class="filter-btn active" data-filter="all">الكل</button>
+                        <button class="filter-btn" data-filter="mine">صوري</button>
+                        <button class="filter-btn" data-filter="recent">الأحدث</button>
+                        <button class="filter-btn" data-filter="popular">الأكثر مشاهدة</button>
+                    </div>
+                    
                     <!-- رسالة إذا لم توجد صور -->
                     <div class="empty-state" id="empty-gallery">
                         <i class="fas fa-image"></i>
                         <h3>المعرض فارغ حالياً</h3>
                         <p>كن أول من يشارك صورة في معرض شعبة 306!</p>
-                        <button class="btn btn-primary" style="margin-top: 20px;" onclick="document.getElementById('image-title').focus()">
+                        <button class="btn btn-primary" style="margin-top: 15px;" onclick="document.getElementById('image-title').focus()">
                             <i class="fas fa-plus"></i> ابدأ بمشاركة أول صورة
                         </button>
                     </div>
@@ -1238,7 +1307,7 @@
                     </div>
                     
                     <!-- زر تحميل المزيد -->
-                    <div style="text-align: center; margin-top: 40px; display: none;" id="load-more-container">
+                    <div style="text-align: center; margin-top: 30px; display: none;" id="load-more-container">
                         <button class="btn btn-secondary" id="load-more-btn">
                             <i class="fas fa-sync-alt"></i> تحميل المزيد من الصور
                         </button>
@@ -1253,22 +1322,18 @@
                     <span class="badge success">مباشر</span>
                 </div>
                 <div class="card-body">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                        <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: var(--radius);">
-                            <div style="font-size: 2.5rem; color: var(--primary); font-weight: bold;" id="stats-total">0</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                        <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: var(--radius);">
+                            <div style="font-size: 2rem; color: var(--primary); font-weight: bold;" id="stats-total">0</div>
                             <div style="color: var(--secondary); font-weight: 600;">إجمالي الصور</div>
                         </div>
-                        <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: var(--radius);">
-                            <div style="font-size: 2.5rem; color: var(--success); font-weight: bold;" id="stats-mysize">0 KB</div>
-                            <div style="color: var(--secondary); font-weight: 600;">حجم مشاركاتي</div>
+                        <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: var(--radius);">
+                            <div style="font-size: 2rem; color: var(--success); font-weight: bold;" id="stats-mysize">0</div>
+                            <div style="color: var(--secondary); font-weight: 600;">صوري</div>
                         </div>
-                        <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: var(--radius);">
-                            <div style="font-size: 2.5rem; color: var(--accent); font-weight: bold;" id="stats-views">0</div>
-                            <div style="color: var(--secondary); font-weight: 600;">إجمالي المشاهدات</div>
-                        </div>
-                        <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: var(--radius);">
-                            <div style="font-size: 2.5rem; color: var(--warning); font-weight: bold;" id="stats-saving">0%</div>
-                            <div style="color: var(--secondary); font-weight: 600;">متوسط التوفير</div>
+                        <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: var(--radius);">
+                            <div style="font-size: 2rem; color: var(--accent); font-weight: bold;" id="stats-views">0</div>
+                            <div style="color: var(--secondary); font-weight: 600;">المشاهدات</div>
                         </div>
                     </div>
                 </div>
@@ -1277,27 +1342,27 @@
         
         <!-- التذييل -->
         <footer class="main-footer" id="main-footer">
-            <div style="margin-bottom: 20px;">
-                <i class="fas fa-graduation-cap" style="font-size: 2rem; color: var(--primary); margin-bottom: 15px;"></i>
-                <h3 style="color: var(--secondary); margin-bottom: 10px;">معرض الصور المشفر - شعبة 306</h3>
-                <p class="footer-text">نظام مبتكر لتخزين ومشاركة الصور باستخدام تقنية التشفير المتقدمة</p>
+            <div style="margin-bottom: 15px;">
+                <i class="fas fa-graduation-cap" style="font-size: 1.8rem; color: var(--primary); margin-bottom: 10px;"></i>
+                <h3 style="color: var(--secondary); margin-bottom: 8px; font-size: 1.2rem;">معرض الصور المشفر - شعبة 306</h3>
+                <p class="footer-text">نظام مبتكر لتخزين ومشاركة الصور باستخدام تقنية التشفير</p>
             </div>
-            <div style="display: flex; justify-content: center; gap: 30px; margin: 20px 0; flex-wrap: wrap;">
+            <div style="display: flex; justify-content: center; gap: 20px; margin: 15px 0; flex-wrap: wrap;">
                 <div>
                     <i class="fas fa-lock" style="color: var(--accent);"></i>
-                    <span class="footer-highlight"> آمن 100%</span>
+                    <span class="footer-highlight"> آمن</span>
                 </div>
                 <div>
                     <i class="fas fa-bolt" style="color: var(--warning);"></i>
-                    <span class="footer-highlight"> سريع وفعال</span>
+                    <span class="footer-highlight"> سريع</span>
                 </div>
                 <div>
-                    <i class="fas fa-users" style="color: var(--primary);"></i>
-                    <span class="footer-highlight"> تعاوني</span>
+                    <i class="fas fa-mobile-alt" style="color: var(--primary);"></i>
+                    <span class="footer-highlight"> متجاوب</span>
                 </div>
             </div>
-            <p class="footer-text">© 2024 نظام إدارة شعبة 306 - جميع الحقوق محفوظة</p>
-            <p class="footer-text">تم التطوير باستخدام <span class="footer-highlight">Firebase</span> | الإصدار: 2.0.0</p>
+            <p class="footer-text">© 2024 نظام إدارة شعبة 306</p>
+            <p class="footer-text">الإصدار: 3.0.0 | عرض تلقائي للصور</p>
         </footer>
     </div>
     
@@ -1320,7 +1385,10 @@
             push, 
             remove,
             get,
-            update
+            update,
+            query,
+            orderByChild,
+            limitToLast
         } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
         // ===============================
@@ -1363,7 +1431,9 @@
         let currentImageData = null;
         let isProcessing = false;
         let galleryItems = [];
-        const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+        const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB للهواتف
+        let currentFilter = 'all';
+        let isLoadingMore = false;
 
         // ===============================
         // وظائف مساعدة
@@ -1420,12 +1490,10 @@
                     return `قبل ${Math.floor(diff / (60 * 60 * 1000))} ساعة`;
                 }
                 
-                return date.toLocaleString('ar-SA', {
+                return date.toLocaleDateString('ar-SA', {
                     year: 'numeric',
                     month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
+                    day: 'numeric'
                 });
             } catch (error) {
                 return dateString;
@@ -1433,11 +1501,12 @@
         }
 
         function formatFileSize(bytes) {
-            if (bytes === 0) return '0 بايت';
+            if (!bytes || bytes === 0) return '0 بايت';
             const k = 1024;
-            const sizes = ['بايت', 'ك.ب', 'م.ب', 'ج.ب'];
+            const sizes = ['بايت', 'ك.ب', 'م.ب'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            const size = parseFloat((bytes / Math.pow(k, i)).toFixed(1));
+            return size + ' ' + sizes[i];
         }
 
         // ===============================
@@ -1464,7 +1533,7 @@
             });
         }
 
-        function compressImage(base64String, quality = 0.8, maxWidth = 1200) {
+        function compressImage(base64String, quality = 0.7, maxWidth = 800) {
             return new Promise((resolve) => {
                 const img = new Image();
                 img.onload = function() {
@@ -1500,12 +1569,6 @@
                 
                 img.src = base64String;
             });
-        }
-
-        function getPreviewText(base64String, maxLength = 100) {
-            if (!base64String) return 'لا يوجد نص مشفر';
-            if (base64String.length <= maxLength) return base64String;
-            return base64String.substring(0, maxLength) + '...';
         }
 
         // ===============================
@@ -1567,14 +1630,16 @@
                 fileInput.value = '';
                 urlInput.value = '';
                 urlInput.classList.add('hidden-input');
+                updatePublishButton();
             });
 
             // تحديث حالة زر النشر
             function updatePublishButton() {
                 const title = document.getElementById('image-title').value.trim();
-                publishBtn.disabled = !(title && currentImageData);
-                publishBtn.innerHTML = currentImageData ? 
-                    `<i class="fas fa-lock"></i> تشفير ونشر الصورة للجميع` :
+                const hasImage = currentImageData && currentImageData.compressedBase64;
+                publishBtn.disabled = !(title && hasImage);
+                publishBtn.innerHTML = hasImage ? 
+                    `<i class="fas fa-lock"></i> تشفير ونشر الصورة` :
                     `<i class="fas fa-ban"></i> اختر صورة أولاً`;
             }
 
@@ -1613,16 +1678,14 @@
                 try {
                     showProgress("جاري تحميل الصورة من الرابط...", 10);
                     
-                    const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-                    const data = await response.json();
+                    const response = await fetch(url);
                     
                     if (!response.ok) {
                         throw new Error('فشل في تحميل الصورة');
                     }
                     
-                    // تحويل النص إلى Blob
-                    const blob = new Blob([data.contents], { type: 'image/jpeg' });
-                    const file = new File([blob], 'image.jpg', { type: 'image/jpeg' });
+                    const blob = await response.blob();
+                    const file = new File([blob], 'image.jpg', { type: blob.type });
                     
                     await processImageFile(file);
                     
@@ -1654,9 +1717,9 @@
 
                     // تحويل إلى Base64
                     const base64 = await encodeImageToBase64(file);
-                    showProgress("جاري ضغط الصورة...", 60);
+                    showProgress("جاري معالجة الصورة...", 60);
 
-                    // ضغط الصورة
+                    // ضغط الصورة للهواتف
                     const compressed = await compressImage(base64);
                     showProgress("جاري إعداد المعاينة...", 90);
 
@@ -1679,7 +1742,7 @@
 
                     setTimeout(() => {
                         hideProgress();
-                        showAlert("تم التحميل", "تم تحميل الصورة بنجاح وجاهزة للتشفير", "success");
+                        showAlert("تم التحميل", "تم تحميل الصورة بنجاح", "success");
                         updatePublishButton();
                     }, 500);
 
@@ -1696,31 +1759,25 @@
             function showImagePreview() {
                 const previewSection = document.getElementById('preview-section');
                 const imagePreview = document.getElementById('image-preview');
-                const infoFilename = document.getElementById('info-filename');
                 const infoFiletype = document.getElementById('info-filetype');
                 const infoOriginalsize = document.getElementById('info-originalsize');
-                const infoCompressedsize = document.getElementById('info-compressedsize');
                 const infoDimensions = document.getElementById('info-dimensions');
-                const infoSaving = document.getElementById('info-saving');
 
                 if (!currentImageData) return;
 
                 imagePreview.src = currentImageData.compressedBase64;
-                infoFilename.textContent = currentImageData.fileName;
                 infoFiletype.textContent = currentImageData.fileType.split('/')[1].toUpperCase();
                 infoOriginalsize.textContent = formatFileSize(currentImageData.fileSize);
-                infoCompressedsize.textContent = formatFileSize(currentImageData.compressedSize);
                 infoDimensions.textContent = `${currentImageData.width} × ${currentImageData.height}`;
-                
-                const savingPercent = Math.round((1 - currentImageData.compressedSize / currentImageData.fileSize) * 100);
-                infoSaving.textContent = `${savingPercent}%`;
-                infoSaving.style.color = savingPercent > 20 ? 'var(--success)' : 'var(--warning)';
 
                 previewSection.classList.add('active');
                 
                 // تمرير إلى قسم المعاينة
-                previewSection.scrollIntoView({ behavior: 'smooth' });
+                previewSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
+            
+            // استدعاء التحديث الأولي
+            updatePublishButton();
         }
 
         // ===============================
@@ -1733,7 +1790,27 @@
                 await publishImage();
             });
 
+            // تهيئة الفلاتر
+            initFilters();
+            
+            // تحميل الصور
             loadGalleryImages();
+        }
+        
+        function initFilters() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // إزالة النشاط من جميع الأزرار
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    // إضافة النشاط للزر المضغوط
+                    btn.classList.add('active');
+                    // تغيير الفلتر
+                    currentFilter = btn.dataset.filter;
+                    // إعادة عرض المعرض
+                    renderGallery();
+                });
+            });
         }
 
         async function publishImage() {
@@ -1762,8 +1839,9 @@
 
             try {
                 isProcessing = true;
-                document.getElementById('publish-btn').disabled = true;
-                document.getElementById('publish-btn').innerHTML = `<i class="fas fa-spinner fa-spin"></i> جاري النشر...`;
+                const publishBtn = document.getElementById('publish-btn');
+                publishBtn.disabled = true;
+                publishBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> جاري النشر...`;
 
                 // إنشاء معرف فريد للصورة
                 const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -1773,7 +1851,7 @@
                     id: imageId,
                     title: title,
                     description: description || '',
-                    encodedData: currentImageData.compressedBase64,
+                    encodedData: currentImageData.compressedBase64, // الصورة المشفرة
                     fileName: currentImageData.fileName,
                     fileType: currentImageData.fileType,
                     originalSize: currentImageData.fileSize,
@@ -1796,21 +1874,12 @@
                 const galleryRef = ref(database, `classes/${classId}/gallery/${imageId}`);
                 await set(galleryRef, imageData);
 
-                // إضافة إشعار
-                await addNotification({
-                    title: 'صورة جديدة في المعرض',
-                    message: `${userNickname || 'مستخدم'} نشر صورة جديدة: "${title}"`,
-                    type: 'success',
-                    sender: userNickname || 'مستخدم',
-                    senderId: userId
-                });
-
                 // إعادة تعيين النموذج
                 resetForm();
 
                 // عرض رسالة النجاح
                 showAlert("🎉 تم النشر بنجاح", 
-                    `تم نشر الصورة "${title}" في المعرض بنجاح!`, 
+                    `تم نشر الصورة "${title}" في المعرض!`, 
                     "success");
 
                 // تحديث الإحصائيات
@@ -1821,8 +1890,9 @@
                 showAlert("خطأ", "تعذر نشر الصورة. حاول مرة أخرى", "error");
             } finally {
                 isProcessing = false;
-                document.getElementById('publish-btn').disabled = false;
-                document.getElementById('publish-btn').innerHTML = `<i class="fas fa-lock"></i> تشفير ونشر الصورة للجميع`;
+                const publishBtn = document.getElementById('publish-btn');
+                publishBtn.disabled = false;
+                publishBtn.innerHTML = `<i class="fas fa-lock"></i> تشفير ونشر الصورة`;
             }
         }
 
@@ -1833,9 +1903,11 @@
             document.getElementById('url-input').classList.add('hidden-input');
             currentImageData = null;
             document.getElementById('file-input').value = '';
+            const publishBtn = document.getElementById('publish-btn');
+            publishBtn.innerHTML = `<i class="fas fa-ban"></i> اختر صورة أولاً`;
         }
 
-        async function loadGalleryImages() {
+        function loadGalleryImages() {
             if (!userId || !database) return;
 
             const galleryRef = ref(database, `classes/${classId}/gallery`);
@@ -1860,9 +1932,33 @@
 
             if (!galleryList || !galleryCount) return;
 
-            galleryCount.textContent = `${galleryItems.length} صورة`;
+            // تطبيق الفلتر
+            let filteredImages = [...galleryItems];
+            
+            switch(currentFilter) {
+                case 'mine':
+                    filteredImages = galleryItems.filter(img => img.addedById === userId);
+                    break;
+                case 'recent':
+                    filteredImages = galleryItems.sort((a, b) => 
+                        (b.createdAtTimestamp || 0) - (a.createdAtTimestamp || 0)
+                    );
+                    break;
+                case 'popular':
+                    filteredImages = galleryItems.sort((a, b) => 
+                        (b.views || 0) - (a.views || 0)
+                    );
+                    break;
+                default:
+                    // الكل - الأحدث أولاً
+                    filteredImages = galleryItems.sort((a, b) => 
+                        (b.createdAtTimestamp || 0) - (a.createdAtTimestamp || 0)
+                    );
+            }
 
-            if (galleryItems.length === 0) {
+            galleryCount.textContent = `${filteredImages.length} صورة`;
+
+            if (filteredImages.length === 0) {
                 emptyGallery.style.display = 'block';
                 galleryList.innerHTML = '';
                 loadMoreContainer.style.display = 'none';
@@ -1871,21 +1967,14 @@
 
             emptyGallery.style.display = 'none';
 
-            // ترتيب حسب التاريخ (الأحدث أولاً)
-            const sortedImages = galleryItems.sort((a, b) => 
-                (b.createdAtTimestamp || 0) - (a.createdAtTimestamp || 0)
-            );
+            // عرض الصور (بدون نصوص مشفرة)
+            galleryList.innerHTML = filteredImages.slice(0, 6).map(image => createGalleryItem(image)).join('');
 
-            // عرض أول 12 صورة فقط
-            const imagesToShow = sortedImages.slice(0, 12);
-
-            galleryList.innerHTML = imagesToShow.map(image => createGalleryItem(image)).join('');
-
-            // عرض زر تحميل المزيد إذا كان هناك أكثر من 12 صورة
-            if (galleryItems.length > 12) {
+            // عرض زر تحميل المزيد إذا كان هناك أكثر من 6 صور
+            if (filteredImages.length > 6) {
                 loadMoreContainer.style.display = 'block';
                 const loadMoreBtn = document.getElementById('load-more-btn');
-                loadMoreBtn.onclick = () => loadMoreImages();
+                loadMoreBtn.onclick = () => loadMoreImages(filteredImages);
             } else {
                 loadMoreContainer.style.display = 'none';
             }
@@ -1894,13 +1983,17 @@
             addGalleryEventListeners();
         }
 
-        function loadMoreImages() {
+        function loadMoreImages(filteredImages) {
+            if (isLoadingMore) return;
+            
+            isLoadingMore = true;
             const galleryList = document.getElementById('gallery-list');
             const currentCount = document.querySelectorAll('.gallery-item').length;
-            const imagesToAdd = galleryItems.slice(currentCount, currentCount + 6);
+            const imagesToAdd = filteredImages.slice(currentCount, currentCount + 3);
 
             if (imagesToAdd.length === 0) {
                 document.getElementById('load-more-container').style.display = 'none';
+                isLoadingMore = false;
                 return;
             }
 
@@ -1911,12 +2004,13 @@
 
             // إعادة إضافة مستمعي الأحداث للعناصر الجديدة
             addGalleryEventListeners();
+            
+            isLoadingMore = false;
         }
 
         function createGalleryItem(image) {
-            const previewText = getPreviewText(image.encodedData, 80);
             const isOwner = image.addedById === userId;
-            const savingPercent = image.originalSize ? 
+            const savingPercent = image.originalSize && image.compressedSize ? 
                 Math.round((1 - image.compressedSize / image.originalSize) * 100) : 0;
 
             return `
@@ -1936,8 +2030,13 @@
                     </div>
                     
                     <div class="gallery-body">
-                        <div class="encoded-preview" title="النص المشفر">
-                            ${previewText}
+                        <!-- عرض الصورة مباشرة بدون أي ضغطات -->
+                        <div class="image-display">
+                            <img src="${image.encodedData}" 
+                                 alt="${image.title}" 
+                                 loading="lazy"
+                                 onload="this.style.opacity='1'"
+                                 style="opacity:0; transition: opacity 0.3s">
                         </div>
                         
                         ${image.description ? `
@@ -1951,13 +2050,9 @@
                                 <i class="fas fa-expand-alt"></i>
                                 <span>${image.dimensions?.width || 0}×${image.dimensions?.height || 0}</span>
                             </div>
-                            <div class="stat" title="الحجم بعد الضغط">
+                            <div class="stat" title="الحجم">
                                 <i class="fas fa-weight-hanging"></i>
                                 <span>${formatFileSize(image.compressedSize || 0)}</span>
-                            </div>
-                            <div class="stat" title="نسبة التوفير">
-                                <i class="fas fa-percentage"></i>
-                                <span>${savingPercent}%</span>
                             </div>
                             <div class="stat" title="عدد المشاهدات">
                                 <i class="fas fa-eye"></i>
@@ -1968,21 +2063,26 @@
                     
                     <div class="gallery-footer">
                         <div class="gallery-actions">
-                            <button class="btn btn-success btn-sm decode-btn" data-id="${image.id}">
-                                <i class="fas fa-unlock"></i> فك التشفير وعرض
+                            <!-- زر عرض كامل الشاشة -->
+                            <button class="btn btn-success btn-sm view-btn" data-id="${image.id}" data-image="${image.encodedData}">
+                                <i class="fas fa-expand"></i> عرض كامل
                             </button>
-                            <button class="btn btn-primary btn-sm copy-btn" data-id="${image.id}" 
-                                    data-text="${image.encodedData}">
-                                <i class="fas fa-copy"></i> نسخ النص
+                            
+                            <!-- زر تنزيل الصورة -->
+                            <button class="btn btn-primary btn-sm download-btn" data-id="${image.id}" 
+                                    data-filename="${image.title.replace(/[^a-z0-9]/gi, '_')}.jpg"
+                                    data-image="${image.encodedData}">
+                                <i class="fas fa-download"></i> تنزيل
                             </button>
+                            
                             ${isOwner ? `
                                 <button class="btn btn-danger btn-sm delete-btn" data-id="${image.id}">
                                     <i class="fas fa-trash"></i> حذف
                                 </button>
                             ` : ''}
                         </div>
-                        <div style="color: #666; font-size: 0.85rem;">
-                            <i class="fas fa-lock"></i> مشفر
+                        <div style="color: #666; font-size: 0.85rem; text-align: center;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i> معروضة تلقائياً
                         </div>
                     </div>
                 </div>
@@ -1990,24 +2090,22 @@
         }
 
         function addGalleryEventListeners() {
-            // زر فك التشفير
-            document.querySelectorAll('.decode-btn').forEach(btn => {
+            // زر العرض الكامل
+            document.querySelectorAll('.view-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const imageId = e.target.closest('.decode-btn').dataset.id;
-                    decodeAndShowImage(imageId);
+                    const imageId = e.target.closest('.view-btn').dataset.id;
+                    const imageData = e.target.closest('.view-btn').dataset.image;
+                    viewImageFullscreen(imageId, imageData);
                 });
             });
 
-            // زر نسخ النص
-            document.querySelectorAll('.copy-btn').forEach(btn => {
+            // زر التنزيل
+            document.querySelectorAll('.download-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
-                    const text = e.target.closest('.copy-btn').dataset.text;
-                    try {
-                        await navigator.clipboard.writeText(text);
-                        showAlert("تم النسخ", "تم نسخ النص المشفر إلى الحافظة", "success");
-                    } catch (error) {
-                        showAlert("خطأ", "تعذر نسخ النص. حاول مرة أخرى", "error");
-                    }
+                    const imageId = e.target.closest('.download-btn').dataset.id;
+                    const filename = e.target.closest('.download-btn').dataset.filename;
+                    const imageData = e.target.closest('.download-btn').dataset.image;
+                    await downloadImage(imageId, filename, imageData);
                 });
             });
 
@@ -2020,7 +2118,7 @@
             });
         }
 
-        async function decodeAndShowImage(imageId) {
+        function viewImageFullscreen(imageId, imageData) {
             const image = galleryItems.find(img => img.id === imageId);
             if (!image) {
                 showAlert("خطأ", "الصورة غير موجودة", "error");
@@ -2028,7 +2126,7 @@
             }
 
             // زيادة عدد المشاهدات
-            await updateViewCount(imageId);
+            updateViewCount(imageId);
 
             // فتح نافذة العرض
             const modal = document.getElementById('image-modal');
@@ -2037,40 +2135,86 @@
             const modalFooter = document.getElementById('modal-footer');
             const modalClose = document.getElementById('modal-close');
 
-            modalImage.src = image.encodedData;
+            modalImage.src = imageData;
             modalTitle.textContent = image.title;
             modalFooter.innerHTML = `
                 نشرها: <strong>${image.addedBy}</strong> | 
                 الأبعاد: <strong>${image.dimensions?.width || 0}×${image.dimensions?.height || 0}</strong> | 
                 المشاهدات: <strong>${(image.views || 0) + 1}</strong>
+                <br>
+                <button class="btn btn-sm btn-success" style="margin-top: 10px;" onclick="downloadImage('${imageId}', '${image.title.replace(/[^a-z0-9]/gi, '_')}.jpg', '${imageData}')">
+                    <i class="fas fa-download"></i> تنزيل الصورة
+                </button>
             `;
 
             modal.classList.add('active');
+            document.body.classList.add('modal-open');
 
             // إغلاق النافذة
-            modalClose.onclick = () => modal.classList.remove('active');
+            modalClose.onclick = () => {
+                modal.classList.remove('active');
+                document.body.classList.remove('modal-open');
+            };
+            
             modal.onclick = (e) => {
-                if (e.target === modal) modal.classList.remove('active');
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                    document.body.classList.remove('modal-open');
+                }
             };
 
             // إغلاق بالزر ESC
             document.addEventListener('keydown', function closeOnEsc(e) {
                 if (e.key === 'Escape') {
                     modal.classList.remove('active');
+                    document.body.classList.remove('modal-open');
                     document.removeEventListener('keydown', closeOnEsc);
                 }
             });
+        }
+
+        async function downloadImage(imageId, filename, imageData) {
+            try {
+                // زيادة عدد المشاهدات
+                await updateViewCount(imageId);
+                
+                // تحويل Base64 إلى Blob
+                const response = await fetch(imageData);
+                const blob = await response.blob();
+                
+                // إنشاء رابط تنزيل
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showAlert("تم التنزيل", "تم تحميل الصورة بنجاح", "success");
+                
+            } catch (error) {
+                console.error("❌ خطأ في تنزيل الصورة:", error);
+                showAlert("خطأ", "تعذر تنزيل الصورة", "error");
+            }
         }
 
         async function updateViewCount(imageId) {
             if (!database) return;
 
             try {
-                const imageRef = ref(database, `classes/${classId}/gallery/${imageId}/views`);
+                const imageRef = ref(database, `classes/${classId}/gallery/${imageId}`);
                 const snapshot = await get(imageRef);
-                const currentViews = snapshot.val() || 0;
                 
-                await set(imageRef, currentViews + 1);
+                if (snapshot.exists()) {
+                    const imageData = snapshot.val();
+                    const currentViews = imageData.views || 0;
+                    
+                    await update(imageRef, {
+                        views: currentViews + 1
+                    });
+                }
             } catch (error) {
                 console.warn("⚠️ لم تحديث عدد المشاهدات:", error);
             }
@@ -2097,60 +2241,24 @@
             const statsTotal = document.getElementById('stats-total');
             const statsMysize = document.getElementById('stats-mysize');
             const statsViews = document.getElementById('stats-views');
-            const statsSaving = document.getElementById('stats-saving');
 
             if (!galleryItems.length) {
                 statsTotal.textContent = '0';
-                statsMysize.textContent = '0 بايت';
+                statsMysize.textContent = '0';
                 statsViews.textContent = '0';
-                statsSaving.textContent = '0%';
                 return;
             }
 
             // الإجمالي
             statsTotal.textContent = galleryItems.length;
 
-            // حجم مشاركاتي
+            // صوري
             const myImages = galleryItems.filter(img => img.addedById === userId);
-            const myTotalSize = myImages.reduce((sum, img) => sum + (img.compressedSize || 0), 0);
-            statsMysize.textContent = formatFileSize(myTotalSize);
+            statsMysize.textContent = myImages.length;
 
             // إجمالي المشاهدات
             const totalViews = galleryItems.reduce((sum, img) => sum + (img.views || 0), 0);
-            statsViews.textContent = totalViews.toLocaleString();
-
-            // متوسط التوفير
-            const imagesWithSize = galleryItems.filter(img => img.originalSize && img.compressedSize);
-            if (imagesWithSize.length > 0) {
-                const totalSaving = imagesWithSize.reduce((sum, img) => {
-                    return sum + (1 - img.compressedSize / img.originalSize);
-                }, 0);
-                const avgSaving = Math.round((totalSaving / imagesWithSize.length) * 100);
-                statsSaving.textContent = `${avgSaving}%`;
-                statsSaving.style.color = avgSaving > 20 ? 'var(--success)' : 'var(--warning)';
-            }
-        }
-
-        // ===============================
-        // نظام الإشعارات
-        // ===============================
-        async function addNotification(notificationData) {
-            if (!userId || !database) return;
-
-            try {
-                const notificationsRef = ref(database, `classes/${classId}/notifications`);
-                const newNotificationRef = push(notificationsRef);
-                
-                await set(newNotificationRef, {
-                    ...notificationData,
-                    id: newNotificationRef.key,
-                    timestamp: new Date().toISOString(),
-                    readBy: {}
-                });
-
-            } catch (error) {
-                console.error("❌ خطأ في إضافة الإشعار:", error);
-            }
+            statsViews.textContent = totalViews;
         }
 
         // ===============================
@@ -2285,21 +2393,47 @@
             // تهيئة المعرض
             initGallery();
             
-            // تهيئة تسجيل الخروج
-            document.getElementById('logout-btn').addEventListener('click', async () => {
-                if (confirm('هل تريد تسجيل الخروج من النظام؟')) {
-                    try {
-                        await signOut(auth);
-                        showAlert("تم تسجيل الخروج", "تم تسجيل الخروج بنجاح!", "success");
-                        
-                        setTimeout(() => {
-                            window.location.href = "index.html";
-                        }, 1500);
-                        
-                    } catch (error) {
-                        console.error("❌ خطأ تسجيل الخروج:", error);
-                        showAlert("خطأ", "تعذر تسجيل الخروج", "error");
+            // تهيئة زر الخروج
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    if (confirm('هل تريد تسجيل الخروج من النظام؟')) {
+                        try {
+                            await signOut(auth);
+                            showAlert("تم تسجيل الخروج", "تم تسجيل الخروج بنجاح!", "success");
+                            
+                            setTimeout(() => {
+                                window.location.href = "index.html";
+                            }, 1500);
+                            
+                        } catch (error) {
+                            console.error("❌ خطأ تسجيل الخروج:", error);
+                            showAlert("خطأ", "تعذر تسجيل الخروج", "error");
+                        }
                     }
+                });
+            }
+            
+            // تهيئة زر التبديل للهواتف
+            const navToggle = document.getElementById('nav-toggle');
+            if (navToggle) {
+                navToggle.addEventListener('click', () => {
+                    const mainNav = document.querySelector('.main-nav');
+                    if (mainNav) {
+                        mainNav.classList.toggle('active');
+                    }
+                });
+            }
+            
+            // إغلاق القائمة عند النقر خارجها
+            document.addEventListener('click', (e) => {
+                const mainNav = document.querySelector('.main-nav');
+                const navToggle = document.getElementById('nav-toggle');
+                
+                if (mainNav && mainNav.classList.contains('active') && 
+                    !mainNav.contains(e.target) && 
+                    navToggle && !navToggle.contains(e.target)) {
+                    mainNav.classList.remove('active');
                 }
             });
         }
@@ -2318,6 +2452,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log("🚀 بدء تحميل معرض الصور المشفر...");
             checkAuthStatus();
+            
+            // جعل وظائف التنزيل متاحة عالمياً
+            window.downloadImage = downloadImage;
+            window.viewImageFullscreen = viewImageFullscreen;
         });
     </script>
 </body>
