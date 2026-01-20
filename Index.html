@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الإشعارات</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .status-card {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-right: 4px solid #4299e1;
+        }
+
+        .status-card h3 {
+            color: #2d3748;
+            margin-top: 0;
+        }
+
+        #subscriptionStatus {
+            font-weight: bold;
+            color: #38a169;
+        }
+
+        .btn {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #f56565;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .admin-section {
+            background: #fff5f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 1px solid #fed7d7;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin: 10px 0;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+        }
+
+        .notification.error {
+            background: #f56565;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            height: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1 style="color: #4299e1;">🔔 نظام الإشعارات الذكي</h1>
+        </div>
+
+        <div class="status-card">
+            <h3>💡 حالة الاشتراك في الإشعارات</h3>
+            <p id="subscriptionStatus">جاري التحقق...</p>
+            <button class="btn" id="subscribeBtn">✅ اشترك في الإشعارات</button>
+            <button class="btn btn-danger" id="unsubscribeBtn">❌ إلغاء الاشتراك</button>
+        </div>
+
+        <div class="status-card">
+            <h3>👥 معلومات المستخدم</h3>
+            <p><strong>معرف المستخدم:</strong> <span id="userId">جاري التحميل...</span></p>
+            <p><strong>حالة الإشعارات:</strong> <span id="notificationStatus">جاري التحقق...</span></p>
+        </div>
+
+        <div class="admin-section">
+            <h3>⚙️ لوحة التحكم (لإرسال إشعارات لجميع المستخدمين)</h3>
+            
+            <div>
+                <label for="notificationTitle">عنوان الإشعار:</label>
+                <input type="text" id="notificationTitle" placeholder="أدخل عنوان الإشعار">
+            </div>
+
+            <div>
+                <label for="notificationMessage">نص الإشعار:</label>
+                <textarea id="notificationMessage" placeholder="أدخل نص الإشعار هنا..."></textarea>
+            </div>
+
+            <div>
+                <label for="notificationUrl">رابط إضافي (اختياري):</label>
+                <input type="text" id="notificationUrl" placeholder="https://example.com">
+            </div>
+
+            <button class="btn" id="sendToAllBtn">📨 إرسال للجميع</button>
+            <button class="btn" id="testNotificationBtn">🧪 إرسال إشعار تجريبي</button>
+        </div>
+    </div>
+
+    <div class="notification" id="successNotification">
+        ✅ تم الإرسال بنجاح!
+    </div>
+
+    <div class="notification error" id="errorNotification">
+        ❌ حدث خطأ!
+    </div>
+
+    <!-- OneSignal SDK -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "cb47a670-5e2f-4b55-9121-29fabcdb3746",
+                safari_web_id: "web.onesignal.auto.5d688423-0af1-49ae-8d78-ba60b1402925",
+                notifyButton: {
+                    enable: true,
+                },
+                allowLocalhostAsSecureOrigin: true,
+            });
+            
+            await OneSignal.Slidedown.promptPush();
+            
+            // تحديث حالة المستخدم
+            updateUserStatus();
+        });
+    </script>
+    
+    <script>
+        // تحديث حالة المستخدم
+        async function updateUserStatus() {
+            const subscription = await OneSignal.User.PushSubscription;
+            const userId = await OneSignal.User.getId();
+            
+            document.getElementById('userId').textContent = userId || 'غير متوفر';
+            
+            if (subscription.optedIn) {
+                document.getElementById('subscriptionStatus').textContent = '✅ مشترك في الإشعارات';
+                document.getElementById('notificationStatus').textContent = 'تفعيل الإشعارات: ✅';
+                document.getElementById('subscriptionStatus').style.color = '#38a169';
+            } else {
+                document.getElementById('subscriptionStatus').textContent = '❌ غير مشترك في الإشعارات';
+                document.getElementById('notificationStatus').textContent = 'تفعيل الإشعارات: ❌';
+                document.getElementById('subscriptionStatus').style.color = '#f56565';
+            }
+        }
+
+        // زر الاشتراك
+        document.getElementById('subscribeBtn').addEventListener('click', async () => {
+            try {
+                await OneSignal.Slidedown.promptPush();
+                setTimeout(updateUserStatus, 1000);
+                showNotification('✅ تم تفعيل الإشعارات بنجاح!');
+            } catch (error) {
+                showNotification('❌ حدث خطأ في الاشتراك', true);
+            }
+        });
+
+        // زر إلغاء الاشتراك
+        document.getElementById('unsubscribeBtn').addEventListener('click', async () => {
+            try {
+                await OneSignal.User.PushSubscription.optOut();
+                updateUserStatus();
+                showNotification('✅ تم إلغاء الاشتراك بنجاح');
+            } catch (error) {
+                showNotification('❌ حدث خطأ في إلغاء الاشتراك', true);
+            }
+        });
+
+        // إرسال إشعار لجميع المستخدمين
+        document.getElementById('sendToAllBtn').addEventListener('click', async () => {
+            const title = document.getElementById('notificationTitle').value;
+            const message = document.getElementById('notificationMessage').value;
+            const url = document.getElementById('notificationUrl').value;
+
+            if (!title || !message) {
+                showNotification('❌ الرجاء إدخال عنوان ونص الإشعار', true);
+                return;
+            }
+
+            try {
+                const response = await fetch('https://onesignal.com/api/v1/notifications', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic pa3x3hd5seaem3rfykzxw4xxo'
+                    },
+                    body: JSON.stringify({
+                        app_id: "cb47a670-5e2f-4b55-9121-29fabcdb3746",
+                        included_segments: ["All"],
+                        headings: {"en": title, "ar": title},
+                        contents: {"en": message, "ar": message},
+                        url: url || undefined
+                    })
+                });
+
+                const data = await response.json();
+                if (data.id) {
+                    showNotification('✅ تم إرسال الإشعار لجميع المستخدمين بنجاح');
+                    // تفريغ الحقول
+                    document.getElementById('notificationTitle').value = '';
+                    document.getElementById('notificationMessage').value = '';
+                    document.getElementById('notificationUrl').value = '';
+                } else {
+                    throw new Error('فشل في الإرسال');
+                }
+            } catch (error) {
+                showNotification('❌ حدث خطأ في إرسال الإشعارات', true);
+                console.error(error);
+            }
+        });
+
+        // إرسال إشعار تجريبي
+        document.getElementById('testNotificationBtn').addEventListener('click', async () => {
+            try {
+                await OneSignal.Notifications.requestPermission();
+                OneSignal.showSlidedownPrompt();
+                
+                showNotification('📱 جاري إرسال إشعار تجريبي...');
+            } catch (error) {
+                showNotification('❌ حدث خطأ في الإرسال التجريبي', true);
+            }
+        });
+
+        // دالة لعرض الإشعارات
+        function showNotification(message, isError = false) {
+            const notification = isError 
+                ? document.getElementById('errorNotification')
+                : document.getElementById('successNotification');
+            
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
+        // تحديث الحالة كل 5 ثواني
+        setInterval(updateUserStatus, 5000);
+    </script>
+</body>
+</html>
