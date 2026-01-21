@@ -11,15 +11,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/kdate/dist/kdate.min.js"></script>
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "cb47a670-5e2f-4b55-9121-29fabcdb3746",
-    });
-  });
-</script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
 :root {
@@ -1381,6 +1372,7 @@ footer {
     color: var(--accent) !important; /* نفس لون القبعة */
     font-weight: bold;
 }
+
     </style>
 
     <!-- في main.html داخل <head> -->
@@ -1447,21 +1439,27 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
         </div>
     </header>
 
-    <!-- التنقل (مخفي حتى يتم تسجيل الدخول) -->
-    <nav id="main-nav" style="display: none;">
-        <div class="container">
-            <ul class="nav-links">
-                <li><a href="#" class="nav-link-item active" data-page="dashboard"><i class="fas fa-home nav-icon"></i><span class="nav-text">الرئيسية</span></a></li>
-                <li><a href="#" class="nav-link-item" data-page="assignments"><i class="fas fa-tasks nav-icon"></i><span class="nav-text">الواجبات</span></a></li>
-                <li><a href="#" class="nav-link-item" data-page="submissions"><i class="fas fa-file-upload nav-icon"></i><span class="nav-text">التسليمات</span></a></li>
-                <li><a href="#" class="nav-link-item" data-page="schedule"><i class="fas fa-calendar-alt nav-icon"></i><span class="nav-text">الجدول</span></a></li>
-                <li><a href="#" class="nav-link-item" data-page="exams"><i class="fas fa-clipboard-list nav-icon"></i><span class="nav-text">الاختبارات</span></a></li>
-                <li><a href="#" class="nav-link-item" data-page="calculator"><i class="fas fa-calculator nav-icon"></i><span class="nav-text">النسبة الموزونة</span></a></li>
-                <li><a href="#" class="nav-link-item" data-page="gallery"><i class="fas fa-images nav-icon"></i><span class="nav-text">المعرض</span></a></li>
-                <li><a href="#" class="nav-link-item" data-page="calendar"><i class="far fa-calendar nav-icon"></i><span class="nav-text">التقويم</span></a></li>
-            </ul>
-        </div>
-    </nav>
+<!-- التنقل (مخفي حتى يتم تسجيل الدخول) -->
+<nav id="main-nav" style="display: none;">
+    <div class="container">
+        <ul class="nav-links">
+            <li><a href="#" class="nav-link-item active" data-page="dashboard"><i class="fas fa-home nav-icon"></i><span class="nav-text">الرئيسية</span></a></li>
+            <li><a href="#" class="nav-link-item" data-page="assignments"><i class="fas fa-tasks nav-icon"></i><span class="nav-text">الواجبات</span></a></li>
+            <li><a href="#" class="nav-link-item" data-page="submissions"><i class="fas fa-file-upload nav-icon"></i><span class="nav-text">التسليمات</span></a></li>
+            <li><a href="#" class="nav-link-item" data-page="schedule"><i class="fas fa-calendar-alt nav-icon"></i><span class="nav-text">الجدول</span></a></li>
+            <li><a href="#" class="nav-link-item" data-page="exams"><i class="fas fa-clipboard-list nav-icon"></i><span class="nav-text">الاختبارات</span></a></li>
+            <li><a href="#" class="nav-link-item" data-page="calculator"><i class="fas fa-calculator nav-icon"></i><span class="nav-text">النسبة الموزونة</span></a></li>
+            <li><a href="#" class="nav-link-item" data-page="gallery"><i class="fas fa-images nav-icon"></i><span class="nav-text">المعرض</span></a></li>
+            <li><a href="#" class="nav-link-item" data-page="calendar"><i class="far fa-calendar nav-icon"></i><span class="nav-text">التقويم</span></a></li>
+            
+            <!-- قسم الرسائل - مع أيقونة مناسبة -->
+            <li><a href="#" class="nav-link-item" data-page="messages"><i class="fas fa-comments nav-icon"></i><span class="nav-text">الرسائل</span></a></li>
+            
+            <!-- قسم الإدارة - مع أيقونة مناسبة -->
+            <li><a href="#" class="nav-link-item" data-page="admin"><i class="fas fa-user-shield nav-icon"></i><span class="nav-text">الإدارة</span></a></li>
+        </ul>
+    </div>
+</nav>
 
     <!-- المحتوى الرئيسي (مخفي حتى يتم تسجيل الدخول) -->
     <main class="container" id="main-content" style="display: none;">
@@ -1766,6 +1764,19 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
                 <div class="calendar-container" id="calendar-container"></div>
             </div>
         </div>
+
+
+
+        <!-- إضافة هذه الأقسام بعد قسم التقويم -->
+<section id="messages" class="page-content">
+    <!-- سيتم تحميل محتوى الرسائل هنا تلقائياً -->
+</section>
+
+<section id="admin" class="page-content">
+    <!-- سيتم تحميل محتوى الإدارة هنا تلقائياً -->
+</section>
+
+
     </main>
 
     <!-- الفوتر (مخفي حتى يتم تسجيل الدخول) -->
@@ -1815,7 +1826,8 @@ import {
     update, 
     get, 
     push, 
-    remove 
+    remove,
+    child 
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
 // ===============================
@@ -1855,12 +1867,21 @@ let userName = "";
 let userFullName = "";
 let userNickname = "";
 let userEmail = "";
+let userRole = "student";
 const classId = 'section306';
 let originalLogoText = "شعبة 306";
 let allEvents = [];
 let currentCalendarMonth = new Date().getMonth();
 let currentCalendarYear = new Date().getFullYear();
 let notificationDropdownVisible = false;
+
+// ===============================
+// المستخدمون الذين لهم صلاحيات مشرف (ثابتة)
+// ===============================
+const ADMIN_USERS = [
+    "hussainasari012@gmail.com",  // المشرف الرئيسي
+    "admin@system306.com"         // حساب احتياطي
+];
 
 // ===============================
 // نظام منع تكرار الإشعارات
@@ -1880,15 +1901,13 @@ function cleanupOldNotifications() {
 }
 
 function getNotificationHash(notificationData) {
-    // إنشاء مفتاح فريد لكل إشعار
     const base = `${notificationData.type}_${notificationData.action || 'create'}`;
     
-    // إضافة المعرفات ذات الصلة
     if (notificationData.assignmentId) return `${base}_assignment_${notificationData.assignmentId}`;
     if (notificationData.examId) return `${base}_exam_${notificationData.examId}`;
     if (notificationData.eventId) return `${base}_event_${notificationData.eventId}`;
+    if (notificationData.messageId) return `${base}_message_${notificationData.messageId}`;
     
-    // إضافة جزء من الرسالة كمفتاح
     const messagePart = notificationData.message.substring(0, 30).replace(/\s+/g, '_');
     return `${base}_${messagePart}_${Date.now().toString().slice(-6)}`;
 }
@@ -2372,6 +2391,409 @@ const additionalStyles = `
         opacity: 1;
     }
     
+    /* قسم الإدارة */
+    .admin-stats {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .stat-box {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+    
+    .stat-box:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-box i {
+        font-size: 2rem;
+        color: var(--primary);
+    }
+    
+    .stat-content h4 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #333;
+    }
+    
+    .stat-content p {
+        margin: 5px 0 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .danger-zone {
+        border: 2px solid #dc3545;
+        border-radius: 10px;
+        padding: 20px;
+        background: linear-gradient(135deg, #fff5f5 0%, #ffeaea 100%);
+        margin-top: 30px;
+    }
+    
+    .danger-zone h3 {
+        color: #dc3545;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .danger-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .danger-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+        flex: 1;
+        min-width: 200px;
+        justify-content: center;
+    }
+    
+    .danger-btn:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+    }
+    
+    .danger-btn.warning {
+        background: #ffc107;
+        color: #212529;
+    }
+    
+    .danger-btn.warning:hover {
+        background: #e0a800;
+    }
+    
+    /* قسم الرسائل */
+    .messages-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .message-form-container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .message-input-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .message-input-group input,
+    .message-input-group select {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 0.9rem;
+    }
+    
+    .message-textarea {
+        width: 100%;
+        min-height: 100px;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        resize: vertical;
+    }
+    
+    .send-message-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1rem;
+        transition: all 0.3s;
+        width: 100%;
+        justify-content: center;
+        margin-top: 15px;
+    }
+    
+    .send-message-btn:hover {
+        background: var(--secondary);
+        transform: translateY(-2px);
+    }
+    
+    .messages-list {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .message-item {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        transition: background 0.3s;
+    }
+    
+    .message-item:hover {
+        background: #f9f9f9;
+    }
+    
+    .message-item:last-child {
+        border-bottom: none;
+    }
+    
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
+    
+    .message-sender {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .sender-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    
+    .sender-info h4 {
+        margin: 0;
+        color: #333;
+    }
+    
+    .sender-info small {
+        color: #666;
+        font-size: 0.8rem;
+    }
+    
+    .message-time {
+        color: #888;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .message-content {
+        color: #333;
+        line-height: 1.6;
+        margin-bottom: 10px;
+        padding-right: 50px;
+    }
+    
+    .message-type {
+        display: inline-block;
+        padding: 3px 8px;
+        background: #e9ecef;
+        color: #495057;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        margin-right: 5px;
+    }
+    
+    .message-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 10px;
+    }
+    
+    .delete-message-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .delete-message-btn:hover {
+        background: #c82333;
+    }
+    
+    .no-messages {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+    
+    .no-messages i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #ddd;
+    }
+    
+    /* التقويم البسيط */
+    .calendar-simple {
+        padding: 20px;
+    }
+    
+    .week-days {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+        margin: 15px 0;
+        text-align: center;
+        font-weight: bold;
+        color: var(--primary);
+    }
+    
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+    }
+    
+    .calendar-day {
+        aspect-ratio: 1;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+        padding: 5px;
+    }
+    
+    .calendar-day:hover {
+        background: #f5f5f5;
+        transform: translateY(-2px);
+    }
+    
+    .calendar-day.today {
+        background: var(--primary-light);
+        border-color: var(--primary);
+    }
+    
+    .calendar-day.has-event {
+        background: #fff8e1;
+        border-color: #ffc107;
+    }
+    
+    .calendar-day.empty {
+        background: #f9f9f9;
+        border: none;
+        cursor: default;
+    }
+    
+    .calendar-day.empty:hover {
+        transform: none;
+        background: #f9f9f9;
+    }
+    
+    .day-number {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .hijri-day {
+        font-size: 0.8rem;
+        color: #666;
+        margin-top: 3px;
+    }
+    
+    .event-dot {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        width: 8px;
+        height: 8px;
+        background: #ff5722;
+        border-radius: 50%;
+    }
+    
+    .calendar-events {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    
+    .calendar-events h4 {
+        color: var(--primary);
+        margin-bottom: 15px;
+    }
+    
+    /* تحسينات للتمييز بين الأدوار */
+    .role-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 15px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        margin-right: 5px;
+    }
+    
+    .role-badge.admin {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+    
+    .role-badge.student {
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        color: white;
+    }
+    
+    /* عرض الصلاحيات */
+    .role-display {
+        position: absolute;
+        left: 20px;
+        top: 20px;
+        z-index: 100;
+    }
+    
     /* للشاشات الصغيرة */
     @media (max-width: 768px) {
         .notification-popup {
@@ -2394,6 +2816,38 @@ const additionalStyles = `
             top: 45px;
             right: 15px;
             font-size: 0.7rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .danger-actions {
+            flex-direction: column;
+        }
+        
+        .danger-btn {
+            min-width: 100%;
+        }
+        
+        .message-input-group {
+            flex-direction: column;
+        }
+        
+        .message-header {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .message-content {
+            padding-right: 0;
+        }
+        
+        .role-display {
+            position: relative;
+            left: 0;
+            top: 0;
+            margin-top: 10px;
         }
     }
 </style>
@@ -2471,11 +2925,6 @@ function updateLoadingMessage(message) {
 // ===============================
 function playNotificationSound() {
     try {
-        // إنشاء عنصر صوت
-        const audio = new Audio();
-        audio.volume = 0.5;
-        
-        // محاولة إنشاء صوت باستخدام Web Audio API
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
@@ -2493,8 +2942,6 @@ function playNotificationSound() {
         oscillator.stop(audioContext.currentTime + 0.5);
         
     } catch (error) {
-        console.log("خطأ في تشغيل الصوت:", error);
-        // بديل مع HTML5 Audio
         try {
             const fallbackAudio = new Audio();
             fallbackAudio.volume = 0.3;
@@ -2509,15 +2956,12 @@ function playNotificationSound() {
 // نظام الإشعارات المنبثقة
 // ===============================
 function showNotificationPopup(title, message, type = 'info', duration = 5000) {
-    // إذا كان المستخدم ليس في الصفحة الرئيسية، لا تعرض الإشعارات
     if (document.hidden) return;
     
-    // تشغيل الصوت فقط للإشعارات العامة
     if (type !== 'private') {
         playNotificationSound();
     }
     
-    // إنشاء إشعار منبثق
     const notification = document.createElement('div');
     notification.className = 'notification-popup';
     notification.setAttribute('data-type', type);
@@ -2553,10 +2997,8 @@ function showNotificationPopup(title, message, type = 'info', duration = 5000) {
         </div>
     `;
     
-    // إضافة إلى DOM
     document.body.appendChild(notification);
     
-    // إضافة حدث الإغلاق
     const closeBtn = notification.querySelector('.notification-close');
     closeBtn.addEventListener('click', () => {
         notification.classList.add('hiding');
@@ -2567,7 +3009,6 @@ function showNotificationPopup(title, message, type = 'info', duration = 5000) {
         }, 400);
     });
     
-    // إغلاق تلقائي بعد المدة المحددة
     setTimeout(() => {
         if (notification.parentElement && !notification.classList.contains('hiding')) {
             notification.classList.add('hiding');
@@ -2605,7 +3046,6 @@ function initScrollEffect() {
     
     if (!header || !logoText) return;
     
-    // إضافة عنصر اللقب
     const nicknameElement = document.createElement('div');
     nicknameElement.className = 'user-nickname';
     nicknameElement.id = 'user-nickname';
@@ -2615,13 +3055,11 @@ function initScrollEffect() {
     window.addEventListener('scroll', () => {
         if (window.scrollY > 50) {
             header.classList.add('scrolled');
-            // تغيير النص إلى اسم المستخدم عند التمرير
             if (userFullName && userFullName !== "مستخدم") {
-                logoText.textContent = userFullName.split(' ')[0]; // الاسم الأول فقط
+                logoText.textContent = userFullName.split(' ')[0];
             }
         } else {
             header.classList.remove('scrolled');
-            // إعادة النص إلى "شعبة 306"
             logoText.textContent = originalLogoText;
         }
     });
@@ -2636,7 +3074,6 @@ function initNotificationDropdown() {
     
     if (!notificationBtn || !notificationDropdown) return;
     
-    // النقر على زر الإشعارات
     notificationBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         notificationDropdownVisible = !notificationDropdownVisible;
@@ -2648,7 +3085,6 @@ function initNotificationDropdown() {
         }
     });
     
-    // إغلاق الإشعارات عند النقر خارجها
     document.addEventListener('click', (e) => {
         if (!notificationDropdown.contains(e.target) && !notificationBtn.contains(e.target)) {
             notificationDropdownVisible = false;
@@ -2656,12 +3092,10 @@ function initNotificationDropdown() {
         }
     });
     
-    // منع إغلاق الإشعارات عند النقر داخلها
     notificationDropdown.addEventListener('click', (e) => {
         e.stopPropagation();
     });
     
-    // زر مسح جميع الإشعارات
     const clearNotificationsBtn = document.getElementById('clear-notifications');
     if (clearNotificationsBtn) {
         clearNotificationsBtn.addEventListener('click', clearAllNotifications);
@@ -2687,15 +3121,18 @@ function checkAuthStatus() {
             userId = user.uid;
             userEmail = user.email || '';
             
+            // التحقق إذا كان المشرف الرئيسي
+            if (ADMIN_USERS.includes(user.email)) {
+                userRole = 'admin';
+                console.log("👑 تم التعرف على المشرف الرئيسي:", user.email);
+            }
+            
             await loadUserData();
             showUserInterface();
             initScrollEffect();
             initNotificationDropdown();
             
-            // طلب إذن الإشعارات
             requestNotificationPermission();
-            
-            // تحميل الإشعارات
             loadAllNotifications();
             
         } else {
@@ -2753,12 +3190,24 @@ async function loadUserData() {
                           (userData.firstName ? `${userData.firstName} ${userData.lastName || ''}`.trim() : 'مستخدم');
             userName = userData.firstName || userData.displayName || 'مستخدم';
             userNickname = userData.nickname || userData.displayName || userData.firstName || 'مستخدم';
+            
+            // إذا كان من المشرفين الرئيسيين أو مشرف في قاعدة البيانات
+            if (ADMIN_USERS.includes(userEmail) || userData.role === 'admin') {
+                userRole = 'admin';
+            }
+            
             updateUserDisplay();
             await addUserToClass();
         } else {
             userFullName = currentUser.displayName || currentUser.email || 'مستخدم';
             userName = currentUser.displayName || currentUser.email || 'مستخدم';
             userNickname = currentUser.displayName || currentUser.email || 'مستخدم';
+            
+            // التحقق إذا كان المشرف الرئيسي
+            if (ADMIN_USERS.includes(userEmail)) {
+                userRole = 'admin';
+            }
+            
             updateUserDisplay();
             await createUserInDatabase();
         }
@@ -2768,18 +3217,27 @@ async function loadUserData() {
         userFullName = currentUser.displayName || currentUser.email || 'مستخدم';
         userName = currentUser.displayName || currentUser.email || 'مستخدم';
         userNickname = currentUser.displayName || currentUser.email || 'مستخدم';
+        
+        if (ADMIN_USERS.includes(userEmail)) {
+            userRole = 'admin';
+        }
+        
         updateUserDisplay();
     }
 }
 
 // ===============================
-// إنشاء بيانات المستخدم
+// إنشاء بيانات المستخدم - مع صلاحيات المشرف للمستخدم الرئيسي
 // ===============================
 async function createUserInDatabase() {
     if (!userId || !database) return;
     
     try {
         const userRef = ref(database, `users/${userId}`);
+        
+        // تحديد الدور: إذا كان من المشرفين الرئيسيين -> admin وإلا -> student
+        const isAdmin = ADMIN_USERS.includes(userEmail);
+        
         const userData = {
             uid: userId,
             email: currentUser.email || '',
@@ -2788,14 +3246,31 @@ async function createUserInDatabase() {
             firstName: currentUser.displayName ? currentUser.displayName.split(' ')[0] : 'مستخدم',
             lastName: currentUser.displayName ? currentUser.displayName.split(' ').slice(1).join(' ') : '',
             nickname: currentUser.displayName ? currentUser.displayName.split(' ')[0] : 'مستخدم',
-            role: "student",
+            role: isAdmin ? "admin" : "student",
             class: "306",
             createdAt: new Date().toISOString(),
-            lastActive: new Date().toISOString()
+            lastActive: new Date().toISOString(),
+            isMainAdmin: userEmail === "hussainasari012@gmail.com" // تمييز المشرف الرئيسي
         };
         
         await set(userRef, userData);
-        console.log("✅ تم إنشاء بيانات المستخدم في قاعدة البيانات");
+        
+        if (isAdmin) {
+            console.log("👑 تم إنشاء حساب مشرف لـ:", userEmail);
+            userRole = 'admin';
+            
+            // إرسال إشعار خاص للمشرف
+            setTimeout(() => {
+                showNotificationPopup(
+                    "مرحباً يا مشرف!",
+                    `أهلاً وسهلاً بك ${userNickname}، لديك صلاحيات كاملة في النظام`,
+                    "success",
+                    5000
+                );
+            }, 1500);
+        } else {
+            console.log("✅ تم إنشاء حساب طالب لـ:", userEmail);
+        }
         
     } catch (error) {
         console.warn("⚠️ لم يتم إنشاء بيانات المستخدم:", error);
@@ -2823,11 +3298,50 @@ function updateUserDisplay() {
         else if (hour < 18) greeting = 'مساء الخير';
         else greeting = 'مساء الخير';
         
-        welcomeMessage.textContent = `${greeting} ${userNickname || userName}، في شعبة 306`;
+        const roleText = userRole === 'admin' ? '👑 ' : '';
+        welcomeMessage.textContent = `${greeting} ${roleText}${userNickname || userName}، في شعبة 306`;
     }
     
     if (nicknameElement) {
         nicknameElement.textContent = userNickname || userName;
+    }
+    
+    // إضافة عرض الصلاحيات في لوحة التحكم
+    showRoleBadge();
+}
+
+function showRoleBadge() {
+    const dashboard = document.getElementById('dashboard');
+    if (dashboard) {
+        // إزالة أي عرض سابق للصلاحيات
+        const existingBadge = dashboard.querySelector('.role-display');
+        if (existingBadge) {
+            existingBadge.remove();
+        }
+        
+        const roleDisplay = document.createElement('div');
+        roleDisplay.className = 'role-display';
+        roleDisplay.innerHTML = `
+            <div style="background: ${userRole === 'admin' ? '#dc3545' : '#28a745'}; 
+                        color: white; 
+                        padding: 8px 15px; 
+                        border-radius: 20px;
+                        font-size: 0.9rem;
+                        font-weight: bold;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                <i class="fas ${userRole === 'admin' ? 'fa-user-shield' : 'fa-user-graduate'}"></i>
+                ${userRole === 'admin' ? '👑 مشرف النظام' : 'طالب'}
+                ${userEmail === "hussainasari012@gmail.com" ? ' (الرئيسي)' : ''}
+            </div>
+        `;
+        
+        const dashboardHeader = dashboard.querySelector('.card-header');
+        if (dashboardHeader) {
+            dashboardHeader.appendChild(roleDisplay);
+        }
     }
 }
 
@@ -2840,21 +3354,20 @@ function showUserInterface() {
         loadingScreen.style.display = 'none';
     }
     
-    // إظهار جميع عناصر الواجهة
     document.getElementById('main-header').style.display = 'block';
     document.getElementById('main-nav').style.display = 'block';
     document.getElementById('main-content').style.display = 'block';
     document.getElementById('main-footer').style.display = 'block';
     
-    // تهيئة التنقل
     initNavigation();
-    
-    // تحميل لوحة التحكم
     loadDashboard();
     
-    // إظهار رسالة ترحيب بعد تأخير بسيط
     setTimeout(() => {
-        showNotificationPopup("مرحباً", `أهلاً وسهلاً بك ${userNickname || userName}!`, "success", 3000);
+        const welcomeMessage = userRole === 'admin' 
+            ? `👑 أهلاً وسهلاً بك ${userNickname}! أنت مشرف النظام`
+            : `أهلاً وسهلاً بك ${userNickname}!`;
+        
+        showNotificationPopup("مرحباً", welcomeMessage, "success", 3000);
     }, 1000);
 }
 
@@ -2889,11 +3402,11 @@ async function addUserToClass() {
                 activeUsers: { [userId]: new Date().toISOString() }
             });
             
-            // إنشاء الهياكل الفرعية
             await set(ref(database, `classes/${classId}/assignments`), {});
             await set(ref(database, `classes/${classId}/exams`), {});
             await set(ref(database, `classes/${classId}/events`), {});
             await set(ref(database, `classes/${classId}/notifications`), {});
+            await set(ref(database, `classes/${classId}/messages`), {});
             
             console.log('✅ تم إنشاء الصف المشترك');
         } else {
@@ -2917,59 +3430,65 @@ async function addUserToClass() {
 }
 
 // ===============================
-// إدارة التنقل
+// إدارة التنقل - مع التحقق من الصلاحيات
 // ===============================
 function initNavigation() {
     const navLinks = document.querySelectorAll('.nav-link-item');
     const pages = document.querySelectorAll('.page-content');
+    
+    // تحديث عرض روابط الإدارة بناءً على الصلاحيات
+    updateAdminLinks();
     
     navLinks.forEach(link => {
         link.addEventListener('click', e => {
             e.preventDefault();
             const pageId = link.dataset.page;
             
-            // إخفاء جميع الصفحات
             pages.forEach(p => p.classList.remove('active'));
             navLinks.forEach(l => l.classList.remove('active'));
             
-            // إظهار الصفحة المحددة
             const page = document.getElementById(pageId);
             if (page) {
                 page.classList.add('active');
                 link.classList.add('active');
-            }
-            
-            // تحميل محتوى الصفحة
-            switch(pageId) {
-                case 'dashboard':
-                    loadDashboard();
-                    break;
-                case 'assignments':
-                    loadAssignments();
-                    break;
-                case 'submissions':
-                    loadSubmissions();
-                    break;
-                case 'schedule':
-                    loadSchedule();
-                    break;
-                case 'exams':
-                    loadExams();
-                    break;
-                case 'calculator':
-                    loadCalculator();
-                    break;
-                case 'gallery':
-                    loadGallery();
-                    break;
-                case 'calendar':
-                    loadCalendar();
-                    break;
+                
+                // تحميل محتوى الصفحة
+                switch(pageId) {
+                    case 'dashboard':
+                        loadDashboard();
+                        break;
+                    case 'assignments':
+                        loadAssignments();
+                        break;
+                    case 'submissions':
+                        loadSubmissions();
+                        break;
+                    case 'schedule':
+                        loadSchedule();
+                        break;
+                    case 'exams':
+                        loadExams();
+                        break;
+                    case 'calculator':
+                        loadCalculator();
+                        break;
+                    case 'gallery':
+                        loadGallery();
+                        break;
+                    case 'calendar':
+                        loadCalendar();
+                        break;
+                    case 'messages':
+                        loadMessages();
+                        break;
+                    case 'admin':
+                        loadAdminPanel();
+                        break;
+                }
             }
         });
     });
 
-    // حدث تسجيل الخروج
     document.getElementById('logout-btn')?.addEventListener('click', async () => {
         if (confirm('هل تريد تسجيل الخروج؟')) {
             try {
@@ -2989,6 +3508,22 @@ function initNavigation() {
     });
 }
 
+function updateAdminLinks() {
+    const adminLink = document.querySelector('[data-page="admin"]');
+    
+    if (adminLink) {
+        if (userRole === 'admin') {
+            adminLink.style.display = 'flex';
+            adminLink.innerHTML = `
+                <i class="fas fa-user-shield"></i>
+                <span>الإدارة <small style="color: #ffc107;">👑</small></span>
+            `;
+        } else {
+            adminLink.style.display = 'none';
+        }
+    }
+}
+
 // ===============================
 // نظام إضافة الإشعارات المحسن
 // ===============================
@@ -2996,12 +3531,10 @@ async function addNotification(notificationData) {
     if (!userId || !database) return;
     
     try {
-        // التحقق من تجنب التكرار
         const notificationHash = getNotificationHash(notificationData);
         const now = Date.now();
         const lastSent = lastNotificationHash[notificationHash] || 0;
         
-        // وقت التبريد للإشعارات (10 ثواني للإشعارات العامة، 30 ثانية للإشعارات الخاصة)
         const cooldownTime = notificationData.isPrivate ? 30000 : 10000;
         
         if (now - lastSent < cooldownTime) {
@@ -3009,10 +3542,8 @@ async function addNotification(notificationData) {
             return;
         }
         
-        // تحديث وقت آخر إشعار
         lastNotificationHash[notificationHash] = now;
         
-        // تنظيف المصفوفة القديمة بشكل دوري
         if (Object.keys(lastNotificationHash).length > 100) {
             cleanupOldNotifications();
         }
@@ -3031,7 +3562,6 @@ async function addNotification(notificationData) {
             privateFor: notificationData.privateFor || null
         });
         
-        // فقط الإشعارات العامة تُظهر إشعاراً منبثقاً
         if (!notificationData.isPrivate && !notificationData.privateFor) {
             showNotificationPopup(
                 notificationData.title,
@@ -3055,7 +3585,6 @@ async function addNotification(notificationData) {
 async function loadAllNotifications() {
     if (!userId || !database) return;
     
-    // تحميل الإشعارات العامة
     const classNotificationsRef = ref(database, `classes/${classId}/notifications`);
     
     onValue(classNotificationsRef, (snapshot) => {
@@ -3065,10 +3594,6 @@ async function loadAllNotifications() {
             ...value
         }));
         
-        // تصفية الإشعارات:
-        // 1. الإشعارات العامة (isPrivate = false)
-        // 2. الإشعارات الخاصة بالشخص نفسه (privateFor = userId)
-        // 3. الإشعارات الموجهة لهذا المستخدم (targetUserId = userId)
         const relevantNotifications = notifications.filter(notification => {
             if (notification.isPrivate) {
                 return notification.privateFor === userId;
@@ -3082,13 +3607,11 @@ async function loadAllNotifications() {
 }
 
 function checkNewNotifications(notifications) {
-    // التحقق من الإشعارات الجديدة (آخر 5 دقائق)
     const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
     
     notifications.forEach(notification => {
         const notificationTime = new Date(notification.timestamp).getTime();
         
-        // فقط الإشعارات العامة تظهر منبثقة
         const shouldShowPopup = !notification.isPrivate && 
                                !notification.privateFor && 
                                !notification.readBy?.[userId] &&
@@ -3112,12 +3635,10 @@ function renderNotifications(notifications) {
     
     if (!notificationList || !notificationCount) return;
     
-    // ترتيب حسب الوقت (الأحدث أولاً)
     const sortedNotifications = notifications.sort((a, b) => 
         new Date(b.timestamp || b.time) - new Date(a.timestamp || a.time)
     );
     
-    // حساب الإشعارات غير المقروءة (العامة فقط)
     const unreadCount = sortedNotifications.filter(n => 
         (!n.readBy || !n.readBy[userId]) && !n.isPrivate && !n.privateFor
     ).length;
@@ -3175,7 +3696,6 @@ window.markNotificationAsRead = async function(notificationId) {
         const notificationRef = ref(database, `classes/${classId}/notifications/${notificationId}/readBy/${userId}`);
         await set(notificationRef, true);
         
-        // تحديث العداد
         updateNotificationCount();
         
     } catch (error) {
@@ -3211,7 +3731,7 @@ function updateNotificationCount() {
 }
 
 // ===============================
-// نظام الواجبات المشتركة (معدل)
+// نظام الواجبات المشتركة
 // ===============================
 async function loadAssignments() {
     if (!userId || !database) return;
@@ -3233,7 +3753,6 @@ async function loadAssignments() {
         updateAssignmentStats(assignments, userSubmissions);
     });
     
-    // إضافة معالج حدث لنموذج إضافة واجب
     const addAssignmentForm = document.getElementById('add-assignment-form');
     if (addAssignmentForm) {
         addAssignmentForm.addEventListener('submit', addAssignment);
@@ -3263,7 +3782,6 @@ async function addAssignment(e) {
         const newAssignmentRef = push(assignmentsRef);
         const assignmentId = newAssignmentRef.key;
         
-        // الحصول على عدد أعضاء الصف
         const classRef = ref(database, `classes/${classId}`);
         const classSnapshot = await get(classRef);
         const classData = classSnapshot.val() || {};
@@ -3282,7 +3800,6 @@ async function addAssignment(e) {
             submittedCount: 0
         });
         
-        // إضافة إشعار عام للمستخدمين
         await addNotification({
             title: 'واجب جديد',
             message: `تم إضافة واجب جديد: "${title}" للمادة ${subject}`,
@@ -3293,10 +3810,8 @@ async function addAssignment(e) {
             action: 'create'
         });
         
-        // إعادة تعيين النموذج
         e.target.reset();
         
-        // عرض إشعار النجاح
         showNotificationPopup("تم الإضافة", `تم إضافة الواجب "${title}" للجميع`, "success", 3000);
         
     } catch (error) {
@@ -3404,14 +3919,12 @@ window.submitAssignment = async function(assignmentId) {
         
         const assignment = assignmentSnapshot.val();
         
-        // التحقق مما إذا كان قد تم تسليم الواجب مسبقاً
         const userAssignmentSnapshot = await get(userAssignmentRef);
         if (userAssignmentSnapshot.exists()) {
             showNotificationPopup("معلومات", "لقد قمت بتسليم هذا الواجب مسبقاً", "info", 3000);
             return;
         }
         
-        // إنشاء تسليم المستخدم
         const submissionData = {
             assignmentId: assignmentId,
             title: assignment.title,
@@ -3426,15 +3939,12 @@ window.submitAssignment = async function(assignmentId) {
             status: 'submitted'
         };
         
-        // حفظ التسليم
         await set(userAssignmentRef, submissionData);
         
-        // تحديث عدد المسلمين
         await update(assignmentRef, {
             submittedCount: (assignment.submittedCount || 0) + 1
         });
         
-        // إضافة إشعار خاص (لا يظهر للجميع)
         await addNotification({
             title: 'تم تسليم واجب',
             message: `لقد قمت بتسليم واجب: "${assignment.title}"`,
@@ -3445,10 +3955,8 @@ window.submitAssignment = async function(assignmentId) {
             privateFor: userId
         });
         
-        // عرض إشعار خاص للمستخدم فقط
         showNotificationPopup("تم التسليم", `تم تسليم واجب "${assignment.title}" بنجاح!`, "success", 3000);
         
-        // تحديث القوائم
         loadAssignments();
         loadSubmissions();
         
@@ -3479,7 +3987,6 @@ window.deleteAssignment = async function(assignmentId) {
             return;
         }
         
-        // إضافة إشعار حذف قبل الحذف الفعلي
         await addNotification({
             title: 'تم حذف واجب',
             message: `تم حذف الواجب: "${assignment.title}"`,
@@ -3492,7 +3999,6 @@ window.deleteAssignment = async function(assignmentId) {
         
         await remove(assignmentRef);
         
-        // إشعار خاص للمستخدم فقط
         showNotificationPopup("تم الحذف", `تم حذف الواجب "${assignment.title}"`, "success", 3000);
         
     } catch (error) {
@@ -3573,7 +4079,7 @@ function renderSubmissions(submissions) {
 }
 
 // ===============================
-// نظام الاختبارات المشتركة (معدل)
+// نظام الاختبارات المشتركة
 // ===============================
 async function loadExams() {
     if (!userId || !database) return;
@@ -3588,7 +4094,6 @@ async function loadExams() {
         updateExamsStats(exams);
     });
     
-    // إضافة معالج حدث لنموذج إضافة اختبار
     const addExamForm = document.getElementById('add-exam-form');
     if (addExamForm) {
         addExamForm.addEventListener('submit', addExam);
@@ -3633,7 +4138,6 @@ async function addExam(e) {
             createdAt: new Date().toISOString()
         });
         
-        // إضافة إشعار عام
         await addNotification({
             title: 'اختبار جديد',
             message: `تم إضافة اختبار جديد: "${title}" للمادة ${subject}`,
@@ -3644,10 +4148,8 @@ async function addExam(e) {
             examId: examId
         });
         
-        // إعادة تعيين النموذج
         e.target.reset();
         
-        // عرض إشعار النجاح
         showNotificationPopup("تم الإضافة", `تم إضافة الاختبار "${title}" للجميع`, "success", 3000);
         
     } catch (error) {
@@ -3677,7 +4179,6 @@ window.deleteExam = async function(examId) {
             return;
         }
         
-        // إشعار حذف قبل الحذف
         await addNotification({
             title: 'تم حذف اختبار',
             message: `تم حذف الاختبار: "${exam.title}"`,
@@ -3790,7 +4291,6 @@ async function loadSchedule() {
         renderSchedule(data);
     });
     
-    // إضافة معالج حدث لتعديل الجدول
     const editScheduleForm = document.getElementById('edit-schedule-form');
     if (editScheduleForm) {
         editScheduleForm.addEventListener('submit', editSchedule);
@@ -3799,11 +4299,11 @@ async function loadSchedule() {
 
 function getDefaultSchedule() {
     return {
-        "الأحد": ["الرياضيات", "الموطنة الرقمية", "اللغة الإنجليزية", "الفيزياء", "الكيمياء", "الجغرافيا"],
+        "الأحد": ["الرياضيات", "المواطنة الرقمية", "اللغة الإنجليزية", "الفيزياء", "الكيمياء", "الجغرافيا"],
         "الإثنين": ["المواطنة الرقمية", "الرياضيات", "الفيزياء", "الكيمياء", "اللغة الإنجليزية", "الجغرافيا"],
         "الثلاثاء": ["اللغة الإنجليزية", "الرياضيات", "الكيمياء", "الفيزياء", "المواطنة الرقمية", "الجغرافيا"],
         "الأربعاء": ["الفيزياء", "الكيمياء", "الرياضيات", "اللغة العربية", "اللغة الإنجليزية", "الجغرافيا"],
-        "الخميس": ["المهارات الحياتية", "الفيزياء", "المهارات الإدارية", "الرياضيات", "الدراسات اللإسلامية", "اللغة الإنجليزية"]
+        "الخميس": ["المهارات الحياتية", "الفيزياء", "المهارات الإدارية", "الرياضيات", "الدراسات الإسلامية", "اللغة الإنجليزية"]
     };
 }
 
@@ -3824,7 +4324,6 @@ function renderSchedule(schedule) {
         </tr>
     `).join('');
     
-    // إضافة نموذج تعديل الجدول
     const scheduleCard = document.querySelector('#schedule .card');
     if (scheduleCard && !document.getElementById('edit-schedule-form')) {
         const editFormHTML = `
@@ -3860,7 +4359,7 @@ function renderSchedule(schedule) {
                             <select id="edit-subject" class="form-control" required>
                                 <option value="">اختر المادة</option>
                                 <option value="الرياضيات">الرياضيات</option>
-                                <option value="المواطنة الرقمية">الموطنة الرقمية </option>
+                                <option value="المواطنة الرقمية">المواطنة الرقمية</option>
                                 <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
                                 <option value="الفيزياء">الفيزياء</option>
                                 <option value="المهارات الحياتية">المهارات الحياتية</option>
@@ -3879,7 +4378,6 @@ function renderSchedule(schedule) {
         
         scheduleCard.insertAdjacentHTML('beforeend', editFormHTML);
         
-        // إضافة معالج الحدث للنموذج
         document.getElementById('edit-schedule-form').addEventListener('submit', editSchedule);
     }
 }
@@ -3906,16 +4404,13 @@ async function editSchedule(e) {
         const scheduleSnapshot = await get(scheduleRef);
         let schedule = scheduleSnapshot.exists() ? scheduleSnapshot.val() : getDefaultSchedule();
         
-        // تحديث المادة في اليوم والحصة المحددة
         if (!schedule[day]) {
             schedule[day] = Array(6).fill('');
         }
         schedule[day][period - 1] = subject;
         
-        // حفظ الجدول المحدث
         await set(scheduleRef, schedule);
         
-        // إضافة إشعار عام
         await addNotification({
             title: 'تم تعديل الجدول',
             message: `تم تعديل جدول ${day} - الحصة ${period} إلى ${subject}`,
@@ -3925,13 +4420,10 @@ async function editSchedule(e) {
             action: 'update'
         });
         
-        // إعادة تعيين النموذج
         e.target.reset();
         
-        // عرض إشعار النجاح
         showNotificationPopup("تم التعديل", `تم تعديل الجدول الدراسي بنجاح`, "success", 3000);
         
-        // تحديث عرض الجدول
         renderSchedule(schedule);
         
     } catch (error) {
@@ -4045,1020 +4537,809 @@ function loadGallery() {
 }
 
 // ===============================
-// التقويم الهجري - نسخة مبسطة وعملية
+// التقويم البسيط
 // ===============================
-
-// بيانات التقويم
-let currentHijriYear = 1447;
-let currentHijriMonth = 8; // ربيع الأول (0-11)
-let events = [];
-
-// أسماء الأشهر والأيام
-const HIJRI_MONTHS = [
-    'المحرم', 'صفر', 'ربيع الأول', 'ربيع الآخر',
-    'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان',
-    'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'
-];
-
-const DAY_NAMES = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-
-// تهيئة التقويم
-function initializeCalendar() {
-    createCalendarUI();
-    loadCalendarData();
-    setCurrentHijriDate();
-}
-
-// إنشاء واجهة التقويم
-function createCalendarUI() {
+async function loadCalendar() {
+    if (!userId || !database) return;
+    
     const calendarPage = document.getElementById('calendar');
     if (!calendarPage) return;
     
     calendarPage.innerHTML = `
-        <div class="calendar-container">
-            <div class="calendar-header">
-                <div class="month-navigation">
-                    <button id="prevYear" class="nav-btn">
-                        <i class="fas fa-angle-double-right"></i> السنة السابقة
-                    </button>
-                    <button id="prevMonth" class="nav-btn">
-                        <i class="fas fa-angle-right"></i> الشهر السابق
-                    </button>
-                    
-                    <div class="current-month">
-                        <h2 id="monthYearDisplay"></h2>
-                        <div class="hijri-today" id="todayDisplay"></div>
-                    </div>
-                    
-                    <button id="nextMonth" class="nav-btn">
-                        الشهر التالي <i class="fas fa-angle-left"></i>
-                    </button>
-                    <button id="nextYear" class="nav-btn">
-                        السنة التالية <i class="fas fa-angle-double-left"></i>
-                    </button>
-                </div>
-                
-                <div class="calendar-actions">
-                    <button id="goToday" class="btn-action">
-                        <i class="fas fa-calendar-day"></i> العودة لليوم
-                    </button>
-                    <button id="addQuickEvent" class="btn-action primary">
-                        <i class="fas fa-plus"></i> إضافة حدث
-                    </button>
-                </div>
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-calendar-alt"></i> التقويم الدراسي</h2>
+                <span class="badge">هجري/ميلادي</span>
             </div>
-            
-            <div class="calendar-wrapper">
-                <!-- التقويم -->
-                <div class="calendar-main">
-                    <div class="week-days">
-                        ${DAY_NAMES.map(day => `<div class="week-day ${day === 'الجمعة' ? 'friday' : ''}">${day}</div>`).join('')}
-                    </div>
-                    <div class="month-days" id="monthDays"></div>
-                </div>
-                
-                <!-- لوحة الأحداث -->
-                <div class="events-sidebar">
-                    <div class="events-header">
-                        <h3><i class="fas fa-calendar-check"></i> أحداث اليوم</h3>
-                        <span class="badge" id="eventsCount">0 حدث</span>
-                    </div>
-                    <div class="events-list" id="eventsList">
-                        <div class="empty-events">
-                            <i class="far fa-calendar-times"></i>
-                            <p>لا توجد أحداث لهذا اليوم</p>
-                        </div>
+            <div class="card-body">
+                <div class="calendar-simple">
+                    <div class="month-navigation">
+                        <button id="prevMonth" class="nav-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <h3 id="currentMonth" class="current-month">رمضان 1445</h3>
+                        <button id="nextMonth" class="nav-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
                     </div>
                     
-                    <div class="add-event-form">
-                        <h4><i class="fas fa-plus-circle"></i> إضافة حدث جديد</h4>
-                        <form id="eventForm">
-                            <div class="form-group">
-                                <input type="text" id="eventTitle" placeholder="عنوان الحدث" required>
+                    <div class="week-days">
+                        <div>الأحد</div>
+                        <div>الإثنين</div>
+                        <div>الثلاثاء</div>
+                        <div>الأربعاء</div>
+                        <div>الخميس</div>
+                        <div>الجمعة</div>
+                        <div>السبت</div>
+                    </div>
+                    
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- سيتم توليد الأيام هنا -->
+                    </div>
+                    
+                    <div class="calendar-events">
+                        <h4><i class="fas fa-calendar-day"></i> أحداث اليوم</h4>
+                        <div id="todayEvents">
+                            <div class="empty-state">
+                                <i class="far fa-calendar"></i>
+                                <p>لا توجد أحداث اليوم</p>
                             </div>
-                            <div class="form-row">
-                                <select id="eventDay" class="form-control">
-                                    ${Array.from({length: 30}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
-                                </select>
-                                <select id="eventMonth" class="form-control">
-                                    ${HIJRI_MONTHS.map((month, i) => `<option value="${i}">${month}</option>`).join('')}
-                                </select>
-                                <input type="number" id="eventYear" value="1447" min="1300" max="1500" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <select id="eventType" class="form-control">
-                                    <option value="عام">عام</option>
-                                    <option value="اختبار">اختبار</option>
-                                    <option value="واجب">واجب</option>
-                                    <option value="مناسبة">مناسبة</option>
-                                    <option value="إجازة">إجازة</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <textarea id="eventDesc" placeholder="وصف الحدث (اختياري)" rows="2"></textarea>
-                            </div>
-                            <button type="submit" class="btn-submit">
-                                <i class="fas fa-save"></i> حفظ الحدث
-                            </button>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     `;
     
-    // إضافة المستمعين للأحداث
-    setupEventListeners();
-    generateCalendar();
+    generateSimpleCalendar();
+    setupCalendarListeners();
 }
 
-// توليد التقويم
-function generateCalendar() {
-    const monthDays = document.getElementById('monthDays');
-    if (!monthDays) return;
-    
-    // حساب عدد أيام الشهر الهجري
-    const daysInMonth = getHijriMonthDays(currentHijriYear, currentHijriMonth);
-    
-    // حساب أول يوم في الشهر (0 = الأحد)
-    const firstDay = getFirstDayOfMonth(currentHijriYear, currentHijriMonth);
+function generateSimpleCalendar() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
     
     // تحديث عنوان الشهر
-    updateMonthDisplay();
+    const hijriMonth = convertToHijriMonth(month);
+    document.getElementById('currentMonth').textContent = hijriMonth;
+    
+    // توليد الأيام
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDay = firstDay.getDay(); // 0 = الأحد
     
     let calendarHTML = '';
     
-    // إضافة أيام فارغة قبل بداية الشهر
-    for (let i = 0; i < firstDay; i++) {
-        calendarHTML += '<div class="day empty"></div>';
+    // أيام فارغة قبل بداية الشهر
+    for (let i = 0; i < startingDay; i++) {
+        calendarHTML += '<div class="calendar-day empty"></div>';
     }
     
-    // إضافة أيام الشهر
-    const today = getTodayHijri();
-    
+    // أيام الشهر
+    const today = now.getDate();
     for (let day = 1; day <= daysInMonth; day++) {
-        const dayEvents = getEventsForDay(day);
-        const isToday = today.year === currentHijriYear && 
-                       today.month === currentHijriMonth + 1 && 
-                       today.day === day;
+        const isToday = (day === today);
+        const hasEvent = checkIfDayHasEvent(day, month, year);
         
         calendarHTML += `
-            <div class="day ${isToday ? 'today' : ''} ${dayEvents.length > 0 ? 'has-event' : ''}" 
-                 data-day="${day}"
-                 onclick="selectDay(${day})">
-                <div class="day-header">
-                    <span class="day-number">${day}</span>
-                    ${isToday ? '<span class="today-badge">اليوم</span>' : ''}
-                </div>
-                ${dayEvents.length > 0 ? `
-                    <div class="event-indicators">
-                        ${dayEvents.slice(0, 3).map(event => `
-                            <span class="event-dot" style="background: ${getEventColor(event.type)}" 
-                                  title="${event.title}"></span>
-                        `).join('')}
-                        ${dayEvents.length > 3 ? `<span class="more-events">+${dayEvents.length - 3}</span>` : ''}
-                    </div>
-                ` : ''}
-                <div class="gregorian-date">${convertToGregorian(day)}</div>
+            <div class="calendar-day ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''}" 
+                 data-day="${day}" data-month="${month}" data-year="${year}">
+                <div class="day-number">${day}</div>
+                <div class="hijri-day">${convertToHijriDay(day, month, year)}</div>
+                ${hasEvent ? '<div class="event-dot"></div>' : ''}
             </div>
         `;
     }
     
-    // إضافة أيام فارغة بعد نهاية الشهر
-    const totalCells = 42; // 6 أسابيع × 7 أيام
-    const filledCells = firstDay + daysInMonth;
-    for (let i = filledCells; i < totalCells; i++) {
-        calendarHTML += '<div class="day empty"></div>';
-    }
-    
-    monthDays.innerHTML = calendarHTML;
-    
-    // اختيار اليوم الحالي
-    if (today.year === currentHijriYear && today.month === currentHijriMonth + 1) {
-        selectDay(today.day);
-    }
+    document.getElementById('calendarGrid').innerHTML = calendarHTML;
 }
 
-// إعداد مستمعي الأحداث
-function setupEventListeners() {
-    // التنقل بين الأشهر
+function convertToHijriMonth(gregorianMonth) {
+    const hijriMonths = [
+        'المحرم', 'صفر', 'ربيع الأول', 'ربيع الآخر',
+        'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان',
+        'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'
+    ];
+    
+    // تقريب للتحويل
+    const hijriMonthIndex = (gregorianMonth + 8) % 12;
+    return hijriMonths[hijriMonthIndex] + ' 1445';
+}
+
+function convertToHijriDay(day, month, year) {
+    // تحويل تقريبي (يمكن استبداله بمكتبة دقيقة)
+    const hijriDay = Math.floor(day * 0.97); // تحويل تقريبي
+    return hijriDay > 0 ? hijriDay : '';
+}
+
+function checkIfDayHasEvent(day, month, year) {
+    // هنا يمكنك التحقق من وجود أحداث لهذا اليوم
+    return false; // مؤقتاً
+}
+
+function setupCalendarListeners() {
     document.getElementById('prevMonth')?.addEventListener('click', () => {
-        currentHijriMonth--;
-        if (currentHijriMonth < 0) {
-            currentHijriMonth = 11;
-            currentHijriYear--;
-        }
-        generateCalendar();
+        // التنقل للشهر السابق
+        alert('سيتم تطوير التنقل بين الأشهر قريباً');
     });
     
     document.getElementById('nextMonth')?.addEventListener('click', () => {
-        currentHijriMonth++;
-        if (currentHijriMonth > 11) {
-            currentHijriMonth = 0;
-            currentHijriYear++;
-        }
-        generateCalendar();
-    });
-    
-    // التنقل بين السنين
-    document.getElementById('prevYear')?.addEventListener('click', () => {
-        currentHijriYear--;
-        generateCalendar();
-    });
-    
-    document.getElementById('nextYear')?.addEventListener('click', () => {
-        currentHijriYear++;
-        generateCalendar();
-    });
-    
-    // العودة لليوم
-    document.getElementById('goToday')?.addEventListener('click', () => {
-        const today = getTodayHijri();
-        currentHijriYear = today.year;
-        currentHijriMonth = today.month - 1;
-        generateCalendar();
-    });
-    
-    // إضافة حدث سريع
-    document.getElementById('addQuickEvent')?.addEventListener('click', () => {
-        const today = getTodayHijri();
-        document.getElementById('eventDay').value = today.day;
-        document.getElementById('eventMonth').value = today.month - 1;
-        document.getElementById('eventYear').value = today.year;
-        document.getElementById('eventTitle').focus();
-    });
-    
-    // نموذج إضافة حدث
-    document.getElementById('eventForm')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        addNewEvent();
+        // التنقل للشهر التالي
+        alert('سيتم تطوير التنقل بين الأشهر قريباً');
     });
 }
 
-// تحديث عرض الشهر والسنة
-function updateMonthDisplay() {
-    const display = document.getElementById('monthYearDisplay');
-    if (display) {
-        display.textContent = `${HIJRI_MONTHS[currentHijriMonth]} ${currentHijriYear} هـ`;
-    }
+// ===============================
+// قسم الرسائل المشتركة
+// ===============================
+async function loadMessages() {
+    const messagesPage = document.getElementById('messages');
+    if (!messagesPage) return;
     
-    const todayDisplay = document.getElementById('todayDisplay');
-    if (todayDisplay) {
-        const today = getTodayHijri();
-        todayDisplay.innerHTML = `
-            <i class="fas fa-star-and-crescent"></i>
-            اليوم: ${today.day} ${HIJRI_MONTHS[today.month - 1]} ${today.year} هـ
-        `;
-    }
-}
-
-// اختيار يوم
-window.selectDay = function(day) {
-    // إزالة التحديد من جميع الأيام
-    document.querySelectorAll('.day').forEach(d => d.classList.remove('selected'));
-    
-    // إضافة التحديد لليوم المختار
-    const selectedDay = document.querySelector(`.day[data-day="${day}"]:not(.empty)`);
-    if (selectedDay) {
-        selectedDay.classList.add('selected');
-        displayEventsForDay(day);
-    }
-};
-
-// عرض أحداث يوم معين
-function displayEventsForDay(day) {
-    const eventsList = document.getElementById('eventsList');
-    const eventsCount = document.getElementById('eventsCount');
-    const dayEvents = getEventsForDay(day);
-    
-    if (!eventsList || !eventsCount) return;
-    
-    if (dayEvents.length === 0) {
-        eventsList.innerHTML = `
-            <div class="empty-events">
-                <i class="far fa-calendar-times"></i>
-                <p>لا توجد أحداث ليوم ${day}</p>
-                <button onclick="addEventForDay(${day})" class="btn-add">
-                    <i class="fas fa-plus"></i> إضافة حدث لهذا اليوم
-                </button>
-            </div>
-        `;
-        eventsCount.textContent = '0 حدث';
-    } else {
-        eventsList.innerHTML = dayEvents.map(event => `
-            <div class="event-item" style="border-left-color: ${getEventColor(event.type)}">
-                <div class="event-header">
-                    <h5>${event.title}</h5>
-                    <span class="event-type">${event.type}</span>
-                </div>
-                ${event.description ? `<p class="event-desc">${event.description}</p>` : ''}
-                <div class="event-footer">
-                    <span><i class="fas fa-user"></i> ${event.addedBy || 'مستخدم'}</span>
-                    <span><i class="fas fa-clock"></i> ${formatTime(event.createdAt)}</span>
-                    <button onclick="deleteEvent('${event.id}')" class="btn-delete">
-                        <i class="fas fa-trash"></i>
+    messagesPage.innerHTML = `
+        <div class="messages-container">
+            <div class="message-form-container">
+                <h2><i class="fas fa-comment-dots"></i> إرسال رسالة جديدة</h2>
+                <form id="send-message-form">
+                    <div class="message-input-group">
+                        <select id="message-type" class="form-control">
+                            <option value="عام">رسالة عامة</option>
+                            <option value="تنبيه">تنبيه</option>
+                            <option value="هام">هام</option>
+                            <option value="استفسار">استفسار</option>
+                        </select>
+                        <input type="text" id="message-title" placeholder="عنوان الرسالة" required>
+                    </div>
+                    <textarea id="message-content" class="message-textarea" placeholder="اكتب رسالتك هنا..." required></textarea>
+                    <button type="submit" class="send-message-btn">
+                        <i class="fas fa-paper-plane"></i> إرسال للجميع
                     </button>
+                </form>
+            </div>
+            
+            <div class="messages-list">
+                <div class="messages-header">
+                    <h3><i class="fas fa-comments"></i> الرسائل المشتركة</h3>
+                    <span class="badge" id="messages-count">0 رسالة</span>
+                </div>
+                <div id="messages-list-container">
+                    <div class="no-messages">
+                        <i class="far fa-comments"></i>
+                        <p>لا توجد رسائل بعد</p>
+                    </div>
                 </div>
             </div>
-        `).join('');
-        eventsCount.textContent = `${dayEvents.length} حدث`;
-    }
+        </div>
+    `;
     
-    // تحديث نموذج الإضافة
-    document.getElementById('eventDay').value = day;
-    document.getElementById('eventMonth').value = currentHijriMonth;
-    document.getElementById('eventYear').value = currentHijriYear;
+    document.getElementById('send-message-form').addEventListener('submit', sendMessage);
+    loadAllMessages();
 }
 
-// إضافة حدث ليوم معين
-window.addEventForDay = function(day) {
-    document.getElementById('eventDay').value = day;
-    document.getElementById('eventMonth').value = currentHijriMonth;
-    document.getElementById('eventYear').value = currentHijriYear;
-    document.getElementById('eventTitle').focus();
-};
-
-// إضافة حدث جديد
-function addNewEvent() {
-    const title = document.getElementById('eventTitle').value.trim();
-    const day = parseInt(document.getElementById('eventDay').value);
-    const month = parseInt(document.getElementById('eventMonth').value);
-    const year = parseInt(document.getElementById('eventYear').value);
-    const type = document.getElementById('eventType').value;
-    const description = document.getElementById('eventDesc').value.trim();
+async function loadAllMessages() {
+    if (!userId || !database) return;
     
-    if (!title) {
-        alert('الرجاء إدخال عنوان الحدث');
+    const messagesRef = ref(database, `classes/${classId}/messages`);
+    
+    onValue(messagesRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        const messages = Object.entries(data).map(([key, value]) => ({
+            id: key,
+            ...value
+        }));
+        
+        renderMessages(messages);
+    });
+}
+
+function renderMessages(messages) {
+    const messagesList = document.getElementById('messages-list-container');
+    const messagesCount = document.getElementById('messages-count');
+    
+    if (!messagesList || !messagesCount) return;
+    
+    const sortedMessages = messages.sort((a, b) => 
+        new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    
+    messagesCount.textContent = `${sortedMessages.length} رسالة`;
+    
+    if (sortedMessages.length === 0) {
+        messagesList.innerHTML = `
+            <div class="no-messages">
+                <i class="far fa-comments"></i>
+                <p>لا توجد رسائل بعد</p>
+            </div>`;
+    } else {
+        messagesList.innerHTML = sortedMessages.map(message => {
+            const isOwner = message.senderId === userId;
+            const messageTime = formatDateTime(message.createdAt);
+            const senderInitials = message.senderName?.substring(0, 2) || 'م';
+            
+            return `
+                <div class="message-item" data-id="${message.id}">
+                    <div class="message-header">
+                        <div class="message-sender">
+                            <div class="sender-avatar">
+                                ${senderInitials}
+                            </div>
+                            <div class="sender-info">
+                                <h4>${message.senderName || 'مستخدم'}</h4>
+                                <small>
+                                    <span class="message-type">${message.type || 'عام'}</span>
+                                    ${isOwner ? '<span class="role-badge admin">أنت</span>' : ''}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="message-time">
+                            <i class="far fa-clock"></i>
+                            <span>${messageTime}</span>
+                        </div>
+                    </div>
+                    <div class="message-content">
+                        <h5 style="margin-bottom: 10px; color: var(--primary);">${message.title || 'بدون عنوان'}</h5>
+                        <p>${message.content}</p>
+                    </div>
+                    ${isOwner ? `
+                        <div class="message-actions">
+                            <button class="delete-message-btn" onclick="deleteMessage('${message.id}')">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+async function sendMessage(e) {
+    e.preventDefault();
+    
+    if (!userId || !database) {
+        showNotificationPopup("خطأ", "يرجى تسجيل الدخول أولاً", "error", 3000);
         return;
     }
     
-    const eventId = Date.now().toString();
-    const newEvent = {
-        id: eventId,
-        title,
-        hijriDate: `${year}-${month + 1}-${day}`,
-        type,
-        description,
-        addedBy: userNickname || 'مستخدم',
-        addedById: userId,
-        createdAt: new Date().toISOString()
-    };
+    const title = document.getElementById('message-title').value.trim();
+    const content = document.getElementById('message-content').value.trim();
+    const type = document.getElementById('message-type').value;
     
-    events.push(newEvent);
-    
-    // حفظ في localStorage (مؤقت)
-    saveEventsToStorage();
-    
-    // إعادة توليد التقويم
-    generateCalendar();
-    
-    // عرض الأحداث لليوم
-    selectDay(day);
-    
-    // إعادة تعيين النموذج
-    document.getElementById('eventForm').reset();
-    document.getElementById('eventDay').value = day;
-    document.getElementById('eventMonth').value = month;
-    document.getElementById('eventYear').value = year;
-    
-    // رسالة نجاح
-    showMessage('تم إضافة الحدث بنجاح', 'success');
-}
-
-// حذف حدث
-window.deleteEvent = function(eventId) {
-    if (!confirm('هل أنت متأكد من حذف هذا الحدث؟')) return;
-    
-    events = events.filter(event => event.id !== eventId);
-    saveEventsToStorage();
-    generateCalendar();
-    
-    const selectedDay = document.querySelector('.day.selected')?.dataset.day;
-    if (selectedDay) {
-        displayEventsForDay(parseInt(selectedDay));
+    if (!title || !content) {
+        showNotificationPopup("خطأ", "يرجى ملء جميع الحقول المطلوبة", "error", 3000);
+        return;
     }
     
-    showMessage('تم حذف الحدث', 'success');
+    if (content.length > 1000) {
+        showNotificationPopup("خطأ", "الرسالة طويلة جداً (الحد الأقصى 1000 حرف)", "error", 3000);
+        return;
+    }
+    
+    try {
+        const messagesRef = ref(database, `classes/${classId}/messages`);
+        const newMessageRef = push(messagesRef);
+        const messageId = newMessageRef.key;
+        
+        await set(newMessageRef, {
+            id: messageId,
+            title,
+            content,
+            type,
+            senderId: userId,
+            senderName: userNickname || userName || 'مستخدم',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        });
+        
+        await addNotification({
+            title: 'رسالة جديدة',
+            message: `"${title}" - ${userNickname || 'مستخدم'}`,
+            type: 'info',
+            sender: userNickname || 'مستخدم',
+            senderId: userId,
+            action: 'create',
+            messageId: messageId
+        });
+        
+        e.target.reset();
+        
+        showNotificationPopup("تم الإرسال", "تم إرسال رسالتك للجميع", "success", 3000);
+        
+    } catch (error) {
+        console.error("❌ خطأ في إرسال الرسالة:", error);
+        showNotificationPopup("خطأ", "تعذر إرسال الرسالة", "error", 3000);
+    }
+}
+
+window.deleteMessage = async function(messageId) {
+    if (!confirm('هل أنت متأكد من حذف هذه الرسالة؟ سيتم حذفها للجميع.')) {
+        return;
+    }
+    
+    try {
+        const messageRef = ref(database, `classes/${classId}/messages/${messageId}`);
+        const messageSnapshot = await get(messageRef);
+        
+        if (!messageSnapshot.exists()) {
+            showNotificationPopup("خطأ", "الرسالة غير موجودة", "error", 3000);
+            return;
+        }
+        
+        const message = messageSnapshot.val();
+        
+        if (message.senderId !== userId) {
+            showNotificationPopup("خطأ", "لا يمكنك حذف رسالة لم تقم بإرسالها", "error", 3000);
+            return;
+        }
+        
+        await remove(messageRef);
+        
+        await addNotification({
+            title: 'تم حذف رسالة',
+            message: `تم حذف رسالة: "${message.title}"`,
+            type: 'warning',
+            sender: userNickname || 'مستخدم',
+            senderId: userId,
+            action: 'delete',
+            messageId: messageId
+        });
+        
+        showNotificationPopup("تم الحذف", "تم حذف الرسالة", "success", 3000);
+        
+    } catch (error) {
+        console.error("❌ خطأ في حذف الرسالة:", error);
+        showNotificationPopup("خطأ", "تعذر حذف الرسالة", "error", 3000);
+    }
 };
 
-// الحصول على أحداث يوم معين
-function getEventsForDay(day) {
-    return events.filter(event => {
-        const [year, month, eventDay] = event.hijriDate.split('-').map(Number);
-        return year === currentHijriYear && 
-               month === currentHijriMonth + 1 && 
-               eventDay === day;
-    });
-}
-
-// الحصول على لون الحدث
-function getEventColor(type) {
-    const colors = {
-        'اختبار': '#f44336',
-        'واجب': '#2196f3',
-        'مناسبة': '#9c27b0',
-        'إجازة': '#4caf50',
-        'اجتماع': '#ff9800',
-        'عام': '#607d8b'
-    };
-    return colors[type] || '#607d8b';
-}
-
 // ===============================
-// دوال التقويم الهجري
+// قسم الإدارة - للمشرفين فقط
 // ===============================
-
-// الحصول على التاريخ الهجري الحالي
-function getTodayHijri() {
-    const today = new Date();
-    
-    // حساب تقريبي (يمكن استبداله بمكتبة دقيقة)
-    // 1 محرم 1447 هـ = 19 يوليو 2025 م
-    const referenceDate = new Date(2025, 6, 19); // 19 يوليو 2025
-    const diffDays = Math.floor((today - referenceDate) / (1000 * 60 * 60 * 24));
-    
-    // حساب التقريبي للهجري (354 يوم في السنة)
-    let hijriDays = 1 + diffDays; // بدأنا من اليوم الأول
-    let hijriYear = 1447;
-    let hijriMonth = 1;
-    let hijriDay = 1;
-    
-    while (hijriDays > 0) {
-        const daysInYear = isHijriLeapYear(hijriYear) ? 355 : 354;
-        
-        if (hijriDays > daysInYear) {
-            hijriDays -= daysInYear;
-            hijriYear++;
-        } else {
-            // حساب الشهر
-            for (let month = 1; month <= 12; month++) {
-                const daysInMonth = getHijriMonthDays(hijriYear, month - 1);
-                if (hijriDays > daysInMonth) {
-                    hijriDays -= daysInMonth;
-                    hijriMonth++;
-                } else {
-                    hijriDay = hijriDays;
-                    hijriDays = 0;
-                    break;
-                }
-            }
+async function loadAdminPanel() {
+    // التحقق من الصلاحيات
+    if (userRole !== 'admin') {
+        const adminPage = document.getElementById('admin');
+        if (adminPage) {
+            adminPage.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-user-shield"></i> لوحة الإدارة</h2>
+                        <span class="badge danger">صلاحيات مشرف</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="empty-state" style="padding: 50px;">
+                            <i class="fas fa-lock"></i>
+                            <h3 style="color: #dc3545; margin-top: 20px;">غير مصرح بالدخول</h3>
+                            <p>ليس لديك صلاحيات للوصول إلى هذا القسم</p>
+                            <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+                                صلاحيات الدخول مخصصة للمشرفين فقط
+                            </p>
+                            ${userEmail ? `<p style="font-size: 0.8rem; color: #888;">الحساب الحالي: ${userEmail}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
         }
+        return;
     }
     
-    return {
-        year: hijriYear,
-        month: hijriMonth,
-        day: hijriDay
-    };
-}
-
-// التحقق من السنة الكبيسة
-function isHijriLeapYear(year) {
-    // السنة الكبيسة في التقويم الهجري تأتي كل 2-3 سنوات
-    const cycle = year % 30;
-    const leapYears = [2, 5, 7, 10, 13, 16, 18, 21, 24, 26, 29];
-    return leapYears.includes(cycle);
-}
-
-// الحصول على عدد أيام الشهر الهجري
-function getHijriMonthDays(year, month) {
-    // الأشهر الفردية (1,3,5,7,9,11) عادة 30 يوم
-    // الأشهر الزوجية (2,4,6,8,10) عادة 29 يوم
-    // ذو الحجة (12) 30 يوم في السنة الكبيسة، وإلا 29
+    const adminPage = document.getElementById('admin');
+    if (!adminPage) return;
     
-    const monthNum = month + 1;
-    
-    if (monthNum === 12) { // ذو الحجة
-        return isHijriLeapYear(year) ? 30 : 29;
-    }
-    
-    return (monthNum % 2 === 1) ? 30 : 29;
-}
-
-// الحصول على أول يوم في الشهر
-function getFirstDayOfMonth(year, month) {
-    // حساب تقريبي
-    const today = new Date();
-    const hijriToday = getTodayHijri();
-    
-    if (year === hijriToday.year && month === hijriToday.month - 1) {
-        const dayOfWeek = today.getDay(); // 0 = الأحد
-        const firstDay = (dayOfWeek - (hijriToday.day - 1)) % 7;
-        return firstDay >= 0 ? firstDay : firstDay + 7;
-    }
-    
-    // حساب تقريبي لأشهر أخرى
-    const daysSince = Math.floor((year - 1) * 354.367 + month * 29.53);
-    return (daysSince + 5) % 7; // 5 لأن الهجرة كانت يوم الخميس
-}
-
-// تحويل التاريخ الهجري إلى ميلادي (تقريبي)
-function convertToGregorian(hijriDay) {
-    // حساب تقريبي
-    const referenceDate = new Date(2025, 6, 19); // 1 محرم 1447
-    
-    // حساب إجمالي الأيام من 1 محرم 1447
-    let totalDays = 0;
-    for (let month = 0; month < currentHijriMonth; month++) {
-        totalDays += getHijriMonthDays(currentHijriYear, month);
-    }
-    totalDays += (hijriDay - 1);
-    
-    // إضافة الأيام للتاريخ المرجعي
-    const gregorianDate = new Date(referenceDate);
-    gregorianDate.setDate(referenceDate.getDate() + totalDays);
-    
-    return `${gregorianDate.getDate()}/${gregorianDate.getMonth() + 1}`;
-}
-
-// تعيين التاريخ الهجري الحالي
-function setCurrentHijriDate() {
-    const today = getTodayHijri();
-    currentHijriYear = today.year;
-    currentHijriMonth = today.month - 1;
-}
-
-// ===============================
-// دوال التخزين والمساعدة
-// ===============================
-
-// تحميل البيانات
-function loadCalendarData() {
-    // تحميل من localStorage (مؤقت)
-    const savedEvents = localStorage.getItem(`hijri_events_${classId}`);
-    if (savedEvents) {
-        events = JSON.parse(savedEvents);
-    }
-    
-    // إذا كان هناك eventsRef من Firebase، استخدمه
-    if (typeof eventsRef !== 'undefined') {
-        // كود تحميل من Firebase
-    }
-}
-
-// حفظ الأحداث
-function saveEventsToStorage() {
-    localStorage.setItem(`hijri_events_${classId}`, JSON.stringify(events));
-}
-
-// تنسيق الوقت
-function formatTime(isoString) {
-    const date = new Date(isoString);
-    return date.toLocaleTimeString('ar-SA', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-// عرض رسالة
-function showMessage(message, type = 'info') {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${type}`;
-    messageDiv.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
-        ${message}
+    adminPage.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-user-shield"></i> لوحة الإدارة</h2>
+                <span class="badge danger">صلاحيات مشرف</span>
+                ${userEmail === "hussainasari012@gmail.com" ? 
+                    '<span class="badge" style="background: #ffc107; color: #000; margin-right: 10px;">👑 المشرف الرئيسي</span>' : 
+                    ''}
+            </div>
+            <div class="card-body">
+                <div class="admin-stats">
+                    <h3><i class="fas fa-chart-bar"></i> إحصائيات النظام</h3>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <i class="fas fa-tasks"></i>
+                            <div class="stat-content">
+                                <h4 id="total-assignments">0</h4>
+                                <p>واجبات</p>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <i class="fas fa-clipboard-list"></i>
+                            <div class="stat-content">
+                                <h4 id="total-exams">0</h4>
+                                <p>اختبارات</p>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <i class="fas fa-calendar-alt"></i>
+                            <div class="stat-content">
+                                <h4 id="total-events">0</h4>
+                                <p>أحداث</p>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <i class="fas fa-users"></i>
+                            <div class="stat-content">
+                                <h4 id="total-members">0</h4>
+                                <p>أعضاء</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-actions">
+                    <div class="danger-zone">
+                        <h3><i class="fas fa-exclamation-triangle"></i> منطقة الخطر</h3>
+                        <p style="color: #666; margin-bottom: 20px;">
+                            هذه الإجراءات غير قابلة للاسترجاع وتؤثر على جميع المستخدمين
+                        </p>
+                        
+                        <div class="danger-actions">
+                            <button class="danger-btn" onclick="deleteAllAssignments()">
+                                <i class="fas fa-tasks"></i> حذف جميع الواجبات
+                            </button>
+                            <button class="danger-btn" onclick="deleteAllExams()">
+                                <i class="fas fa-clipboard-list"></i> حذف جميع الاختبارات
+                            </button>
+                            <button class="danger-btn" onclick="deleteAllMessages()">
+                                <i class="fas fa-comments"></i> حذف جميع الرسائل
+                            </button>
+                            <button class="danger-btn warning" onclick="deleteAllNotifications()">
+                                <i class="fas fa-bell-slash"></i> حذف جميع الإشعارات
+                            </button>
+                            <button class="danger-btn" onclick="resetSchedule()">
+                                <i class="fas fa-calendar-alt"></i> إعادة تعيين الجدول
+                            </button>
+                        </div>
+                        
+                        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+                            <h4 style="color: #dc3545;"><i class="fas fa-skull-crossbones"></i> منطقة التدمير الكامل</h4>
+                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">
+                                تحذير: هذه العملية ستحذف كل شيء في النظام ولا يمكن استعادته
+                            </p>
+                            <button class="danger-btn" onclick="deleteEverything()" style="background: #343a40;">
+                                <i class="fas fa-trash-alt"></i> حذف كل شيء في النظام
+                            </button>
+                        </div>
+                    </div>
+                    
+                    ${userEmail === "hussainasari012@gmail.com" ? `
+                        <div style="margin-top: 30px; padding: 20px; background: #e8f5e8; border-radius: 10px; border: 2px solid #28a745;">
+                            <h3 style="color: #28a745;"><i class="fas fa-crown"></i> صلاحيات المشرف الرئيسي</h3>
+                            <p style="color: #666;">أنت تمتلك صلاحيات كاملة في النظام كمشرف رئيسي.</p>
+                            <button onclick="addNewAdmin()" class="btn btn-success mt-2">
+                                <i class="fas fa-user-plus"></i> إضافة مشرف جديد
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
     `;
     
-    document.body.appendChild(messageDiv);
+    await loadAdminStats();
+}
+
+async function loadAdminStats() {
+    if (!userId || !database || userRole !== 'admin') return;
     
-    setTimeout(() => {
-        messageDiv.remove();
-    }, 3000);
-}
-
-// ===============================
-// CSS المطلوب
-// ===============================
-const calendarCSS = `
-.calendar-container {
-    padding: 20px;
-    background: #f8f9fa;
-    min-height: 100vh;
-}
-
-.calendar-header {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.month-navigation {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 15px;
-}
-
-.current-month {
-    text-align: center;
-    flex-grow: 1;
-}
-
-.current-month h2 {
-    color: #2c3e50;
-    margin: 0;
-}
-
-.hijri-today {
-    color: #7f8c8d;
-    font-size: 0.9rem;
-    margin-top: 5px;
-}
-
-.nav-btn {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s;
-    color: #495057;
-}
-
-.nav-btn:hover {
-    background: #e9ecef;
-    border-color: #ced4da;
-}
-
-.calendar-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-}
-
-.btn-action {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s;
-    background: #6c757d;
-    color: white;
-}
-
-.btn-action.primary {
-    background: #007bff;
-}
-
-.btn-action:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-}
-
-.calendar-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 20px;
-}
-
-@media (max-width: 992px) {
-    .calendar-wrapper {
-        grid-template-columns: 1fr;
+    try {
+        const assignmentsRef = ref(database, `classes/${classId}/assignments`);
+        const examsRef = ref(database, `classes/${classId}/exams`);
+        const membersRef = ref(database, `classes/${classId}/members`);
+        const messagesRef = ref(database, `classes/${classId}/messages`);
+        
+        const [assignmentsSnapshot, examsSnapshot, membersSnapshot, messagesSnapshot] = await Promise.all([
+            get(assignmentsRef),
+            get(examsRef),
+            get(membersRef),
+            get(messagesRef)
+        ]);
+        
+        const totalAssignments = Object.keys(assignmentsSnapshot.val() || {}).length;
+        const totalExams = Object.keys(examsSnapshot.val() || {}).length;
+        const totalMembers = Object.keys(membersSnapshot.val() || {}).length;
+        const totalMessages = Object.keys(messagesSnapshot.val() || {}).length;
+        
+        document.getElementById('total-assignments').textContent = totalAssignments;
+        document.getElementById('total-exams').textContent = totalExams;
+        document.getElementById('total-members').textContent = totalMembers;
+        
+    } catch (error) {
+        console.error("❌ خطأ في تحميل إحصائيات الإدارة:", error);
     }
 }
 
-.calendar-main {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.week-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
-    margin-bottom: 10px;
-}
-
-.week-day {
-    text-align: center;
-    padding: 10px;
-    font-weight: bold;
-    color: #495057;
-    background: #f8f9fa;
-    border-radius: 5px;
-}
-
-.week-day.friday {
-    background: #d4edda;
-    color: #155724;
-}
-
-.month-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
-}
-
-.day {
-    background: white;
-    border: 1px solid #e9ecef;
-    border-radius: 5px;
-    padding: 10px;
-    min-height: 100px;
-    cursor: pointer;
-    transition: all 0.3s;
-    position: relative;
-}
-
-.day:hover {
-    background: #f8f9fa;
-    border-color: #007bff;
-}
-
-.day.today {
-    background: #e3f2fd;
-    border-color: #2196f3;
-}
-
-.day.has-event {
-    background: #f1f8e9;
-}
-
-.day.selected {
-    background: #fff3e0;
-    border-color: #ff9800;
-}
-
-.day.empty {
-    background: #f8f9fa;
-    cursor: default;
-}
-
-.day-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.day-number {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #2c3e50;
-}
-
-.today-badge {
-    background: #2196f3;
-    color: white;
-    font-size: 0.7rem;
-    padding: 2px 6px;
-    border-radius: 3px;
-}
-
-.event-indicators {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 3px;
-    margin: 5px 0;
-}
-
-.event-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.more-events {
-    font-size: 0.7rem;
-    color: #6c757d;
-}
-
-.gregorian-date {
-    position: absolute;
-    bottom: 5px;
-    left: 5px;
-    font-size: 0.7rem;
-    color: #6c757d;
-}
-
-.events-sidebar {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.events-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #f8f9fa;
-}
-
-.events-header h3 {
-    margin: 0;
-    color: #2c3e50;
-}
-
-.badge {
-    background: #007bff;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-}
-
-.events-list {
-    max-height: 300px;
-    overflow-y: auto;
-    margin-bottom: 20px;
-}
-
-.empty-events {
-    text-align: center;
-    padding: 40px 20px;
-    color: #6c757d;
-}
-
-.empty-events i {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    color: #dee2e6;
-}
-
-.btn-add {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 15px;
-}
-
-.event-item {
-    background: #f8f9fa;
-    border-radius: 5px;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-left: 4px solid #007bff;
-}
-
-.event-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-}
-
-.event-header h5 {
-    margin: 0;
-    color: #2c3e50;
-    flex: 1;
-}
-
-.event-type {
-    background: #e9ecef;
-    color: #495057;
-    padding: 3px 8px;
-    border-radius: 3px;
-    font-size: 0.8rem;
-}
-
-.event-desc {
-    color: #6c757d;
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-}
-
-.event-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.8rem;
-    color: #6c757d;
-}
-
-.btn-delete {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 3px 8px;
-    border-radius: 3px;
-    cursor: pointer;
-}
-
-.add-event-form {
-    border-top: 2px solid #f8f9fa;
-    padding-top: 20px;
-}
-
-.add-event-form h4 {
-    color: #2c3e50;
-    margin-bottom: 15px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.form-control {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    font-size: 0.9rem;
-}
-
-input, select, textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    box-sizing: border-box;
-}
-
-textarea {
-    resize: vertical;
-    min-height: 60px;
-}
-
-.btn-submit {
-    width: 100%;
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.3s;
-}
-
-.btn-submit:hover {
-    background: #0056b3;
-}
-
-.message {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: white;
-    padding: 15px 20px;
-    border-radius: 5px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    z-index: 1000;
-}
-
-.message.success {
-    border-left: 4px solid #28a745;
-    color: #155724;
-    background: #d4edda;
-}
-
-.message.error {
-    border-left: 4px solid #dc3545;
-    color: #721c24;
-    background: #f8d7da;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.message {
-    animation: fadeIn 0.3s ease;
-}
-`;
-
-// إضافة الأنماط
-if (!document.querySelector('#hijri-calendar-css')) {
-    const style = document.createElement('style');
-    style.id = 'hijri-calendar-css';
-    style.textContent = calendarCSS;
-    document.head.appendChild(style);
-}
-
 // ===============================
-// التصدير والتهيئة
+// دوال الحذف للإدارة
 // ===============================
-window.initializeCalendar = initializeCalendar;
-window.getTodayHijri = getTodayHijri;
-
-// تهيئة تلقائية عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('calendar')) {
-        initializeCalendar();
+window.deleteAllAssignments = async function() {
+    if (userRole !== 'admin') {
+        showNotificationPopup("خطأ", "ليس لديك صلاحية للقيام بهذا الإجراء", "error", 3000);
+        return;
     }
-});
+    
+    if (!confirm('⚠️ تحذير!\nهل أنت متأكد من حذف جميع الواجبات؟\nسيتم حذفها لجميع المستخدمين ولا يمكن استعادتها.')) {
+        return;
+    }
+    
+    try {
+        const assignmentsRef = ref(database, `classes/${classId}/assignments`);
+        await remove(assignmentsRef);
+        
+        await addNotification({
+            title: 'حذف شامل',
+            message: `تم حذف جميع الواجبات بواسطة ${userNickname}`,
+            type: 'warning',
+            sender: userNickname || 'المشرف',
+            senderId: userId,
+            action: 'delete_all'
+        });
+        
+        showNotificationPopup("تم الحذف", "تم حذف جميع الواجبات بنجاح", "success", 3000);
+        
+        loadAdminStats();
+        
+    } catch (error) {
+        console.error("❌ خطأ في حذف جميع الواجبات:", error);
+        showNotificationPopup("خطأ", "تعذر حذف الواجبات", "error", 3000);
+    }
+};
+
+window.deleteAllExams = async function() {
+    if (userRole !== 'admin') {
+        showNotificationPopup("خطأ", "ليس لديك صلاحية للقيام بهذا الإجراء", "error", 3000);
+        return;
+    }
+    
+    if (!confirm('⚠️ تحذير!\nهل أنت متأكد من حذف جميع الاختبارات؟\nسيتم حذفها لجميع المستخدمين ولا يمكن استعادتها.')) {
+        return;
+    }
+    
+    try {
+        const examsRef = ref(database, `classes/${classId}/exams`);
+        await remove(examsRef);
+        
+        await addNotification({
+            title: 'حذف شامل',
+            message: `تم حذف جميع الاختبارات بواسطة ${userNickname}`,
+            type: 'warning',
+            sender: userNickname || 'المشرف',
+            senderId: userId,
+            action: 'delete_all'
+        });
+        
+        showNotificationPopup("تم الحذف", "تم حذف جميع الاختبارات بنجاح", "success", 3000);
+        
+        loadAdminStats();
+        
+    } catch (error) {
+        console.error("❌ خطأ في حذف جميع الاختبارات:", error);
+        showNotificationPopup("خطأ", "تعذر حذف الاختبارات", "error", 3000);
+    }
+};
+
+window.deleteAllMessages = async function() {
+    if (userRole !== 'admin') {
+        showNotificationPopup("خطأ", "ليس لديك صلاحية للقيام بهذا الإجراء", "error", 3000);
+        return;
+    }
+    
+    if (!confirm('⚠️ تحذير!\nهل أنت متأكد من حذف جميع الرسائل؟\nسيتم حذفها لجميع المستخدمين ولا يمكن استعادتها.')) {
+        return;
+    }
+    
+    try {
+        const messagesRef = ref(database, `classes/${classId}/messages`);
+        await remove(messagesRef);
+        
+        await addNotification({
+            title: 'حذف شامل',
+            message: `تم حذف جميع الرسائل بواسطة ${userNickname}`,
+            type: 'warning',
+            sender: userNickname || 'المشرف',
+            senderId: userId,
+            action: 'delete_all'
+        });
+        
+        showNotificationPopup("تم الحذف", "تم حذف جميع الرسائل بنجاح", "success", 3000);
+        
+        loadAdminStats();
+        
+    } catch (error) {
+        console.error("❌ خطأ في حذف جميع الرسائل:", error);
+        showNotificationPopup("خطأ", "تعذر حذف الرسائل", "error", 3000);
+    }
+};
+
+window.deleteAllNotifications = async function() {
+    if (userRole !== 'admin') {
+        showNotificationPopup("خطأ", "ليس لديك صلاحية للقيام بهذا الإجراء", "error", 3000);
+        return;
+    }
+    
+    if (!confirm('⚠️ تحذير!\nهل أنت متأكد من حذف جميع الإشعارات؟\nسيتم حذفها لجميع المستخدمين ولا يمكن استعادتها.')) {
+        return;
+    }
+    
+    try {
+        const notificationsRef = ref(database, `classes/${classId}/notifications`);
+        await remove(notificationsRef);
+        
+        showNotificationPopup("تم الحذف", "تم حذف جميع الإشعارات بنجاح", "success", 3000);
+        
+    } catch (error) {
+        console.error("❌ خطأ في حذف جميع الإشعارات:", error);
+        showNotificationPopup("خطأ", "تعذر حذف الإشعارات", "error", 3000);
+    }
+};
+
+window.resetSchedule = async function() {
+    if (userRole !== 'admin') {
+        showNotificationPopup("خطأ", "ليس لديك صلاحية للقيام بهذا الإجراء", "error", 3000);
+        return;
+    }
+    
+    if (!confirm('⚠️ تحذير!\nهل أنت متأكد من إعادة تعيين الجدول الدراسي؟\nسيتم استعادة الجدول الافتراضي لجميع المستخدمين.')) {
+        return;
+    }
+    
+    try {
+        const scheduleRef = ref(database, `classes/${classId}/schedule`);
+        const defaultSchedule = getDefaultSchedule();
+        
+        await set(scheduleRef, defaultSchedule);
+        
+        await addNotification({
+            title: 'إعادة تعيين الجدول',
+            message: `تم إعادة تعيين الجدول الدراسي بواسطة ${userNickname}`,
+            type: 'info',
+            sender: userNickname || 'المشرف',
+            senderId: userId,
+            action: 'reset'
+        });
+        
+        showNotificationPopup("تم التعديل", "تم إعادة تعيين الجدول الدراسي", "success", 3000);
+        
+    } catch (error) {
+        console.error("❌ خطأ في إعادة تعيين الجدول:", error);
+        showNotificationPopup("خطأ", "تعذر إعادة تعيين الجدول", "error", 3000);
+    }
+};
+
+window.deleteEverything = async function() {
+    if (userRole !== 'admin') {
+        showNotificationPopup("خطأ", "ليس لديك صلاحية للقيام بهذا الإجراء", "error", 3000);
+        return;
+    }
+    
+    const confirmation1 = confirm('☠️ تحذير خطير للغاية!\n\nأنت على وشك حذف كل شيء في النظام.\nهذا الإجراء غير قابل للاسترجاع!\n\nهل أنت متأكد تماماً؟');
+    
+    if (!confirmation1) return;
+    
+    const confirmation2 = confirm('⚠️ تحذير أخير!\n\nسيتم حذف:\n• جميع الواجبات\n• جميع الاختبارات\n• جميع الرسائل\n• جميع الإشعارات\n• جميع البيانات المشتركة\n\nاكتب "نعم أحذف" للتأكيد النهائي:');
+    
+    if (confirmation2) {
+        const finalConfirmation = prompt('❌ للتأكيد النهائي، اكتب: "أنا أتحمل مسؤولية حذف كل شيء"');
+        
+        if (finalConfirmation === 'أنا أتحمل مسؤولية حذف كل شيء') {
+            try {
+                const classRef = ref(database, `classes/${classId}`);
+                
+                // حفظ بيانات الأعضاء فقط
+                const classSnapshot = await get(classRef);
+                const classData = classSnapshot.val() || {};
+                const members = classData.members || {};
+                const memberCount = classData.memberCount || 0;
+                
+                // حذف كل شيء وإعادة إنشاء الهيكل الأساسي
+                await remove(classRef);
+                
+                // إعادة إنشاء الهيكل الأساسي مع الأعضاء
+                await set(classRef, {
+                    name: 'شعبة 306',
+                    description: 'الصف الدراسي المشترك لشعبة 306',
+                    created: new Date().toISOString(),
+                    members: members,
+                    memberCount: memberCount,
+                    activeUsers: { [userId]: new Date().toISOString() },
+                    lastReset: new Date().toISOString(),
+                    resetBy: userNickname || 'المشرف',
+                    resetById: userId
+                });
+                
+                // إعادة إنشاء الهياكل الفرعية الفارغة
+                await set(ref(database, `classes/${classId}/assignments`), {});
+                await set(ref(database, `classes/${classId}/exams`), {});
+                await set(ref(database, `classes/${classId}/events`), {});
+                await set(ref(database, `classes/${classId}/notifications`), {});
+                await set(ref(database, `classes/${classId}/messages`), {});
+                await set(ref(database, `classes/${classId}/schedule`), getDefaultSchedule());
+                
+                await addNotification({
+                    title: 'إعادة تعيين كامل',
+                    message: `تم حذف كل شيء وإعادة تعيين النظام بواسطة ${userNickname}`,
+                    type: 'warning',
+                    sender: userNickname || 'المشرف',
+                    senderId: userId,
+                    action: 'reset_all'
+                });
+                
+                showNotificationPopup("تم الحذف", "تم حذف كل شيء وإعادة تعيين النظام", "success", 5000);
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+                
+            } catch (error) {
+                console.error("❌ خطأ في حذف كل شيء:", error);
+                showNotificationPopup("خطأ", "تعذر حذف جميع البيانات", "error", 3000);
+            }
+        } else {
+            showNotificationPopup("ملغى", "تم إلغاء عملية الحذف الشامل", "info", 3000);
+        }
+    }
+};
+
+window.addNewAdmin = async function() {
+    if (userEmail !== "hussainasari012@gmail.com") {
+        showNotificationPopup("خطأ", "هذه الصلاحية للمشرف الرئيسي فقط", "error", 3000);
+        return;
+    }
+    
+    const email = prompt("أدخل البريد الإلكتروني للمستخدم الذي تريد ترقيته لمشرف:");
+    if (!email) return;
+    
+    try {
+        // البحث عن المستخدم بالبريد الإلكتروني
+        const usersRef = ref(database, 'users');
+        const snapshot = await get(usersRef);
+        const users = snapshot.val() || {};
+        
+        let foundUserId = null;
+        
+        for (const [uid, userData] of Object.entries(users)) {
+            if (userData.email === email) {
+                foundUserId = uid;
+                break;
+            }
+        }
+        
+        if (!foundUserId) {
+            showNotificationPopup("خطأ", "المستخدم غير موجود في النظام", "error", 3000);
+            return;
+        }
+        
+        if (confirm(`هل تريد ترقية ${email} إلى مشرف؟`)) {
+            await update(ref(database, `users/${foundUserId}`), {
+                role: 'admin',
+                promotedAt: new Date().toISOString(),
+                promotedBy: userNickname || 'المشرف الرئيسي'
+            });
+            
+            await addNotification({
+                title: 'ترقية مشرف جديد',
+                message: `تم ترقية ${email} إلى مشرف في النظام بواسطة ${userNickname}`,
+                type: 'info',
+                sender: userNickname || 'المشرف الرئيسي',
+                senderId: userId,
+                action: 'promote'
+            });
+            
+            showNotificationPopup("تم الترقية", `تم ترقية ${email} إلى مشرف بنجاح`, "success", 3000);
+        }
+        
+    } catch (error) {
+        console.error("❌ خطأ في ترقية المستخدم:", error);
+        showNotificationPopup("خطأ", "تعذر ترقية المستخدم", "error", 3000);
+    }
+};
+
 // ===============================
 // تحميل لوحة التحكم
 // ===============================
@@ -5208,6 +5489,7 @@ function updateUrgentTasks(assignments, userSubmissions, exams = []) {
 // ===============================
 document.addEventListener('DOMContentLoaded', () => {
     console.log("🚀 بدء تحميل المنصة التعليمية...");
+    console.log("👑 المشرفون الرئيسيون:", ADMIN_USERS);
     checkAuthStatus();
 });
 
@@ -5222,654 +5504,16 @@ window.markNotificationAsRead = markNotificationAsRead;
 window.submitAssignment = submitAssignment;
 window.deleteAssignment = deleteAssignment;
 window.deleteExam = deleteExam;
-window.deleteEvent = deleteEvent;
-window.showDayEvents = showDayEvents;
+window.deleteMessage = deleteMessage;
+window.deleteAllAssignments = deleteAllAssignments;
+window.deleteAllExams = deleteAllExams;
+window.deleteAllMessages = deleteAllMessages;
+window.deleteAllNotifications = deleteAllNotifications;
+window.resetSchedule = resetSchedule;
+window.deleteEverything = deleteEverything;
+window.addNewAdmin = addNewAdmin;
 </script>
-<script>
-// ================================
-// نظام التحكم الإداري المتكامل
-// ================================
 
-// إضافة قائمة الإدارة إلى التنقل بعد تحميل الصفحة
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        addAdminMenu();
-    }, 2000);
-});
-
-function addAdminMenu() {
-    const navLinks = document.querySelector('.nav-links');
-    if (!navLinks) return;
-    
-    // التحقق مما إذا كان المستخدم مديراً (تعدل الشرط حسب نظامك)
-    const isAdmin = true; // غيّر هذا الشرط حسب احتياجك
-    
-    if (isAdmin && !document.getElementById('admin-nav-link')) {
-        const adminLink = document.createElement('li');
-        adminLink.innerHTML = `
-            <a href="#" class="nav-link-item" id="admin-nav-link" data-page="admin-control">
-                <i class="fas fa-cogs nav-icon"></i>
-                <span class="nav-text">الإدارة</span>
-            </a>
-        `;
-        navLinks.appendChild(adminLink);
-        
-        // إضافة صفحة التحكم الإداري
-        const mainContent = document.getElementById('main-content');
-        const adminPage = document.createElement('div');
-        adminPage.id = 'admin-control';
-        adminPage.className = 'page-content';
-        adminPage.style.display = 'none';
-        
-        adminPage.innerHTML = `
-            <div class="card">
-                <div class="card-header">
-                    <h2><i class="fas fa-cogs"></i> لوحة التحكم الإدارية</h2>
-                    <span class="badge warning">مدير النظام</span>
-                </div>
-                
-                <div class="admin-controls">
-                    <!-- حذف جماعي -->
-                    <div class="admin-section">
-                        <h3><i class="fas fa-trash-alt"></i> الحذف الجماعي</h3>
-                        <p class="admin-description">حذف جميع المحتويات للجميع (لا يمكن التراجع)</p>
-                        
-                        <div class="admin-grid">
-                            <div class="admin-card danger">
-                                <div class="admin-card-header">
-                                    <i class="fas fa-bell-slash"></i>
-                                    <h4>حذف جميع الإشعارات</h4>
-                                </div>
-                                <p>سيتم حذف جميع الإشعارات القديمة والجديدة لكل المستخدمين</p>
-                                <button class="btn btn-danger admin-btn" onclick="deleteAllNotifications()">
-                                    <i class="fas fa-trash"></i> حذف جميع الإشعارات
-                                </button>
-                            </div>
-                            
-                            <div class="admin-card danger">
-                                <div class="admin-card-header">
-                                    <i class="fas fa-tasks"></i>
-                                    <h4>حذف جميع الواجبات</h4>
-                                </div>
-                                <p>سيتم حذف جميع الواجبات المشتركة وبيانات التسليم</p>
-                                <button class="btn btn-danger admin-btn" onclick="deleteAllAssignments()">
-                                    <i class="fas fa-trash"></i> حذف جميع الواجبات
-                                </button>
-                            </div>
-                            
-                            <div class="admin-card danger">
-                                <div class="admin-card-header">
-                                    <i class="fas fa-clipboard-list"></i>
-                                    <h4>حذف جميع الاختبارات</h4>
-                                </div>
-                                <p>سيتم حذف جميع الاختبارات المشتركة لكل المستخدمين</p>
-                                <button class="btn btn-danger admin-btn" onclick="deleteAllExams()">
-                                    <i class="fas fa-trash"></i> حذف جميع الاختبارات
-                                </button>
-                            </div>
-                            
-                            <div class="admin-card danger">
-                                <div class="admin-card-header">
-                                    <i class="fas fa-calendar-times"></i>
-                                    <h4>حذف جميع الأحداث</h4>
-                                </div>
-                                <p>سيتم حذف جميع الأحداث والتقويمات المشتركة</p>
-                                <button class="btn btn-danger admin-btn" onclick="deleteAllEvents()">
-                                    <i class="fas fa-trash"></i> حذف جميع الأحداث
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="admin-card extreme-danger">
-                            <div class="admin-card-header">
-                                <i class="fas fa-bomb"></i>
-                                <h4>حذف كل شيء</h4>
-                            </div>
-                            <p><strong>تحذير:</strong> سيتم حذف جميع البيانات المشتركة (إشعارات، واجبات، اختبارات، أحداث)</p>
-                            <button class="btn btn-danger admin-btn" onclick="deleteEverything()">
-                                <i class="fas fa-skull-crossbones"></i> حذف جميع المحتويات
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- حذف انتقائي -->
-                    <div class="admin-section">
-                        <h3><i class="fas fa-filter"></i> الحذف الانتقائي</h3>
-                        <p class="admin-description">اختر ما تريد حذفه تحديداً</p>
-                        
-                        <div class="selective-delete">
-                            <div class="form-group">
-                                <label><input type="checkbox" id="delete-old-notifications" checked> الإشعارات القديمة (أكثر من 30 يوم)</label>
-                            </div>
-                            <div class="form-group">
-                                <label><input type="checkbox" id="delete-completed-assignments" checked> الواجبات المنتهية</label>
-                            </div>
-                            <div class="form-group">
-                                <label><input type="checkbox" id="delete-past-exams" checked> الاختبارات المنتهية</label>
-                            </div>
-                            <div class="form-group">
-                                <label><input type="checkbox" id="delete-old-events" checked> الأحداث المنتهية</label>
-                            </div>
-                            
-                            <button class="btn btn-warning" onclick="selectiveDelete()">
-                                <i class="fas fa-filter"></i> حذف المحدد
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- إحصائيات -->
-                    <div class="admin-section">
-                        <h3><i class="fas fa-chart-bar"></i> الإحصائيات</h3>
-                        <div class="stats-grid">
-                            <div class="stat-item">
-                                <div class="stat-number" id="total-notifications">0</div>
-                                <div class="stat-label">إشعارات</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number" id="total-assignments">0</div>
-                                <div class="stat-label">واجبات</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number" id="total-exams">0</div>
-                                <div class="stat-label">اختبارات</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number" id="total-events">0</div>
-                                <div class="stat-label">أحداث</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number" id="total-members">0</div>
-                                <div class="stat-label">أعضاء</div>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary" onclick="loadAdminStats()">
-                            <i class="fas fa-sync-alt"></i> تحديث الإحصائيات
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <style>
-                /* تنسيقات خاصة بلوحة الإدارة */
-                .admin-controls {
-                    padding: 20px;
-                }
-                
-                .admin-section {
-                    margin-bottom: 30px;
-                    padding-bottom: 20px;
-                    border-bottom: 2px solid #eee;
-                }
-                
-                .admin-section:last-child {
-                    border-bottom: none;
-                }
-                
-                .admin-description {
-                    color: #666;
-                    margin-bottom: 15px;
-                    font-size: 0.9rem;
-                }
-                
-                .admin-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                    gap: 20px;
-                    margin-bottom: 20px;
-                }
-                
-                .admin-card {
-                    background: white;
-                    border-radius: 10px;
-                    padding: 20px;
-                    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-                    border: 2px solid #e0e0e0;
-                    transition: all 0.3s ease;
-                }
-                
-                .admin-card:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-                }
-                
-                .admin-card.danger {
-                    border-color: #ffebee;
-                    background: #fff5f5;
-                }
-                
-                .admin-card.extreme-danger {
-                    border-color: #ffcdd2;
-                    background: #ffebee;
-                    animation: pulse 2s infinite;
-                }
-                
-                @keyframes pulse {
-                    0% { border-color: #ffcdd2; }
-                    50% { border-color: #ef9a9a; }
-                    100% { border-color: #ffcdd2; }
-                }
-                
-                .admin-card-header {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    margin-bottom: 15px;
-                }
-                
-                .admin-card-header i {
-                    font-size: 1.5rem;
-                    color: #f44336;
-                }
-                
-                .admin-card-header h4 {
-                    margin: 0;
-                    color: #333;
-                }
-                
-                .admin-card p {
-                    color: #666;
-                    font-size: 0.9rem;
-                    margin-bottom: 20px;
-                    line-height: 1.5;
-                }
-                
-                .admin-btn {
-                    width: 100%;
-                    padding: 12px;
-                    font-weight: bold;
-                }
-                
-                .selective-delete {
-                    background: #fff8e1;
-                    padding: 20px;
-                    border-radius: 10px;
-                    border: 1px dashed #ffd54f;
-                }
-                
-                .selective-delete .form-group {
-                    margin-bottom: 10px;
-                    padding: 10px;
-                    background: white;
-                    border-radius: 5px;
-                }
-                
-                .selective-delete label {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    cursor: pointer;
-                    font-weight: 500;
-                }
-                
-                .stats-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-                    gap: 15px;
-                    margin-bottom: 20px;
-                }
-                
-                .stat-item {
-                    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-                    color: white;
-                    padding: 15px;
-                    border-radius: 10px;
-                    text-align: center;
-                }
-                
-                .stat-item .stat-number {
-                    font-size: 2rem;
-                    font-weight: bold;
-                    margin-bottom: 5px;
-                }
-                
-                .stat-item .stat-label {
-                    font-size: 0.9rem;
-                    opacity: 0.9;
-                }
-            </style>
-        `;
-        
-        mainContent.appendChild(adminPage);
-        
-        // إضافة مستمع الأحداث لزر الإدارة
-        document.getElementById('admin-nav-link').addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // إخفاء جميع الصفحات
-            document.querySelectorAll('.page-content').forEach(page => {
-                page.style.display = 'none';
-            });
-            
-            // إزالة النشاط من جميع الروابط
-            document.querySelectorAll('.nav-link-item').forEach(link => {
-                link.classList.remove('active');
-            });
-            
-            // إظهار صفحة الإدارة وإضافة النشاط
-            adminPage.style.display = 'flex';
-            this.classList.add('active');
-            
-            // تحميل الإحصائيات
-            loadAdminStats();
-        });
-        
-        console.log('✅ تم تحميل لوحة التحكم الإدارية');
-    }
-}
-
-// ================================
-// دوال الحذف الإداري
-// ================================
-
-// 1. حذف جميع الإشعارات
-async function deleteAllNotifications() {
-    if (!confirm('⚠️ هل أنت متأكد من حذف جميع الإشعارات لكل المستخدمين؟\nهذا الإجراء لا يمكن التراجع عنه.')) {
-        return;
-    }
-    
-    try {
-        const notificationsRef = ref(database, `classes/${classId}/notifications`);
-        await remove(notificationsRef);
-        
-        showNotificationPopup('تم الحذف', 'تم حذف جميع الإشعارات بنجاح', 'success', 3000);
-        
-        // تحديث الإحصائيات
-        loadAdminStats();
-        
-    } catch (error) {
-        console.error('❌ خطأ في حذف الإشعارات:', error);
-        showNotificationPopup('خطأ', 'فشل حذف الإشعارات', 'error', 3000);
-    }
-}
-
-// 2. حذف جميع الواجبات
-async function deleteAllAssignments() {
-    if (!confirm('⚠️ هل أنت متأكد من حذف جميع الواجبات لكل المستخدمين؟\nسيتم حذف:\n• الواجبات المشتركة\n• بيانات التسليم')) {
-        return;
-    }
-    
-    try {
-        // حذف الواجبات المشتركة
-        const assignmentsRef = ref(database, `classes/${classId}/assignments`);
-        await remove(assignmentsRef);
-        
-        // حذف تسليمات جميع المستخدمين
-        const usersRef = ref(database, 'users');
-        const usersSnapshot = await get(usersRef);
-        
-        if (usersSnapshot.exists()) {
-            const users = usersSnapshot.val();
-            const deletePromises = [];
-            
-            for (const userId in users) {
-                const userAssignmentsRef = ref(database, `users/${userId}/assignments`);
-                deletePromises.push(remove(userAssignmentsRef));
-            }
-            
-            await Promise.all(deletePromises);
-        }
-        
-        showNotificationPopup('تم الحذف', 'تم حذف جميع الواجبات بنجاح', 'success', 3000);
-        loadAdminStats();
-        
-    } catch (error) {
-        console.error('❌ خطأ في حذف الواجبات:', error);
-        showNotificationPopup('خطأ', 'فشل حذف الواجبات', 'error', 3000);
-    }
-}
-
-// 3. حذف جميع الاختبارات
-async function deleteAllExams() {
-    if (!confirm('⚠️ هل أنت متأكد من حذف جميع الاختبارات؟')) {
-        return;
-    }
-    
-    try {
-        const examsRef = ref(database, `classes/${classId}/exams`);
-        await remove(examsRef);
-        
-        showNotificationPopup('تم الحذف', 'تم حذف جميع الاختبارات بنجاح', 'success', 3000);
-        loadAdminStats();
-        
-    } catch (error) {
-        console.error('❌ خطأ في حذف الاختبارات:', error);
-        showNotificationPopup('خطأ', 'فشل حذف الاختبارات', 'error', 3000);
-    }
-}
-
-// 4. حذف جميع الأحداث
-async function deleteAllEvents() {
-    if (!confirm('⚠️ هل أنت متأكد من حذف جميع الأحداث والتقويمات؟')) {
-        return;
-    }
-    
-    try {
-        const eventsRef = ref(database, `classes/${classId}/events`);
-        await remove(eventsRef);
-        
-        showNotificationPopup('تم الحذف', 'تم حذف جميع الأحداث بنجاح', 'success', 3000);
-        loadAdminStats();
-        
-    } catch (error) {
-        console.error('❌ خطأ في حذف الأحداث:', error);
-        showNotificationPopup('خطأ', 'فشل حذف الأحداث', 'error', 3000);
-    }
-}
-
-// 5. حذف كل شيء
-async function deleteEverything() {
-    if (!confirm('⚠️ ⚠️ ⚠️ تحذير شديد الخطورة!\n\nهل أنت متأكد من حذف جميع المحتويات؟\nسيتم حذف:\n• جميع الإشعارات\n• جميع الواجبات\n• جميع الاختبارات\n• جميع الأحداث\n\nهذا الإجراء لا يمكن التراجع عنه!')) {
-        return;
-    }
-    
-    try {
-        // حذف جميع البيانات المشتركة
-        const classDataRef = ref(database, `classes/${classId}`);
-        const classSnapshot = await get(classDataRef);
-        
-        if (classSnapshot.exists()) {
-            const classData = classSnapshot.val();
-            const deletePromises = [];
-            
-            // حذف كل قسم على حدة
-            if (classData.notifications) {
-                deletePromises.push(remove(ref(database, `classes/${classId}/notifications`)));
-            }
-            if (classData.assignments) {
-                deletePromises.push(remove(ref(database, `classes/${classId}/assignments`)));
-            }
-            if (classData.exams) {
-                deletePromises.push(remove(ref(database, `classes/${classId}/exams`)));
-            }
-            if (classData.events) {
-                deletePromises.push(remove(ref(database, `classes/${classId}/events`)));
-            }
-            
-            await Promise.all(deletePromises);
-        }
-        
-        // حذف تسليمات جميع المستخدمين
-        const usersRef = ref(database, 'users');
-        const usersSnapshot = await get(usersRef);
-        
-        if (usersSnapshot.exists()) {
-            const users = usersSnapshot.val();
-            const userDeletePromises = [];
-            
-            for (const userId in users) {
-                const userAssignmentsRef = ref(database, `users/${userId}/assignments`);
-                userDeletePromises.push(remove(userAssignmentsRef));
-            }
-            
-            await Promise.all(userDeletePromises);
-        }
-        
-        showNotificationPopup('تم الحذف الكامل', 'تم حذف جميع المحتويات بنجاح', 'success', 4000);
-        loadAdminStats();
-        
-    } catch (error) {
-        console.error('❌ خطأ في الحذف الشامل:', error);
-        showNotificationPopup('خطأ', 'فشل الحذف الشامل', 'error', 3000);
-    }
-}
-
-// 6. الحذف الانتقائي
-async function selectiveDelete() {
-    const deleteOldNotifications = document.getElementById('delete-old-notifications').checked;
-    const deleteCompletedAssignments = document.getElementById('delete-completed-assignments').checked;
-    const deletePastExams = document.getElementById('delete-past-exams').checked;
-    const deleteOldEvents = document.getElementById('delete-old-events').checked;
-    
-    if (!deleteOldNotifications && !deleteCompletedAssignments && !deletePastExams && !deleteOldEvents) {
-        showNotificationPopup('تحذير', 'لم تختر أي عناصر للحذف', 'warning', 3000);
-        return;
-    }
-    
-    if (!confirm('هل أنت متأكد من حذف العناصر المحددة؟')) {
-        return;
-    }
-    
-    try {
-        const now = new Date();
-        const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
-        
-        // حذف الإشعارات القديمة
-        if (deleteOldNotifications) {
-            const notificationsRef = ref(database, `classes/${classId}/notifications`);
-            const notificationsSnapshot = await get(notificationsRef);
-            
-            if (notificationsSnapshot.exists()) {
-                const notifications = notificationsSnapshot.val();
-                const deletePromises = [];
-                
-                for (const notificationId in notifications) {
-                    const notification = notifications[notificationId];
-                    const notificationDate = new Date(notification.timestamp || notification.createdAt);
-                    
-                    if (notificationDate < thirtyDaysAgo) {
-                        deletePromises.push(remove(ref(database, `classes/${classId}/notifications/${notificationId}`)));
-                    }
-                }
-                
-                await Promise.all(deletePromises);
-            }
-        }
-        
-        // حذف الواجبات المنتهية
-        if (deleteCompletedAssignments) {
-            const assignmentsRef = ref(database, `classes/${classId}/assignments`);
-            const assignmentsSnapshot = await get(assignmentsRef);
-            
-            if (assignmentsSnapshot.exists()) {
-                const assignments = assignmentsSnapshot.val();
-                const deletePromises = [];
-                
-                for (const assignmentId in assignments) {
-                    const assignment = assignments[assignmentId];
-                    const dueDate = new Date(assignment.dueDate);
-                    
-                    if (dueDate < now) {
-                        deletePromises.push(remove(ref(database, `classes/${classId}/assignments/${assignmentId}`)));
-                    }
-                }
-                
-                await Promise.all(deletePromises);
-            }
-        }
-        
-        // حذف الاختبارات المنتهية
-        if (deletePastExams) {
-            const examsRef = ref(database, `classes/${classId}/exams`);
-            const examsSnapshot = await get(examsRef);
-            
-            if (examsSnapshot.exists()) {
-                const exams = examsSnapshot.val();
-                const deletePromises = [];
-                
-                for (const examId in exams) {
-                    const exam = exams[examId];
-                    const examDate = new Date(exam.date + 'T' + exam.time);
-                    
-                    if (examDate < now) {
-                        deletePromises.push(remove(ref(database, `classes/${classId}/exams/${examId}`)));
-                    }
-                }
-                
-                await Promise.all(deletePromises);
-            }
-        }
-        
-        showNotificationPopup('تم الحذف الانتقائي', 'تم حذف العناصر المحددة بنجاح', 'success', 3000);
-        loadAdminStats();
-        
-    } catch (error) {
-        console.error('❌ خطأ في الحذف الانتقائي:', error);
-        showNotificationPopup('خطأ', 'فشل الحذف الانتقائي', 'error', 3000);
-    }
-}
-
-// 7. تحميل الإحصائيات
-async function loadAdminStats() {
-    try {
-        // عدد الإشعارات
-        const notificationsRef = ref(database, `classes/${classId}/notifications`);
-        const notificationsSnapshot = await get(notificationsRef);
-        const notificationsCount = notificationsSnapshot.exists() ? Object.keys(notificationsSnapshot.val()).length : 0;
-        
-        // عدد الواجبات
-        const assignmentsRef = ref(database, `classes/${classId}/assignments`);
-        const assignmentsSnapshot = await get(assignmentsRef);
-        const assignmentsCount = assignmentsSnapshot.exists() ? Object.keys(assignmentsSnapshot.val()).length : 0;
-        
-        // عدد الاختبارات
-        const examsRef = ref(database, `classes/${classId}/exams`);
-        const examsSnapshot = await get(examsRef);
-        const examsCount = examsSnapshot.exists() ? Object.keys(examsSnapshot.val()).length : 0;
-        
-        // عدد الأحداث
-        const eventsRef = ref(database, `classes/${classId}/events`);
-        const eventsSnapshot = await get(eventsRef);
-        const eventsCount = eventsSnapshot.exists() ? Object.keys(eventsSnapshot.val()).length : 0;
-        
-        // عدد الأعضاء
-        const classRef = ref(database, `classes/${classId}`);
-        const classSnapshot = await get(classRef);
-        let membersCount = 0;
-        
-        if (classSnapshot.exists()) {
-            const classData = classSnapshot.val();
-            if (classData.members) {
-                membersCount = Object.keys(classData.members).length;
-            } else if (classData.memberCount) {
-                membersCount = classData.memberCount;
-            }
-        }
-        
-        // تحديث العرض
-        document.getElementById('total-notifications').textContent = notificationsCount;
-        document.getElementById('total-assignments').textContent = assignmentsCount;
-        document.getElementById('total-exams').textContent = examsCount;
-        document.getElementById('total-events').textContent = eventsCount;
-        document.getElementById('total-members').textContent = membersCount;
-        
-    } catch (error) {
-        console.error('❌ خطأ في تحميل الإحصائيات:', error);
-    }
-}
-
-// التأكد من تعريف المتغيرات المطلوبة
-if (typeof showNotificationPopup === 'undefined') {
-    console.warn('⚠️ تأكد من تعريف showNotificationPopup في الكود الأساسي');
-}
-
-if (typeof ref === 'undefined' || typeof get === 'undefined' || typeof remove === 'undefined') {
-    console.warn('⚠️ تأكد من استيراد Firebase Database في الكود الأساسي');
-}
-
-console.log('✅ نظام التحكم الإداري جاهز للاستخدام');
-</script>
 
 </body>
-
 </html>
-

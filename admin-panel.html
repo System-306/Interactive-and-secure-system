@@ -1581,41 +1581,10 @@
     </div>
 
     <!-- Firebase SDK -->
-   <script type="module">
-// استيراد مكتبات Firebase
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { 
-    getAuth, 
-    signOut,
-    sendPasswordResetEmail,
-    deleteUser,
-    updatePassword,
-    updateEmail,
-    reauthenticateWithCredential,
-    EmailAuthProvider
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { 
-    getDatabase, 
-    ref, 
-    get, 
-    set, 
-    update,
-    remove,
-    onValue,
-    push,
-    query,
-    orderByChild,
-    equalTo,
-    limitToLast
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
-import { 
-    getStorage,
-    ref as storageRef,
-    deleteObject,
-    listAll
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
+import { getDatabase, ref, get, set, remove, push } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
-// تكوين Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyCYbDqGBlBEEDGNfXbAbsS4sZupNDb7jrY",
     authDomain: "system-306.firebaseapp.com",
@@ -1627,1122 +1596,465 @@ const firebaseConfig = {
     measurementId: "G-T4RTTBWHKL"
 };
 
-// تهيئة Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const database = getDatabase(app);
-const storage = getStorage(app);
+const db = getDatabase(app);
 
-// المتغيرات العامة
-let currentUser = null;
-let allUsers = [];
-let currentEditingUser = null;
-let classId = 'section306';
-let searchTimeout = null;
+const PUBLIC_ACCESS_CODE = "2008009";
 
-// عناصر DOM
-const elements = {
-    // معلومات المدير
-    adminName: document.getElementById('admin-name'),
-    adminEmail: document.getElementById('admin-email'),
-    adminAvatar: document.getElementById('admin-avatar'),
-    adminStats: document.getElementById('admin-stats'),
-    
-    // الإحصائيات
-    totalUsers: document.getElementById('total-users'),
-    activeUsers: document.getElementById('active-users'),
-    todayUsers: document.getElementById('today-users'),
-    pendingUsers: document.getElementById('pending-users'),
-    
-    // البحث والتصفية
-    searchInput: document.getElementById('user-search'),
-    filterRole: document.getElementById('filter-role'),
-    filterStatus: document.getElementById('filter-status'),
-    filterClass: document.getElementById('filter-class'),
-    resetFilters: document.getElementById('reset-filters'),
-    
-    // الجدول
-    usersTable: document.getElementById('users-table'),
-    tableBody: document.getElementById('users-table-body'),
-    loadingRow: document.getElementById('loading-row'),
-    
-    // الأزرار
-    addUserBtn: document.getElementById('add-user-btn'),
-    exportBtn: document.getElementById('export-btn'),
-    bulkActions: document.getElementById('bulk-actions'),
-    deleteSelectedBtn: document.getElementById('delete-selected-btn'),
-    exportSelectedBtn: document.getElementById('export-selected-btn'),
-    
-    // النوافذ المنبثقة
-    addUserModal: document.getElementById('add-user-modal'),
-    editUserModal: document.getElementById('edit-user-modal'),
-    deleteUserModal: document.getElementById('delete-user-modal'),
-    resetPasswordModal: document.getElementById('reset-password-modal'),
-    bulkDeleteModal: document.getElementById('bulk-delete-modal'),
-    userDetailsModal: document.getElementById('user-details-modal'),
-    
-    // النماذج
-    addUserForm: document.getElementById('add-user-form'),
-    editUserForm: document.getElementById('edit-user-form'),
-    
-    // الأزرار في النوافذ
-    closeModalBtns: document.querySelectorAll('.close-modal'),
-    confirmDeleteBtn: document.getElementById('confirm-delete-btn'),
-    confirmResetBtn: document.getElementById('confirm-reset-btn'),
-    confirmBulkDeleteBtn: document.getElementById('confirm-bulk-delete-btn'),
-    
-    // رسائل
-    messageContainer: document.getElementById('message-container'),
-    
-    // التحكم في التسجيلات
-    registrationToggle: document.getElementById('registration-toggle'),
-    registrationStatus: document.getElementById('registration-status')
-};
-
-// دالة إظهار الرسائل
-function showMessage(message, type = 'info', duration = 5000) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `alert alert-${type} alert-dismissible fade show`;
-    messageDiv.innerHTML = `
-        <span>${message}</span>
-        <button type="button" class="close" onclick="this.parentElement.remove()">
-            <span>&times;</span>
-        </button>
-    `;
-    
-    elements.messageContainer.innerHTML = '';
-    elements.messageContainer.appendChild(messageDiv);
-    
-    if (duration > 0) {
-        setTimeout(() => {
-            if (messageDiv.parentElement) {
-                messageDiv.remove();
-            }
-        }, duration);
-    }
-}
-
-// دالة تنسيق التاريخ
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ar-SA', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-// دالة الحصول على الأحرف الأولى من الاسم
-function getInitials(name) {
-    if (!name) return '?';
-    return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().substring(0, 2);
-}
-
-// دالة تحميل بيانات المدير
-async function loadAdminData() {
+// التحقق من الدخول
+async function checkAccess() {
     try {
-        const user = auth.currentUser;
-        if (!user) {
-            window.location.href = 'index.html';
-            return;
+        const accessData = JSON.parse(localStorage.getItem('admin_access'));
+        
+        if (!accessData || accessData.accessCode !== PUBLIC_ACCESS_CODE) {
+            // إعادة التوجيه إلى صفحة الدخول
+            window.location.href = "admin-login.html";
+            return false;
         }
         
-        // التحقق من صلاحيات المدير
-        const userRef = ref(database, `users/${user.uid}`);
-        const snapshot = await get(userRef);
+        // التحقق من وقت الدخول (اختياري - يمكن حذفه للوصول الدائم)
+        const loginTime = new Date(accessData.loginTime);
+        const now = new Date();
+        const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
         
-        if (!snapshot.exists() || !snapshot.val().isAdmin) {
-            showMessage('ليس لديك صلاحية الوصول إلى هذه الصفحة', 'danger');
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 2000);
-            return;
+        // إذا مرت أكثر من 24 ساعة، اطلب إعادة الدخول
+        if (hoursDiff > 24) {
+            localStorage.removeItem('admin_access');
+            window.location.href = "admin-login.html";
+            return false;
         }
         
-        const userData = snapshot.val();
-        currentUser = user;
+        // تحديث معلومات المدير
+        document.getElementById('adminName').textContent = "مدير النظام";
+        document.getElementById('adminEmail').textContent = `مدخل بالكود: ${PUBLIC_ACCESS_CODE}`;
+        document.getElementById('adminAvatar').textContent = "مد";
         
-        // تحديث واجهة المدير
-        if (elements.adminName) {
-            elements.adminName.textContent = userData.fullName || user.displayName || 'مدير النظام';
-        }
-        if (elements.adminEmail) {
-            elements.adminEmail.textContent = user.email;
-        }
-        if (elements.adminAvatar) {
-            elements.adminAvatar.textContent = getInitials(userData.fullName || user.email);
-        }
-        
-        // تحميل الإحصائيات
-        loadStatistics();
-        loadAllUsers();
-        
-        // تحميل حالة التسجيلات
-        loadRegistrationStatus();
-        
+        return true;
     } catch (error) {
-        console.error('خطأ في تحميل بيانات المدير:', error);
-        showMessage('خطأ في تحميل البيانات', 'danger');
+        console.error('خطأ في التحقق من الدخول:', error);
+        window.location.href = "admin-login.html";
+        return false;
     }
 }
 
-// دالة تحميل الإحصائيات
+// ========== تحميل البيانات ==========
 async function loadStatistics() {
     try {
-        const usersRef = ref(database, 'users');
+        const usersRef = ref(db, 'users');
         const snapshot = await get(usersRef);
         
-        if (!snapshot.exists()) {
-            elements.totalUsers.textContent = '0';
-            elements.activeUsers.textContent = '0';
-            elements.todayUsers.textContent = '0';
-            elements.pendingUsers.textContent = '0';
-            return;
+        if (snapshot.exists()) {
+            let totalUsers = 0;
+            let activeUsers = 0;
+            let todayUsers = 0;
+            const today = new Date().toDateString();
+            
+            snapshot.forEach(() => {
+                totalUsers++;
+                activeUsers++; // كلهم نشطين في هذا النظام البسيط
+            });
+            
+            document.getElementById('total-users').textContent = totalUsers;
+            document.getElementById('active-users').textContent = activeUsers;
+            document.getElementById('today-users').textContent = todayUsers;
         }
         
-        const users = [];
-        const now = new Date();
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        let todayCount = 0;
-        let activeCount = 0;
-        let pendingCount = 0;
-        
-        snapshot.forEach(child => {
-            const user = child.val();
-            user.id = child.key;
-            users.push(user);
-            
-            // حساب المستخدمين النشطين (آخر نشاط خلال 7 أيام)
-            if (user.lastActive) {
-                const lastActiveDate = new Date(user.lastActive);
-                const diffDays = (now - lastActiveDate) / (1000 * 60 * 60 * 24);
-                if (diffDays <= 7) activeCount++;
-            }
-            
-            // حساب المستخدمين المسجلين اليوم
-            if (user.createdAt) {
-                const createdDate = new Date(user.createdAt);
-                if (createdDate >= todayStart) todayCount++;
-            }
-            
-            // حساب المستخدمين المعلقين (إذا كان هناك حقل status)
-            if (user.status === 'pending') pendingCount++;
-        });
-        
-        elements.totalUsers.textContent = users.length;
-        elements.activeUsers.textContent = activeCount;
-        elements.todayUsers.textContent = todayCount;
-        elements.pendingUsers.textContent = pendingCount;
-        
-        // تحديث نص الإحصائيات
-        if (elements.adminStats) {
-            elements.adminStats.textContent = `إدارة ${users.length} حساب`;
-        }
+        // تحديث حالة النظام
+        document.getElementById('firebase-status').textContent = '🟢 متصل';
+        document.getElementById('system-last-update').textContent = new Date().toLocaleTimeString('ar-SA');
         
     } catch (error) {
         console.error('خطأ في تحميل الإحصائيات:', error);
     }
 }
 
-// دالة تحميل جميع المستخدمين
-async function loadAllUsers() {
+// ========== تحميل المستخدمين ==========
+async function loadUsers() {
     try {
-        elements.loadingRow.style.display = 'table-row';
-        
-        const usersRef = ref(database, 'users');
+        const usersRef = ref(db, 'users');
         const snapshot = await get(usersRef);
+        const tbody = document.getElementById('users-table-body');
         
-        allUsers = [];
-        if (snapshot.exists()) {
-            snapshot.forEach(child => {
-                const user = child.val();
-                user.id = child.key;
-                allUsers.push(user);
-            });
+        if (!snapshot.exists()) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px;">
+                        <i class="fas fa-users-slash fa-2x" style="color: #ccc; margin-bottom: 15px;"></i>
+                        <p style="color: #777;">لا يوجد مستخدمين بعد</p>
+                    </td>
+                </tr>
+            `;
+            return;
         }
         
-        renderUsersTable(allUsers);
-        elements.loadingRow.style.display = 'none';
+        let tableHTML = '';
+        const users = [];
+        
+        snapshot.forEach(child => {
+            const user = child.val();
+            user.id = child.key;
+            users.push(user);
+            
+            tableHTML += `
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar-small" style="background: #3498db; color: white;">
+                                ${user.fullName ? user.fullName.charAt(0) : '?'}
+                            </div>
+                            <div class="user-details">
+                                <div class="user-name">${user.fullName || 'غير محدد'}</div>
+                                <div class="user-email">${user.email || 'لا يوجد'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${user.email || 'غير محدد'}</td>
+                    <td>${user.class || '306'}</td>
+                    <td>${formatDate(user.createdAt)}</td>
+                    <td>
+                        <span class="status-badge status-active">
+                            نشط
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn edit-btn" onclick="editUser('${user.id}')">
+                                <i class="fas fa-edit"></i> تعديل
+                            </button>
+                            <button class="action-btn reset-btn" onclick="resetPassword('${user.email}')">
+                                <i class="fas fa-key"></i> إعادة تعيين
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteUser('${user.id}', '${user.fullName || user.email}')">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = tableHTML;
         
     } catch (error) {
         console.error('خطأ في تحميل المستخدمين:', error);
-        elements.loadingRow.style.display = 'none';
-        showMessage('خطأ في تحميل بيانات المستخدمين', 'danger');
     }
 }
 
-// دالة عرض جدول المستخدمين
-function renderUsersTable(users) {
-    const tableBody = elements.tableBody;
-    tableBody.innerHTML = '';
-    
-    if (users.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="10" class="text-center py-4">
-                    <i class="fas fa-users-slash fa-2x text-muted mb-3"></i>
-                    <p class="text-muted">لا توجد حسابات بعد</p>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-    
-    // تطبيق الفلاتر
-    let filteredUsers = [...users];
-    
-    // فلترة حسب الدور
-    const roleFilter = elements.filterRole.value;
-    if (roleFilter) {
-        filteredUsers = filteredUsers.filter(user => user.role === roleFilter);
-    }
-    
-    // فلترة حسب الحالة
-    const statusFilter = elements.filterStatus.value;
-    if (statusFilter) {
-        filteredUsers = filteredUsers.filter(user => user.status === statusFilter);
-    }
-    
-    // فلترة حسب الصف
-    const classFilter = elements.filterClass.value;
-    if (classFilter) {
-        filteredUsers = filteredUsers.filter(user => user.class === classFilter);
-    }
-    
-    // تطبيق البحث
-    const searchTerm = elements.searchInput.value.toLowerCase();
-    if (searchTerm) {
-        filteredUsers = filteredUsers.filter(user => 
-            (user.fullName && user.fullName.toLowerCase().includes(searchTerm)) ||
-            (user.email && user.email.toLowerCase().includes(searchTerm)) ||
-            (user.firstName && user.firstName.toLowerCase().includes(searchTerm)) ||
-            (user.lastName && user.lastName.toLowerCase().includes(searchTerm)) ||
-            (user.phone && user.phone.includes(searchTerm))
-        );
-    }
-    
-    // ترتيب حسب آخر تحديث
-    filteredUsers.sort((a, b) => {
-        const dateA = a.updatedAt || a.createdAt || '0';
-        const dateB = b.updatedAt || b.createdAt || '0';
-        return new Date(dateB) - new Date(dateA);
-    });
-    
-    filteredUsers.forEach(user => {
-        const row = document.createElement('tr');
-        
-        // حالة الحساب
-        let statusBadge = '';
-        if (user.status === 'active') {
-            statusBadge = '<span class="badge badge-success">نشط</span>';
-        } else if (user.status === 'suspended') {
-            statusBadge = '<span class="badge badge-danger">موقوف</span>';
-        } else if (user.status === 'pending') {
-            statusBadge = '<span class="badge badge-warning">بانتظار</span>';
-        } else {
-            statusBadge = '<span class="badge badge-secondary">غير معروف</span>';
-        }
-        
-        // الدور
-        let roleBadge = '';
-        if (user.role === 'admin') {
-            roleBadge = '<span class="badge badge-primary">مدير</span>';
-        } else if (user.role === 'teacher') {
-            roleBadge = '<span class="badge badge-info">معلم</span>';
-        } else {
-            roleBadge = '<span class="badge badge-light">طالب</span>';
-        }
-        
-        // آخر نشاط
-        let lastActiveText = 'غير معروف';
-        if (user.lastActive) {
-            const lastActive = new Date(user.lastActive);
-            const now = new Date();
-            const diffHours = Math.floor((now - lastActive) / (1000 * 60 * 60));
-            
-            if (diffHours < 1) lastActiveText = 'الآن';
-            else if (diffHours < 24) lastActiveText = `قبل ${diffHours} ساعة`;
-            else lastActiveText = formatDate(user.lastActive);
-        }
-        
-        row.innerHTML = `
-            <td>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input user-checkbox" value="${user.id}">
-                </div>
-            </td>
-            <td>
-                <div class="d-flex align-items-center">
-                    <div class="avatar-circle avatar-sm bg-primary text-white mr-2">
-                        ${getInitials(user.fullName || user.email)}
-                    </div>
-                    <div>
-                        <strong>${user.fullName || 'غير محدد'}</strong>
-                        <div class="text-muted small">${user.email || 'لا يوجد'}</div>
-                    </div>
-                </div>
-            </td>
-            <td>${user.email || 'غير محدد'}</td>
-            <td>${roleBadge}</td>
-            <td>${user.class || '306'}</td>
-            <td>${statusBadge}</td>
-            <td>${formatDate(user.createdAt || new Date().toISOString())}</td>
-            <td>${lastActiveText}</td>
-            <td>
-                <button class="btn btn-sm btn-outline-info view-user" data-id="${user.id}" title="عرض التفاصيل">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-primary edit-user" data-id="${user.id}" title="تعديل">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-warning reset-password" data-id="${user.id}" title="إعادة تعيين كلمة المرور">
-                    <i class="fas fa-key"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger delete-user" data-id="${user.id}" title="حذف">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        `;
-        
-        tableBody.appendChild(row);
-    });
-    
-    // إضافة مستمعي الأحداث للأزرار
-    addEventListenersToButtons();
-    updateBulkActions();
-}
-
-// دالة إضافة مستمعي الأحداث لأزرار الجدول
-function addEventListenersToButtons() {
-    // عرض التفاصيل
-    document.querySelectorAll('.view-user').forEach(btn => {
-        btn.addEventListener('click', () => showUserDetails(btn.dataset.id));
-    });
-    
-    // تعديل المستخدم
-    document.querySelectorAll('.edit-user').forEach(btn => {
-        btn.addEventListener('click', () => openEditModal(btn.dataset.id));
-    });
-    
-    // إعادة تعيين كلمة المرور
-    document.querySelectorAll('.reset-password').forEach(btn => {
-        btn.addEventListener('click', () => openResetPasswordModal(btn.dataset.id));
-    });
-    
-    // حذف المستخدم
-    document.querySelectorAll('.delete-user').forEach(btn => {
-        btn.addEventListener('click', () => openDeleteModal(btn.dataset.id));
-    });
-    
-    // اختيار/إلغاء اختيار جميع المستخدمين
-    const selectAllCheckbox = document.getElementById('select-all');
-    if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', function() {
-            const checkboxes = document.querySelectorAll('.user-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-            updateBulkActions();
-        });
-    }
-    
-    // تحديث الإجراءات الجماعية عند اختيار مستخدم
-    document.querySelectorAll('.user-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', updateBulkActions);
-    });
-}
-
-// دالة تحديث حالة أزرار الإجراءات الجماعية
-function updateBulkActions() {
-    const selectedCount = document.querySelectorAll('.user-checkbox:checked').length;
-    const bulkActions = elements.bulkActions;
-    const deleteSelectedBtn = elements.deleteSelectedBtn;
-    const exportSelectedBtn = elements.exportSelectedBtn;
-    
-    if (selectedCount > 0) {
-        bulkActions.style.display = 'block';
-        deleteSelectedBtn.textContent = `حذف المحدد (${selectedCount})`;
-        exportSelectedBtn.textContent = `تصدير المحدد (${selectedCount})`;
-    } else {
-        bulkActions.style.display = 'none';
-    }
-}
-
-// دالة فتح نافذة عرض تفاصيل المستخدم
-async function showUserDetails(userId) {
-    const user = allUsers.find(u => u.id === userId);
-    if (!user) return;
-    
-    try {
-        // الحصول على تفاصيل إضافية
-        const userRef = ref(database, `users/${userId}`);
-        const snapshot = await get(userRef);
-        const userDetails = snapshot.val();
-        
-        // ملء البيانات في النافذة
-        document.getElementById('detail-name').textContent = userDetails.fullName || 'غير محدد';
-        document.getElementById('detail-email').textContent = userDetails.email || 'غير محدد';
-        document.getElementById('detail-phone').textContent = userDetails.phone || 'غير محدد';
-        document.getElementById('detail-class').textContent = userDetails.class || '306';
-        document.getElementById('detail-role').textContent = userDetails.role || 'طالب';
-        document.getElementById('detail-status').textContent = userDetails.status || 'نشط';
-        document.getElementById('detail-created').textContent = formatDate(userDetails.createdAt || new Date().toISOString());
-        document.getElementById('detail-updated').textContent = formatDate(userDetails.updatedAt || userDetails.createdAt || new Date().toISOString());
-        document.getElementById('detail-lastActive').textContent = userDetails.lastActive ? formatDate(userDetails.lastActive) : 'غير معروف';
-        
-        // عرض الملفات المرفوعة
-        const filesRef = ref(database, `users/${userId}/files`);
-        const filesSnapshot = await get(filesRef);
-        let filesHtml = '<p class="text-muted">لا توجد ملفات</p>';
-        
-        if (filesSnapshot.exists()) {
-            const files = [];
-            filesSnapshot.forEach(child => {
-                files.push(child.val());
-            });
-            
-            filesHtml = files.map(file => `
-                <div class="file-item">
-                    <i class="fas fa-file"></i>
-                    <span>${file.name}</span>
-                    <small class="text-muted">${formatDate(file.uploadedAt)}</small>
-                </div>
-            `).join('');
-        }
-        document.getElementById('detail-files').innerHTML = filesHtml;
-        
-        // عرض الأنشطة
-        const activitiesRef = ref(database, `userActivities/${userId}`);
-        const activitiesSnapshot = await get(activitiesRef);
-        let activitiesHtml = '<p class="text-muted">لا توجد أنشطة</p>';
-        
-        if (activitiesSnapshot.exists()) {
-            const activities = [];
-            activitiesSnapshot.forEach(child => {
-                activities.push(child.val());
-            });
-            
-            // ترتيب حسب التاريخ
-            activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
-            activitiesHtml = activities.slice(0, 10).map(activity => `
-                <div class="activity-item">
-                    <i class="fas fa-circle small ${getActivityColor(activity.type)}"></i>
-                    <span>${getActivityText(activity.type)}</span>
-                    <small class="text-muted">${formatDate(activity.timestamp)}</small>
-                </div>
-            `).join('');
-        }
-        document.getElementById('detail-activities').innerHTML = activitiesHtml;
-        
-        // فتح النافذة
-        elements.userDetailsModal.style.display = 'flex';
-        
-    } catch (error) {
-        console.error('خطأ في عرض تفاصيل المستخدم:', error);
-        showMessage('خطأ في تحميل التفاصيل', 'danger');
-    }
-}
-
-// دالة فتح نافذة تعديل المستخدم
-async function openEditModal(userId) {
-    const user = allUsers.find(u => u.id === userId);
-    if (!user) return;
-    
-    currentEditingUser = user;
-    
-    // ملء النموذج
-    document.getElementById('edit-user-id').value = user.id;
-    document.getElementById('edit-first-name').value = user.firstName || '';
-    document.getElementById('edit-last-name').value = user.lastName || '';
-    document.getElementById('edit-email').value = user.email || '';
-    document.getElementById('edit-phone').value = user.phone || '';
-    document.getElementById('edit-class').value = user.class || '306';
-    document.getElementById('edit-role').value = user.role || 'student';
-    document.getElementById('edit-status').value = user.status || 'active';
-    
-    elements.editUserModal.style.display = 'flex';
-}
-
-// دالة حفظ التعديلات
-async function saveUserEdits(e) {
-    e.preventDefault();
-    
-    const userId = document.getElementById('edit-user-id').value;
-    const firstName = document.getElementById('edit-first-name').value.trim();
-    const lastName = document.getElementById('edit-last-name').value.trim();
-    const email = document.getElementById('edit-email').value.trim();
-    const phone = document.getElementById('edit-phone').value.trim();
-    const userClass = document.getElementById('edit-class').value;
-    const role = document.getElementById('edit-role').value;
-    const status = document.getElementById('edit-status').value;
-    
-    if (!firstName || !lastName || !email) {
-        showMessage('يرجى ملء جميع الحقول المطلوبة', 'warning');
-        return;
-    }
-    
-    const fullName = `${firstName} ${lastName}`;
-    
-    try {
-        const updates = {
-            firstName: firstName,
-            lastName: lastName,
-            fullName: fullName,
-            email: email,
-            phone: phone || null,
-            class: userClass,
-            role: role,
-            status: status,
-            updatedAt: new Date().toISOString()
-        };
-        
-        const userRef = ref(database, `users/${userId}`);
-        await update(userRef, updates);
-        
-        // إذا تغير البريد الإلكتروني، قم بتحديثه في Authentication
-        if (email !== currentEditingUser.email) {
-            try {
-                // هذا يتطلب إعادة المصادقة في تطبيق حقيقي
-                showMessage('تحديث البريد الإلكتروني يتطلب إعادة تسجيل دخول المستخدم', 'info');
-            } catch (authError) {
-                console.error('خطأ في تحديث البريد الإلكتروني:', authError);
-            }
-        }
-        
-        showMessage('تم تحديث بيانات المستخدم بنجاح', 'success');
-        closeAllModals();
-        loadAllUsers();
-        loadStatistics();
-        
-    } catch (error) {
-        console.error('خطأ في تحديث المستخدم:', error);
-        showMessage('خطأ في تحديث البيانات', 'danger');
-    }
-}
-
-// دالة فتح نافذة إعادة تعيين كلمة المرور
-function openResetPasswordModal(userId) {
-    const user = allUsers.find(u => u.id === userId);
-    if (!user) return;
-    
-    document.getElementById('reset-user-id').value = user.id;
-    document.getElementById('reset-user-name').textContent = user.fullName || user.email;
-    document.getElementById('reset-user-email').textContent = user.email;
-    
-    elements.resetPasswordModal.style.display = 'flex';
-}
-
-// دالة إعادة تعيين كلمة المرور
-async function resetUserPassword() {
-    const userId = document.getElementById('reset-user-id').value;
-    const user = allUsers.find(u => u.id === userId);
-    
-    if (!user || !user.email) {
-        showMessage('المستخدم غير موجود', 'danger');
+// ========== إدارة المستخدمين ==========
+// حذف مستخدم
+window.deleteUser = async function(userId, userName) {
+    if (!confirm(`هل تريد حذف المستخدم: ${userName}؟\nهذا الإجراء لا يمكن التراجع عنه!`)) {
         return;
     }
     
     try {
-        await sendPasswordResetEmail(auth, user.email);
-        
-        // تسجيل النشاط
-        const activityRef = ref(database, `adminActivities/${Date.now()}`);
-        await set(activityRef, {
-            type: 'password_reset',
-            adminId: currentUser.uid,
-            adminEmail: currentUser.email,
-            userId: userId,
-            userEmail: user.email,
-            timestamp: new Date().toISOString()
-        });
-        
-        showMessage('تم إرسال رابط إعادة التعيين إلى بريد المستخدم', 'success');
-        closeAllModals();
-        
-    } catch (error) {
-        console.error('خطأ في إعادة تعيين كلمة المرور:', error);
-        showMessage('خطأ في إرسال رابط إعادة التعيين', 'danger');
-    }
-}
-
-// دالة فتح نافذة حذف المستخدم
-function openDeleteModal(userId) {
-    const user = allUsers.find(u => u.id === userId);
-    if (!user) return;
-    
-    document.getElementById('delete-user-id').value = user.id;
-    document.getElementById('delete-user-name').textContent = user.fullName || user.email;
-    document.getElementById('delete-user-email').textContent = user.email;
-    
-    elements.deleteUserModal.style.display = 'flex';
-}
-
-// دالة حذف المستخدم
-async function deleteUserAccount() {
-    const userId = document.getElementById('delete-user-id').value;
-    const user = allUsers.find(u => u.id === userId);
-    
-    if (!user) {
-        showMessage('المستخدم غير موجود', 'danger');
-        return;
-    }
-    
-    try {
-        // 1. إرسال رسالة تنبيه للمستخدم
-        const notificationRef = ref(database, `users/${userId}/notifications`);
-        const notificationId = push(notificationRef).key;
-        
-        await set(ref(database, `users/${userId}/notifications/${notificationId}`), {
-            id: notificationId,
-            title: "🚫 حذف حسابك",
-            message: "تم حذف حسابك في منصة شعبة 306 بسبب انتهاك قوانين المنصة. إذا كان هناك خطأ، يرجى التواصل مع الإدارة.",
-            type: "danger",
-            timestamp: new Date().toISOString(),
-            isUrgent: true,
-            sender: "إدارة المنصة"
-        });
-        
-        // 2. سجل الحذف
-        const deletionLogRef = ref(database, `deletedAccounts/${userId}`);
-        await set(deletionLogRef, {
-            userId: userId,
-            email: user.email,
-            name: user.fullName,
-            deletedBy: currentUser.email,
-            deletedAt: new Date().toISOString(),
-            reason: "انتهاك قوانين المنصة",
-            notificationSent: true
-        });
-        
-        // 3. إشعار للصف
-        const classNotificationRef = ref(database, `classes/${classId}/notifications`);
-        const classNotificationId = push(classNotificationRef).key;
-        
-        await set(ref(database, `classes/${classId}/notifications/${classNotificationId}`), {
-            id: classNotificationId,
-            title: "إجراء إداري",
-            message: `تم اتخاذ إجراء إداري ضد مستخدم بسبب انتهاك القوانين`,
-            type: "warning",
-            timestamp: new Date().toISOString(),
-            sender: "الإدارة"
-        });
-        
-        // 4. حذف بيانات المستخدم من قاعدة البيانات
-        const userRef = ref(database, `users/${userId}`);
+        const userRef = ref(db, `users/${userId}`);
         await remove(userRef);
         
-        // 5. إزالة المستخدم من القائمة المشتركة
-        const classUserRef = ref(database, `classes/${classId}/members/${userId}`);
-        await remove(classUserRef);
-        
-        // 6. حذف الملفات من التخزين
-        try {
-            const storageUserRef = storageRef(storage, `users/${userId}`);
-            const listResult = await listAll(storageUserRef);
-            
-            const deletePromises = listResult.items.map(itemRef => 
-                deleteObject(itemRef).catch(err => console.error('خطأ في حذف الملف:', err))
-            );
-            
-            await Promise.all(deletePromises);
-        } catch (storageError) {
-            console.warn('لم يتم حذف ملفات المستخدم:', storageError);
-        }
-        
-        // 7. تسجيل النشاط
-        const activityRef = ref(database, `adminActivities/${Date.now()}`);
-        await set(activityRef, {
-            type: 'account_deleted',
-            adminId: currentUser.uid,
-            adminEmail: currentUser.email,
-            userId: userId,
-            userEmail: user.email,
-            userName: user.fullName,
-            timestamp: new Date().toISOString(),
-            notificationSent: true
-        });
-        
-        showMessage(`تم حذف حساب ${user.fullName || user.email} وإرسال التنبيه`, 'success');
-        closeAllModals();
-        loadAllUsers();
-        loadStatistics();
+        showMessage(`تم حذف المستخدم ${userName} بنجاح`, 'success');
+        await loadUsers();
+        await loadStatistics();
         
     } catch (error) {
         console.error('خطأ في حذف المستخدم:', error);
-        showMessage('خطأ في عملية الحذف', 'danger');
+        showMessage('خطأ في حذف المستخدم', 'error');
     }
-}
+};
 
-// دالة الحذف الجماعي
-async function deleteSelectedUsers() {
-    const selectedCheckboxes = document.querySelectorAll('.user-checkbox:checked');
-    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
-    
-    if (selectedIds.length === 0) {
-        showMessage('يرجى اختيار مستخدم واحد على الأقل', 'warning');
+// تعديل مستخدم
+window.editUser = async function(userId) {
+    try {
+        const userRef = ref(db, `users/${userId}`);
+        const snapshot = await get(userRef);
+        
+        if (!snapshot.exists()) {
+            showMessage('المستخدم غير موجود', 'error');
+            return;
+        }
+        
+        const user = snapshot.val();
+        
+        // ملء النموذج
+        document.getElementById('edit-user-id').value = userId;
+        document.getElementById('edit-user-name').value = user.firstName || '';
+        document.getElementById('edit-user-lastname').value = user.lastName || '';
+        document.getElementById('edit-user-email').value = user.email || '';
+        document.getElementById('edit-user-class').value = user.class || '306';
+        
+        // فتح النافذة
+        document.getElementById('edit-user-modal').style.display = 'flex';
+        
+    } catch (error) {
+        console.error('خطأ في تحميل بيانات المستخدم:', error);
+        showMessage('خطأ في تحميل البيانات', 'error');
+    }
+};
+
+// إعادة تعيين كلمة المرور
+window.resetPassword = async function(userEmail) {
+    if (!confirm(`سيتم إرسال رابط إعادة تعيين كلمة المرور إلى: ${userEmail}`)) {
         return;
     }
     
-    document.getElementById('bulk-delete-count').textContent = selectedIds.length;
-    elements.bulkDeleteModal.style.display = 'flex';
-}
-
-// دالة تأكيد الحذف الجماعي
-async function confirmBulkDelete() {
-    const selectedCheckboxes = document.querySelectorAll('.user-checkbox:checked');
-    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    showMessage('ملاحظة: في هذا النظام البسيط، عليك إبلاغ المستخدم بتغيير كلمة المرور يدوياً', 'info');
     
-    try {
-        elements.confirmBulkDeleteBtn.disabled = true;
-        elements.confirmBulkDeleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...';
-        
-        for (const userId of selectedIds) {
-            const user = allUsers.find(u => u.id === userId);
-            if (user) {
-                // إرسال إشعار للمستخدم
-                const notificationRef = ref(database, `users/${userId}/notifications`);
-                const notificationId = push(notificationRef).key;
-                
-                await set(ref(database, `users/${userId}/notifications/${notificationId}`), {
-                    id: notificationId,
-                    title: "حذف حسابك",
-                    message: "تم حذف حسابك بسبب مخالفة قوانين المنصة",
-                    type: "danger",
-                    timestamp: new Date().toISOString()
-                });
-                
-                // حذف البيانات
-                const userRef = ref(database, `users/${userId}`);
-                await remove(userRef);
-                
-                // إزالة من القائمة المشتركة
-                const classUserRef = ref(database, `classes/${classId}/members/${userId}`);
-                await remove(classUserRef);
-            }
-        }
-        
-        showMessage(`تم حذف ${selectedIds.length} حساب بنجاح`, 'success');
-        closeAllModals();
-        loadAllUsers();
-        loadStatistics();
-        
-    } catch (error) {
-        console.error('خطأ في الحذف الجماعي:', error);
-        showMessage('خطأ في عملية الحذف', 'danger');
-    } finally {
-        elements.confirmBulkDeleteBtn.disabled = false;
-        elements.confirmBulkDeleteBtn.innerHTML = 'تأكيد الحذف';
-    }
-}
+    // هنا يمكنك إضافة Firebase Authentication لإرسال رابط إعادة التعيين
+    // ولكن في النظام البسيط نكتفي بالرسالة
+};
 
-// دالة إغلاق جميع النوافذ
-function closeAllModals() {
-    elements.addUserModal.style.display = 'none';
-    elements.editUserModal.style.display = 'none';
-    elements.deleteUserModal.style.display = 'none';
-    elements.resetPasswordModal.style.display = 'none';
-    elements.bulkDeleteModal.style.display = 'none';
-    elements.userDetailsModal.style.display = 'none';
-    
-    // إعادة تعيين النماذج
-    if (elements.addUserForm) elements.addUserForm.reset();
-    if (elements.editUserForm) elements.editUserForm.reset();
-    
-    currentEditingUser = null;
-}
-
-// دالة تحميل حالة التسجيلات
+// ========== التحكم في التسجيلات ==========
 async function loadRegistrationStatus() {
     try {
-        const statusRef = ref(database, 'system/registrationEnabled');
-        const snapshot = await get(statusRef);
+        const regRef = ref(db, 'system/registrationEnabled');
+        const snapshot = await get(regRef);
         
         if (snapshot.exists()) {
             const isEnabled = snapshot.val();
-            elements.registrationToggle.checked = isEnabled;
-            elements.registrationStatus.textContent = isEnabled ? 'مفعل' : 'معطل';
+            document.getElementById('toggle-registration').checked = isEnabled;
+            document.getElementById('registration-status').textContent = isEnabled ? 'مفعلة' : 'معطلة';
         } else {
-            await set(statusRef, true);
-            elements.registrationToggle.checked = true;
-            elements.registrationStatus.textContent = 'مفعل';
+            // القيمة الافتراضية
+            await set(regRef, true);
+            document.getElementById('toggle-registration').checked = true;
+            document.getElementById('registration-status').textContent = 'مفعلة';
         }
     } catch (error) {
         console.error('خطأ في تحميل حالة التسجيلات:', error);
     }
 }
 
-// دالة تحديث حالة التسجيلات
-async function updateRegistrationStatus() {
-    const isEnabled = elements.registrationToggle.checked;
+// تحديث حالة التسجيلات
+document.getElementById('toggle-registration').addEventListener('change', async function() {
+    const isEnabled = this.checked;
     
     try {
-        const statusRef = ref(database, 'system/registrationEnabled');
-        await set(statusRef, isEnabled);
+        const regRef = ref(db, 'system/registrationEnabled');
+        await set(regRef, isEnabled);
         
-        const logRef = ref(database, 'system/registrationLog');
-        await push(logRef, {
-            enabled: isEnabled,
-            changedBy: currentUser.email,
-            timestamp: new Date().toISOString()
-        });
+        document.getElementById('registration-status').textContent = isEnabled ? 'مفعلة' : 'معطلة';
+        document.getElementById('last-update').textContent = new Date().toLocaleTimeString('ar-SA');
         
-        elements.registrationStatus.textContent = isEnabled ? 'مفعل' : 'معطل';
-        showMessage(`تم ${isEnabled ? 'تفعيل' : 'تعطيل'} التسجيلات الجديدة`, 'success');
-        
+        showMessage(`تم ${isEnabled ? 'تفعيل' : 'تعطيل'} التسجيلات`, 'success');
     } catch (error) {
-        console.error('خطأ في تحديث حالة التسجيلات:', error);
-        elements.registrationToggle.checked = !isEnabled;
-        showMessage('خطأ في تحديث الحالة', 'danger');
+        this.checked = !isEnabled;
+        showMessage('خطأ في تحديث الحالة', 'error');
     }
-}
+});
 
-// دالة التصدير
-async function exportData() {
-    const selectedCheckboxes = document.querySelectorAll('.user-checkbox:checked');
-    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
-    
-    let usersToExport = allUsers;
-    if (selectedIds.length > 0) {
-        usersToExport = allUsers.filter(user => selectedIds.includes(user.id));
-    }
-    
-    // تحضير البيانات
-    const exportData = {
-        exportDate: new Date().toISOString(),
-        exportedBy: currentUser.email,
-        totalUsers: usersToExport.length,
-        users: usersToExport.map(user => ({
-            id: user.id,
-            fullName: user.fullName,
-            email: user.email,
-            phone: user.phone,
-            class: user.class,
-            role: user.role,
-            status: user.status,
-            createdAt: user.createdAt,
-            lastActive: user.lastActive
-        }))
-    };
-    
-    // إنشاء ملف JSON
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
-    // تحميل الملف
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `users-export-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    // تسجيل النشاط
-    const activityRef = ref(database, `adminActivities/${Date.now()}`);
-    await set(activityRef, {
-        type: 'data_export',
-        adminId: currentUser.uid,
-        count: usersToExport.length,
-        timestamp: new Date().toISOString()
-    });
-    
-    showMessage(`تم تصدير ${usersToExport.length} حساب`, 'success');
-}
+// ========== الإعلانات ==========
+document.getElementById('new-announcement-btn').addEventListener('click', function() {
+    document.getElementById('new-announcement-modal').style.display = 'flex';
+});
 
-// دالات مساعدة
-function getActivityColor(type) {
-    const colors = {
-        'login': 'text-success',
-        'logout': 'text-secondary',
-        'assignment_submitted': 'text-primary',
-        'exam_taken': 'text-info',
-        'profile_updated': 'text-warning'
-    };
-    return colors[type] || 'text-muted';
-}
-
-function getActivityText(type) {
-    const texts = {
-        'login': 'تسجيل دخول',
-        'logout': 'تسجيل خروج',
-        'assignment_submitted': 'تسليم واجب',
-        'exam_taken': 'أداء اختبار',
-        'profile_updated': 'تحديث الملف الشخصي',
-        'dashboard_access': 'زيارة لوحة التحكم'
-    };
-    return texts[type] || type;
-}
-
-// دالة إعداد مستمعي الأحداث
-function setupEventListeners() {
-    // البحث مع تأخير
-    elements.searchInput.addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            renderUsersTable(allUsers);
-        }, 300);
-    });
-    
-    // الفلاتر
-    elements.filterRole.addEventListener('change', () => renderUsersTable(allUsers));
-    elements.filterStatus.addEventListener('change', () => renderUsersTable(allUsers));
-    elements.filterClass.addEventListener('change', () => renderUsersTable(allUsers));
-    
-    // إعادة تعيين الفلاتر
-    elements.resetFilters.addEventListener('click', () => {
-        elements.searchInput.value = '';
-        elements.filterRole.value = '';
-        elements.filterStatus.value = '';
-        elements.filterClass.value = '';
-        renderUsersTable(allUsers);
-    });
-    
-    // أزرار النوافذ
-    elements.addUserBtn.addEventListener('click', () => {
-        elements.addUserModal.style.display = 'flex';
-    });
-    
-    elements.exportBtn.addEventListener('click', exportData);
-    elements.deleteSelectedBtn.addEventListener('click', deleteSelectedUsers);
-    elements.exportSelectedBtn.addEventListener('click', exportData);
-    
-    // إغلاق النوافذ
-    elements.closeModalBtns.forEach(btn => {
-        btn.addEventListener('click', closeAllModals);
-    });
-    
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            closeAllModals();
-        }
-    });
-    
-    // تأكيد الإجراءات
-    elements.confirmDeleteBtn.addEventListener('click', deleteUserAccount);
-    elements.confirmResetBtn.addEventListener('click', resetUserPassword);
-    elements.confirmBulkDeleteBtn.addEventListener('click', confirmBulkDelete);
-    
-    // النماذج
-    if (elements.addUserForm) {
-        elements.addUserForm.addEventListener('submit', addNewUser);
-    }
-    
-    if (elements.editUserForm) {
-        elements.editUserForm.addEventListener('submit', saveUserEdits);
-    }
-    
-    // التحكم في التسجيلات
-    elements.registrationToggle.addEventListener('change', updateRegistrationStatus);
-    
-    // تسجيل الخروج
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            if (confirm('هل تريد تسجيل الخروج؟')) {
-                try {
-                    await signOut(auth);
-                    localStorage.removeItem('currentUser');
-                    window.location.href = 'index.html';
-                } catch (error) {
-                    console.error('خطأ في تسجيل الخروج:', error);
-                    showMessage('خطأ في تسجيل الخروج', 'danger');
-                }
-            }
-        });
-    }
-}
-
-// دالة إضافة مستخدم جديد
-async function addNewUser(e) {
+// إرسال إعلان
+document.getElementById('announcement-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    const firstName = document.getElementById('first-name').value.trim();
-    const lastName = document.getElementById('last-name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const userClass = document.getElementById('class').value;
-    const role = document.getElementById('role').value;
+    const title = document.getElementById('announcement-title').value;
+    const message = document.getElementById('announcement-message').value;
+    const type = document.getElementById('announcement-type').value;
     
-    if (!firstName || !lastName || !email) {
-        showMessage('يرجى ملء جميع الحقول المطلوبة', 'warning');
-        return;
-    }
-    
-    // التحقق من صحة البريد الإلكتروني
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        showMessage('البريد الإلكتروني غير صحيح', 'warning');
+    if (!title || !message) {
+        showMessage('يرجى تعبئة جميع الحقول', 'error');
         return;
     }
     
     try {
-        const fullName = `${firstName} ${lastName}`;
-        const userId = `temp_${Date.now()}`; // سيتم إنشاؤه بواسطة Authentication
+        const announcementsRef = ref(db, 'announcements');
+        await push(announcementsRef, {
+            title: title,
+            message: message,
+            type: type,
+            sender: 'مدير النظام',
+            timestamp: new Date().toISOString(),
+            recipients: 'all'
+        });
         
-        const userData = {
-            id: userId,
-            firstName: firstName,
-            lastName: lastName,
-            fullName: fullName,
-            email: email,
-            phone: phone || null,
-            class: userClass,
-            role: role,
-            status: 'active',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            isAdmin: role === 'admin',
-            requiresPasswordReset: true
-        };
-        
-        // في تطبيق حقيقي، هنا يتم إنشاء المستخدم في Authentication
-        showMessage('في بيئة الإنتاج، سيتم إنشاء حساب كامل مع إرسال رابط التعيين', 'info');
-        
-        // تخزين بيانات مؤقتة
-        const tempUsersRef = ref(database, 'tempUsers');
-        await push(tempUsersRef, userData);
-        
-        showMessage('تم حفظ بيانات المستخدم، سيتم إنشاء الحساب الكامل في بيئة الإنتاج', 'success');
-        closeAllModals();
-        loadAllUsers();
-        loadStatistics();
+        showMessage('تم إرسال الإعلان بنجاح', 'success');
+        document.getElementById('announcement-form').reset();
+        document.getElementById('new-announcement-modal').style.display = 'none';
         
     } catch (error) {
-        console.error('خطأ في إضافة مستخدم:', error);
-        showMessage('خطأ في إضافة المستخدم', 'danger');
+        console.error('خطأ في إرسال الإعلان:', error);
+        showMessage('خطأ في إرسال الإعلان', 'error');
+    }
+});
+
+// ========== النسخ الاحتياطي ==========
+document.getElementById('backup-btn').addEventListener('click', async function() {
+    const btn = this;
+    const originalText = btn.innerHTML;
+    
+    try {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري النسخ...';
+        btn.disabled = true;
+        
+        // الحصول على جميع البيانات
+        const usersRef = ref(db, 'users');
+        const snapshot = await get(usersRef);
+        
+        let backupData = {
+            timestamp: new Date().toISOString(),
+            admin: 'مدخل بالكود السري',
+            users: [],
+            total: 0
+        };
+        
+        if (snapshot.exists()) {
+            snapshot.forEach(child => {
+                backupData.users.push(child.val());
+            });
+            backupData.total = backupData.users.length;
+        }
+        
+        // تحويل إلى JSON وتنزيله
+        const dataStr = JSON.stringify(backupData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `backup-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        // تحديث المعلومات
+        document.getElementById('last-backup').textContent = new Date().toLocaleTimeString('ar-SA');
+        document.getElementById('data-size').textContent = `${(dataStr.length / 1024).toFixed(2)} KB`;
+        
+        showMessage('تم إنشاء نسخة احتياطية بنجاح', 'success');
+        
+    } catch (error) {
+        console.error('خطأ في النسخ الاحتياطي:', error);
+        showMessage('خطأ في إنشاء النسخة الاحتياطية', 'error');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+
+// ========== أدوات مساعدة ==========
+function showMessage(text, type = 'info') {
+    const messageDiv = document.getElementById('message');
+    const icon = type === 'success' ? 'check-circle' : 
+                type === 'error' ? 'exclamation-circle' : 'info-circle';
+    
+    messageDiv.innerHTML = `<i class="fas fa-${icon}"></i> ${text}`;
+    messageDiv.className = `message ${type}`;
+    messageDiv.style.display = 'block';
+    
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 5000);
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'غير محدد';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ar-SA', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    } catch {
+        return dateString;
     }
 }
 
-// دالة بدء التطبيق
+// ========== تسجيل الخروج ==========
+document.getElementById('logoutBtn').addEventListener('click', function() {
+    if (confirm('هل تريد تسجيل الخروج؟')) {
+        localStorage.removeItem('admin_access');
+        window.location.href = 'admin-login.html';
+    }
+});
+
+// ========== إغلاق النوافذ ==========
+document.querySelectorAll('.close-modal').forEach(btn => {
+    btn.addEventListener('click', function() {
+        this.closest('.modal').style.display = 'none';
+    });
+});
+
+// النقر خارج النافذة يغلقها
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.style.display = 'none';
+        }
+    });
+});
+
+// ========== إعداد الشريط الجانبي ==========
+document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.toggle('active');
+});
+
+// تغيير التبويبات
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+        if (this.classList.contains('logout-btn')) return;
+        
+        e.preventDefault();
+        
+        // إزالة النشاط من الكل
+        document.querySelectorAll('.nav-item').forEach(nav => {
+            nav.classList.remove('active');
+        });
+        
+        // إضافة النشاط للعنصر الحالي
+        this.classList.add('active');
+        
+        // إخفاء كل المحتوى
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.style.display = 'none';
+        });
+        
+        // إظهار المحتوى المطلوب
+        const tabId = this.getAttribute('data-tab') + '-tab';
+        document.getElementById(tabId).style.display = 'block';
+    });
+});
+
+// ========== بدء التطبيق ==========
 async function initApp() {
     try {
-        // انتظار تحميل Firebase
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // التحقق من الدخول أولاً
+        const hasAccess = await checkAccess();
         
-        // تحميل بيانات المدير
-        await loadAdminData();
+        if (!hasAccess) {
+            return;
+        }
         
-        // إعداد مستمعي الأحداث
-        setupEventListeners();
+        // تحميل البيانات
+        await loadStatistics();
+        await loadUsers();
+        await loadRegistrationStatus();
         
-        // تحديث تلقائي كل دقيقة
-        setInterval(() => {
-            loadStatistics();
-        }, 60000);
+        // البحث عن المستخدمين
+        document.getElementById('user-search').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#users-table-body tr');
+            
+            rows.forEach(row => {
+                const name = row.querySelector('.user-name').textContent.toLowerCase();
+                const email = row.querySelector('.user-email').textContent.toLowerCase();
+                const shouldShow = name.includes(searchTerm) || email.includes(searchTerm);
+                row.style.display = shouldShow ? '' : 'none';
+            });
+        });
         
-        console.log('✅ نظام إدارة الحسابات جاهز');
+        console.log('✅ نظام المدير جاهز - يمكن لأي شخص الدخول بالكود: 2008009');
         
     } catch (error) {
         console.error('خطأ في بدء التطبيق:', error);
-        showMessage('خطأ في تحميل التطبيق', 'danger');
+        showMessage('خطأ في تحميل التطبيق', 'error');
     }
 }
 
-// بدء التطبيق عند تحميل الصفحة
+// بدء التطبيق
 document.addEventListener('DOMContentLoaded', initApp);
 </script>
 </body>
