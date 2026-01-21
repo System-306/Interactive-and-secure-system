@@ -1082,6 +1082,96 @@
         .modal-open .modal-overlay {
             display: block;
         }
+
+
+        /* أنماط نظام التحديد المتعدد */
+@keyframes slideUp {
+    from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.gallery-item.select-mode {
+    transform: scale(0.98);
+    border: 2px dashed var(--primary);
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.gallery-item.select-mode::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(52, 152, 219, 0.1);
+    z-index: 1;
+    border-radius: var(--radius);
+}
+
+.gallery-item.selected {
+    border: 3px solid var(--accent);
+    box-shadow: 0 0 20px rgba(26, 188, 156, 0.4);
+    transform: scale(0.95);
+}
+
+.gallery-item.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--accent);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    z-index: 11;
+    animation: fadeIn 0.3s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.multi-select-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: linear-gradient(135deg, var(--warning) 0%, #e67e22 100%);
+    color: white;
+    border-radius: var(--radius) var(--radius) 0 0;
+    margin: -20px -20px 20px -20px;
+    animation: slideDown 0.3s ease;
+}
+
+.gallery-actions.select-mode {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* زر التحديد في الهيدر */
+#multi-select-btn {
+    margin-right: 10px;
+}
+
+/* تأثير النبض لزر الحذف */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse {
+    animation: pulse 1s infinite;
+}
     </style>
 </head>
 <body>
@@ -1361,1094 +1451,611 @@
     <!-- Firebase و JavaScript -->
     <script type="module">
         // ===============================
-        // Firebase v12 SDK
-        // ===============================
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged, 
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-        import { 
-            getDatabase, 
-            ref, 
-            onValue, 
-            set, 
-            push, 
-            remove,
-            get,
-            update,
-            query,
-            orderByChild,
-            limitToLast
-        } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+// نظام تحديد وحذف الصور للجميع
+// ===============================
 
-        // ===============================
-        // تكوين Firebase
-        // ===============================
-        const firebaseConfig = {
-            apiKey: "AIzaSyCYbDqGBlBEEDGNfXbAbsS4sZupNDb7jrY",
-            authDomain: "system-306.firebaseapp.com",
-            databaseURL: "https://system-306-default-rtdb.firebaseio.com",
-            projectId: "system-306",
-            storageBucket: "system-306.firebasestorage.app",
-            messagingSenderId: "471316495588",
-            appId: "1:471316495588:web:4d7ba9be7fea17c7a8c0f1",
-            measurementId: "G-T4RTTBWHKL"
-        };
+// متغيرات نظام التحديد
+let selectedImages = new Set();
+let isSelectMode = false;
+let originalGalleryItems = [];
 
-        // ===============================
-        // تهيئة Firebase
-        // ===============================
-        let app, auth, database;
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            database = getDatabase(app);
-            console.log("✅ Firebase تم التهيئة بنجاح");
-        } catch (error) {
-            console.error("❌ خطأ في تهيئة Firebase:", error);
-            showAlert("خطأ", "Firebase غير متصل. تحقق من اتصال الإنترنت", "danger");
+function initMultiDeleteSystem() {
+    // إنشاء زر التحديد في الهيدر
+    createSelectButton();
+    
+    // إنشاء واجهة التحكم بالتحديد
+    createSelectionControls();
+    
+    console.log("✅ نظام التحديد متعدد الصور جاهز");
+}
+
+function createSelectButton() {
+    // البحث عن قسم المستخدم
+    const userSection = document.querySelector('.user-section');
+    if (!userSection) return;
+    
+    // إنشاء زر التحديد
+    const selectButton = document.createElement('button');
+    selectButton.className = 'btn btn-warning';
+    selectButton.id = 'multi-select-btn';
+    selectButton.innerHTML = `
+        <i class="fas fa-check-square"></i>
+        <span>تحديد صور</span>
+    `;
+    selectButton.style.marginLeft = '10px';
+    
+    // إضافة زر الخروج الموجود إذا كان موجوداً
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        userSection.insertBefore(selectButton, logoutBtn);
+    } else {
+        // البحث عن عنصر داخل user-section لإضافة الزر
+        const userInfo = document.querySelector('.user-info');
+        if (userInfo) {
+            userSection.insertBefore(selectButton, userInfo.nextSibling);
+        } else {
+            userSection.appendChild(selectButton);
         }
+    }
+    
+    // حدث زر التحديد
+    selectButton.addEventListener('click', toggleSelectMode);
+}
 
-        // ===============================
-        // تعريف المتغيرات العامة
-        // ===============================
-        let userId = null;
-        let currentUser = null;
-        let userName = "";
-        let userFullName = "";
-        let userNickname = "";
-        const classId = 'section306';
-        let currentImageData = null;
-        let isProcessing = false;
-        let galleryItems = [];
-        const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB للهواتف
-        let currentFilter = 'all';
-        let isLoadingMore = false;
-
-        // ===============================
-        // وظائف مساعدة
-        // ===============================
-        function showAlert(title, message, type = 'info', duration = 5000) {
-            const alertsContainer = document.getElementById('alerts-container');
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type}`;
-            alert.innerHTML = `
-                <i class="fas fa-${getAlertIcon(type)} alert-icon"></i>
-                <div>
-                    <strong>${title}</strong><br>
-                    ${message}
-                </div>
-            `;
-            
-            alertsContainer.insertBefore(alert, alertsContainer.firstChild);
-            
-            // إزالة التنبيه بعد المدة المحددة
-            setTimeout(() => {
-                alert.style.opacity = '0';
-                alert.style.transform = 'translateX(-20px)';
-                setTimeout(() => alert.remove(), 300);
-            }, duration);
-        }
-
-        function getAlertIcon(type) {
-            const icons = {
-                'success': 'check-circle',
-                'warning': 'exclamation-triangle',
-                'error': 'exclamation-circle',
-                'info': 'info-circle'
-            };
-            return icons[type] || 'info-circle';
-        }
-
-        function updateLoadingMessage(message) {
-            const loadingMessage = document.getElementById('loading-message');
-            if (loadingMessage) {
-                loadingMessage.textContent = message;
-            }
-        }
-
-        function formatDate(dateString) {
-            try {
-                const date = new Date(dateString);
-                const now = new Date();
-                const diff = now - date;
-                
-                // إذا كان أقل من يوم
-                if (diff < 24 * 60 * 60 * 1000) {
-                    if (diff < 60 * 1000) return 'الآن';
-                    if (diff < 60 * 60 * 1000) return `قبل ${Math.floor(diff / (60 * 1000))} دقيقة`;
-                    return `قبل ${Math.floor(diff / (60 * 60 * 1000))} ساعة`;
-                }
-                
-                return date.toLocaleDateString('ar-SA', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-            } catch (error) {
-                return dateString;
-            }
-        }
-
-        function formatFileSize(bytes) {
-            if (!bytes || bytes === 0) return '0 بايت';
-            const k = 1024;
-            const sizes = ['بايت', 'ك.ب', 'م.ب'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            const size = parseFloat((bytes / Math.pow(k, i)).toFixed(1));
-            return size + ' ' + sizes[i];
-        }
-
-        // ===============================
-        // نظام التشفير وفك التشفير
-        // ===============================
-        function encodeImageToBase64(file) {
-            return new Promise((resolve, reject) => {
-                if (!file) {
-                    reject(new Error('لم يتم اختيار صورة'));
-                    return;
-                }
-
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    resolve(e.target.result);
-                };
-                
-                reader.onerror = function() {
-                    reject(new Error('فشل في قراءة ملف الصورة'));
-                };
-                
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function compressImage(base64String, quality = 0.7, maxWidth = 800) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    let width = img.width;
-                    let height = img.height;
-                    
-                    // حساب الأبعاد الجديدة
-                    if (width > maxWidth) {
-                        height = (height * maxWidth) / width;
-                        width = maxWidth;
-                    }
-                    
-                    canvas.width = width;
-                    canvas.height = height;
-                    
-                    // رسم الصورة على Canvas
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    // الحصول على الصورة المضغوطة
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
-                    
-                    resolve({
-                        base64: compressedBase64,
-                        width: width,
-                        height: height,
-                        quality: quality,
-                        size: compressedBase64.length
-                    });
-                };
-                
-                img.src = base64String;
-            });
-        }
-
-        // ===============================
-        // إدارة تحميل الصور
-        // ===============================
-        function initImageUpload() {
-            const cameraBtn = document.getElementById('camera-btn');
-            const galleryBtn = document.getElementById('gallery-btn');
-            const urlBtn = document.getElementById('url-btn');
-            const fileInput = document.getElementById('file-input');
-            const urlInput = document.getElementById('url-input');
-            const removePreviewBtn = document.getElementById('remove-preview');
-            const publishBtn = document.getElementById('publish-btn');
-            const progressContainer = document.getElementById('progress-container');
-            const progressBar = document.getElementById('progress-bar');
-            const progressText = document.getElementById('progress-text');
-
-            // حدث الكاميرا
-            cameraBtn.addEventListener('click', () => {
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    showAlert("خطأ", "متصفحك لا يدعم استخدام الكاميرا", "error");
-                    return;
-                }
-                
-                fileInput.accept = 'image/*';
-                fileInput.capture = 'environment';
-                fileInput.click();
-            });
-
-            // حدث المعرض
-            galleryBtn.addEventListener('click', () => {
-                fileInput.accept = 'image/*';
-                fileInput.capture = null;
-                fileInput.click();
-            });
-
-            // حدث الرابط
-            urlBtn.addEventListener('click', () => {
-                urlInput.classList.remove('hidden-input');
-                urlInput.focus();
-                showAlert("معلومات", "أدخل رابط الصورة ثم اضغط Enter", "info");
-            });
-
-            // حدث اختيار الملف
-            fileInput.addEventListener('change', handleFileSelect);
-            
-            // حدث إدخال الرابط
-            urlInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleUrlInput();
-                }
-            });
-
-            // حدث إزالة المعاينة
-            removePreviewBtn.addEventListener('click', () => {
-                document.getElementById('preview-section').classList.remove('active');
-                currentImageData = null;
-                fileInput.value = '';
-                urlInput.value = '';
-                urlInput.classList.add('hidden-input');
-                updatePublishButton();
-            });
-
-            // تحديث حالة زر النشر
-            function updatePublishButton() {
-                const title = document.getElementById('image-title').value.trim();
-                const hasImage = currentImageData && currentImageData.compressedBase64;
-                publishBtn.disabled = !(title && hasImage);
-                publishBtn.innerHTML = hasImage ? 
-                    `<i class="fas fa-lock"></i> تشفير ونشر الصورة` :
-                    `<i class="fas fa-ban"></i> اختر صورة أولاً`;
-            }
-
-            // تحديث الأحداث
-            document.getElementById('image-title').addEventListener('input', updatePublishButton);
-            document.getElementById('image-description').addEventListener('input', updatePublishButton);
-
-            // معالجة اختيار الملف
-            async function handleFileSelect(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                if (!file.type.startsWith('image/')) {
-                    showAlert("خطأ", "الرجاء اختيار ملف صورة فقط (JPG, PNG, GIF)", "error");
-                    return;
-                }
-
-                if (file.size > MAX_IMAGE_SIZE) {
-                    showAlert("خطأ", `حجم الصورة كبير جداً. الحد الأقصى ${formatFileSize(MAX_IMAGE_SIZE)}`, "error");
-                    return;
-                }
-
-                await processImageFile(file);
-            }
-
-            // معالجة إدخال الرابط
-            async function handleUrlInput() {
-                const url = urlInput.value.trim();
-                if (!url) return;
-
-                if (!url.startsWith('http')) {
-                    showAlert("خطأ", "الرجاء إدخال رابط صحيح يبدأ بـ http:// أو https://", "error");
-                    return;
-                }
-
-                try {
-                    showProgress("جاري تحميل الصورة من الرابط...", 10);
-                    
-                    const response = await fetch(url);
-                    
-                    if (!response.ok) {
-                        throw new Error('فشل في تحميل الصورة');
-                    }
-                    
-                    const blob = await response.blob();
-                    const file = new File([blob], 'image.jpg', { type: blob.type });
-                    
-                    await processImageFile(file);
-                    
-                } catch (error) {
-                    console.error("❌ خطأ في تحميل الصورة:", error);
-                    showAlert("خطأ", "تعذر تحميل الصورة من الرابط. تأكد من صلاحيته", "error");
-                    hideProgress();
-                }
-            }
-
-            // إظهار شريط التقدم
-            function showProgress(text, percent) {
-                progressContainer.style.display = 'block';
-                progressBar.style.width = percent + '%';
-                progressText.textContent = text;
-            }
-
-            // إخفاء شريط التقدم
-            function hideProgress() {
-                progressContainer.style.display = 'none';
-                progressBar.style.width = '0%';
-            }
-
-            // معالجة ملف الصورة
-            async function processImageFile(file) {
-                try {
-                    isProcessing = true;
-                    showProgress("جاري قراءة الصورة...", 30);
-
-                    // تحويل إلى Base64
-                    const base64 = await encodeImageToBase64(file);
-                    showProgress("جاري معالجة الصورة...", 60);
-
-                    // ضغط الصورة للهواتف
-                    const compressed = await compressImage(base64);
-                    showProgress("جاري إعداد المعاينة...", 90);
-
-                    // حفظ البيانات
-                    currentImageData = {
-                        originalBase64: base64,
-                        compressedBase64: compressed.base64,
-                        fileName: file.name,
-                        fileType: file.type,
-                        fileSize: file.size,
-                        compressedSize: compressed.size,
-                        width: compressed.width,
-                        height: compressed.height,
-                        quality: compressed.quality
-                    };
-
-                    // عرض المعاينة
-                    showImagePreview();
-                    showProgress("اكتمل!", 100);
-
-                    setTimeout(() => {
-                        hideProgress();
-                        showAlert("تم التحميل", "تم تحميل الصورة بنجاح", "success");
-                        updatePublishButton();
-                    }, 500);
-
-                } catch (error) {
-                    console.error("❌ خطأ في معالجة الصورة:", error);
-                    showAlert("خطأ", "تعذر معالجة الصورة. حاول مرة أخرى", "error");
-                    hideProgress();
-                } finally {
-                    isProcessing = false;
-                }
-            }
-
-            // عرض معاينة الصورة
-            function showImagePreview() {
-                const previewSection = document.getElementById('preview-section');
-                const imagePreview = document.getElementById('image-preview');
-                const infoFiletype = document.getElementById('info-filetype');
-                const infoOriginalsize = document.getElementById('info-originalsize');
-                const infoDimensions = document.getElementById('info-dimensions');
-
-                if (!currentImageData) return;
-
-                imagePreview.src = currentImageData.compressedBase64;
-                infoFiletype.textContent = currentImageData.fileType.split('/')[1].toUpperCase();
-                infoOriginalsize.textContent = formatFileSize(currentImageData.fileSize);
-                infoDimensions.textContent = `${currentImageData.width} × ${currentImageData.height}`;
-
-                previewSection.classList.add('active');
-                
-                // تمرير إلى قسم المعاينة
-                previewSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-            
-            // استدعاء التحديث الأولي
-            updatePublishButton();
-        }
-
-        // ===============================
-        // نظام النشر والتحميل
-        // ===============================
-        function initGallery() {
-            const form = document.getElementById('add-image-form');
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await publishImage();
-            });
-
-            // تهيئة الفلاتر
-            initFilters();
-            
-            // تحميل الصور
-            loadGalleryImages();
+function createSelectionControls() {
+    // إنشاء شريط التحكم بالتحديد
+    const selectionBar = document.createElement('div');
+    selectionBar.className = 'selection-controls';
+    selectionBar.id = 'selection-controls';
+    selectionBar.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        padding: 15px 25px;
+        border-radius: var(--radius);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        display: none;
+        z-index: 1001;
+        color: white;
+        text-align: center;
+        min-width: 300px;
+        max-width: 90%;
+        animation: slideUp 0.3s ease;
+        border: 2px solid white;
+    `;
+    
+    selectionBar.innerHTML = `
+        <div style="margin-bottom: 15px; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <i class="fas fa-layer-group"></i>
+            <span id="selected-count">0</span> صورة محددة
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn btn-success btn-sm" id="select-all-btn" style="min-width: 120px;">
+                <i class="fas fa-check-double"></i> تحديد الكل
+            </button>
+            <button class="btn btn-warning btn-sm" id="deselect-all-btn" style="min-width: 120px;">
+                <i class="fas fa-times-circle"></i> إلغاء الكل
+            </button>
+            <button class="btn btn-danger btn-sm" id="delete-selected-btn" style="min-width: 120px;">
+                <i class="fas fa-trash-alt"></i> حذف المحدد
+            </button>
+            <button class="btn btn-secondary btn-sm" id="cancel-select-btn" style="min-width: 120px;">
+                <i class="fas fa-times"></i> إنهاء
+            </button>
+        </div>
+        <div style="margin-top: 10px; font-size: 0.85rem; opacity: 0.9;">
+            <i class="fas fa-info-circle"></i> يمكنك تحديد عدة صور لحذفها مرة واحدة
+        </div>
+    `;
+    
+    document.body.appendChild(selectionBar);
+    
+    // إضافة أنماط CSS للتحكم
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
         
-        function initFilters() {
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            filterButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    // إزالة النشاط من جميع الأزرار
-                    filterButtons.forEach(b => b.classList.remove('active'));
-                    // إضافة النشاط للزر المضغوط
-                    btn.classList.add('active');
-                    // تغيير الفلتر
-                    currentFilter = btn.dataset.filter;
-                    // إعادة عرض المعرض
-                    renderGallery();
-                });
-            });
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
+        
+        .selection-checkbox {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 22px;
+            height: 22px;
+            z-index: 10;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .gallery-item.select-mode {
+            transform: scale(0.98);
+            border: 2px dashed var(--primary);
+            position: relative;
+        }
+        
+        .gallery-item.select-mode::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(52, 152, 219, 0.1);
+            z-index: 1;
+            border-radius: var(--radius);
+        }
+        
+        .gallery-item.selected {
+            border: 3px solid var(--accent);
+            box-shadow: 0 0 20px rgba(26, 188, 156, 0.4);
+            transform: scale(0.95);
+        }
+        
+        .gallery-item.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--accent);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 11;
+            animation: fadeIn 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .multi-select-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: linear-gradient(135deg, var(--warning) 0%, #e67e22 100%);
+            color: white;
+            border-radius: var(--radius) var(--radius) 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+        
+        .gallery-actions.select-mode {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    `;
+    
+    document.head.appendChild(style);
+    
+    // إضافة مستمعي الأحداث للأزرار
+    setupSelectionEvents();
+}
 
-        async function publishImage() {
-            if (!userId || !database) {
-                showAlert("خطأ", "يرجى تسجيل الدخول أولاً", "error");
-                return;
-            }
+function setupSelectionEvents() {
+    // تحديد الكل
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('#select-all-btn')) {
+            selectAllImages();
+        }
+        
+        if (e.target.closest('#deselect-all-btn')) {
+            deselectAllImages();
+        }
+        
+        if (e.target.closest('#delete-selected-btn')) {
+            deleteSelectedImages();
+        }
+        
+        if (e.target.closest('#cancel-select-btn')) {
+            exitSelectMode();
+        }
+    });
+}
 
-            if (!currentImageData) {
-                showAlert("خطأ", "الرجاء اختيار صورة أولاً", "error");
-                return;
-            }
+function toggleSelectMode() {
+    if (!isSelectMode) {
+        enterSelectMode();
+    } else {
+        exitSelectMode();
+    }
+}
 
-            if (isProcessing) {
-                showAlert("معلومات", "جاري معالجة الصورة، الرجاء الانتظار...", "info");
-                return;
-            }
+function enterSelectMode() {
+    isSelectMode = true;
+    selectedImages.clear();
+    
+    // تغيير زر التحديد
+    const selectBtn = document.getElementById('multi-select-btn');
+    if (selectBtn) {
+        selectBtn.innerHTML = '<i class="fas fa-times"></i> إنهاء التحديد';
+        selectBtn.classList.remove('btn-warning');
+        selectBtn.classList.add('btn-danger');
+    }
+    
+    // إظهار شريط التحكم
+    const selectionBar = document.getElementById('selection-controls');
+    if (selectionBar) {
+        selectionBar.style.display = 'block';
+        updateSelectionCount();
+    }
+    
+    // حفظ العناصر الأصلية
+    originalGalleryItems = [...document.querySelectorAll('.gallery-item')];
+    
+    // تمكين وضع التحديد على جميع العناصر
+    originalGalleryItems.forEach(item => {
+        // إضافة وضع التحديد
+        item.classList.add('select-mode');
+        
+        // إضافة حدث النقر للتحديد
+        item.addEventListener('click', handleImageSelection);
+        
+        // تعطيل الأحداث الأخرى
+        const actions = item.querySelector('.gallery-actions');
+        if (actions) {
+            actions.classList.add('select-mode');
+        }
+    });
+    
+    // إضافة رسالة في الهيدر
+    addSelectionHeader();
+    
+    showAlert("معلومات", "وضع التحديد نشط. انقر على الصور لتحديدها، ثم استخدم أزرار التحكم", "info");
+}
 
-            const title = document.getElementById('image-title').value.trim();
-            const description = document.getElementById('image-description').value.trim();
+function exitSelectMode() {
+    isSelectMode = false;
+    
+    // إعادة زر التحديد
+    const selectBtn = document.getElementById('multi-select-btn');
+    if (selectBtn) {
+        selectBtn.innerHTML = '<i class="fas fa-check-square"></i> تحديد صور';
+        selectBtn.classList.remove('btn-danger');
+        selectBtn.classList.add('btn-warning');
+    }
+    
+    // إخفاء شريط التحكم
+    const selectionBar = document.getElementById('selection-controls');
+    if (selectionBar) {
+        selectionBar.style.display = 'none';
+    }
+    
+    // إزالة وضع التحديد من جميع العناصر
+    document.querySelectorAll('.gallery-item').forEach(item => {
+        item.classList.remove('select-mode', 'selected');
+        item.removeEventListener('click', handleImageSelection);
+        
+        // تمكين الأحداث الأخرى
+        const actions = item.querySelector('.gallery-actions');
+        if (actions) {
+            actions.classList.remove('select-mode');
+        }
+    });
+    
+    // إزالة الهيدر
+    removeSelectionHeader();
+    
+    selectedImages.clear();
+}
 
-            if (!title) {
-                showAlert("خطأ", "الرجاء إدخال عنوان للصورة", "error");
-                return;
-            }
+function addSelectionHeader() {
+    const galleryCard = document.querySelector('.card .card-body');
+    if (!galleryCard) return;
+    
+    const header = document.createElement('div');
+    header.className = 'multi-select-header';
+    header.id = 'multi-select-header';
+    header.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-mouse-pointer"></i>
+            <span>وضع التحديد نشط - انقر على الصور لتحديدها</span>
+        </div>
+        <div style="font-size: 0.9rem;">
+            <i class="fas fa-info-circle"></i> الصور المحددة: <span id="header-selected-count">0</span>
+        </div>
+    `;
+    
+    galleryCard.insertBefore(header, galleryCard.firstChild);
+}
 
+function removeSelectionHeader() {
+    const header = document.getElementById('multi-select-header');
+    if (header) {
+        header.remove();
+    }
+}
+
+function handleImageSelection(e) {
+    if (!isSelectMode) return;
+    
+    // البحث عن عنصر gallery-item
+    const galleryItem = e.target.closest('.gallery-item');
+    if (!galleryItem) return;
+    
+    const imageId = galleryItem.dataset.id;
+    
+    if (!imageId) {
+        console.error('❌ لا يوجد معرف للصورة');
+        return;
+    }
+    
+    // تبديل التحديد
+    if (selectedImages.has(imageId)) {
+        // إلغاء التحديد
+        selectedImages.delete(imageId);
+        galleryItem.classList.remove('selected');
+    } else {
+        // تحديد
+        selectedImages.add(imageId);
+        galleryItem.classList.add('selected');
+    }
+    
+    // تحديث العداد
+    updateSelectionCount();
+    
+    // تأثير صوتي (اختياري)
+    playSelectionSound();
+}
+
+function updateSelectionCount() {
+    const count = selectedImages.size;
+    
+    // تحديث شريط التحكم
+    const selectionCount = document.getElementById('selected-count');
+    if (selectionCount) {
+        selectionCount.textContent = count;
+        selectionCount.style.color = count > 0 ? '#ffeaa7' : 'white';
+        selectionCount.style.fontWeight = 'bold';
+    }
+    
+    // تحديث الهيدر
+    const headerCount = document.getElementById('header-selected-count');
+    if (headerCount) {
+        headerCount.textContent = count;
+        headerCount.style.color = count > 0 ? '#ffeaa7' : 'white';
+        headerCount.style.fontWeight = 'bold';
+    }
+    
+    // تحديث زر الحذف
+    const deleteBtn = document.getElementById('delete-selected-btn');
+    if (deleteBtn) {
+        if (count > 0) {
+            deleteBtn.innerHTML = `<i class="fas fa-trash-alt"></i> حذف (${count})`;
+            deleteBtn.classList.add('pulse');
+        } else {
+            deleteBtn.innerHTML = `<i class="fas fa-trash-alt"></i> حذف المحدد`;
+            deleteBtn.classList.remove('pulse');
+        }
+    }
+}
+
+function selectAllImages() {
+    if (!isSelectMode) return;
+    
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    selectedImages.clear();
+    
+    galleryItems.forEach(item => {
+        const imageId = item.dataset.id;
+        if (imageId) {
+            selectedImages.add(imageId);
+            item.classList.add('selected');
+        }
+    });
+    
+    updateSelectionCount();
+    showAlert("معلومات", `تم تحديد جميع الصور (${selectedImages.size})`, "info");
+}
+
+function deselectAllImages() {
+    if (!isSelectMode) return;
+    
+    selectedImages.clear();
+    document.querySelectorAll('.gallery-item.selected').forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    updateSelectionCount();
+    showAlert("معلومات", "تم إلغاء تحديد جميع الصور", "info");
+}
+
+async function deleteSelectedImages() {
+    if (!isSelectMode || selectedImages.size === 0) {
+        showAlert("تحذير", "لم تقم بتحديد أي صور للحذف", "warning");
+        return;
+    }
+    
+    // تأكيد الحذف
+    if (!confirm(`هل أنت متأكد من حذف ${selectedImages.size} صورة؟\n\n⚠️ هذا الإجراء لا يمكن التراجع عنه!`)) {
+        return;
+    }
+    
+    try {
+        // إظهار تحميل
+        showAlert("معلومات", `جاري حذف ${selectedImages.size} صورة...`, "info");
+        
+        // قائمة الانتظار للحذف
+        const deletePromises = [];
+        const errors = [];
+        
+        for (const imageId of selectedImages) {
             try {
-                isProcessing = true;
-                const publishBtn = document.getElementById('publish-btn');
-                publishBtn.disabled = true;
-                publishBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> جاري النشر...`;
-
-                // إنشاء معرف فريد للصورة
-                const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                
-                // بيانات الصورة
-                const imageData = {
-                    id: imageId,
-                    title: title,
-                    description: description || '',
-                    encodedData: currentImageData.compressedBase64, // الصورة المشفرة
-                    fileName: currentImageData.fileName,
-                    fileType: currentImageData.fileType,
-                    originalSize: currentImageData.fileSize,
-                    compressedSize: currentImageData.compressedSize,
-                    dimensions: {
-                        width: currentImageData.width,
-                        height: currentImageData.height
-                    },
-                    quality: currentImageData.quality,
-                    addedBy: userNickname || userName || 'مستخدم',
-                    addedById: userId,
-                    createdAt: new Date().toISOString(),
-                    createdAtTimestamp: Date.now(),
-                    views: 0,
-                    likes: 0,
-                    likedBy: {}
-                };
-
-                // حفظ في قاعدة البيانات
-                const galleryRef = ref(database, `classes/${classId}/gallery/${imageId}`);
-                await set(galleryRef, imageData);
-
-                // إعادة تعيين النموذج
-                resetForm();
-
-                // عرض رسالة النجاح
-                showAlert("🎉 تم النشر بنجاح", 
-                    `تم نشر الصورة "${title}" في المعرض!`, 
-                    "success");
-
-                // تحديث الإحصائيات
-                updateStatistics();
-
+                const deletePromise = deleteImageFromDatabase(imageId);
+                deletePromises.push(deletePromise);
             } catch (error) {
-                console.error("❌ خطأ في نشر الصورة:", error);
-                showAlert("خطأ", "تعذر نشر الصورة. حاول مرة أخرى", "error");
-            } finally {
-                isProcessing = false;
-                const publishBtn = document.getElementById('publish-btn');
-                publishBtn.disabled = false;
-                publishBtn.innerHTML = `<i class="fas fa-lock"></i> تشفير ونشر الصورة`;
+                errors.push({ id: imageId, error: error.message });
             }
         }
-
-        function resetForm() {
-            document.getElementById('add-image-form').reset();
-            document.getElementById('preview-section').classList.remove('active');
-            document.getElementById('url-input').value = '';
-            document.getElementById('url-input').classList.add('hidden-input');
-            currentImageData = null;
-            document.getElementById('file-input').value = '';
-            const publishBtn = document.getElementById('publish-btn');
-            publishBtn.innerHTML = `<i class="fas fa-ban"></i> اختر صورة أولاً`;
-        }
-
-        function loadGalleryImages() {
-            if (!userId || !database) return;
-
-            const galleryRef = ref(database, `classes/${classId}/gallery`);
-
-            onValue(galleryRef, (snapshot) => {
-                const data = snapshot.val() || {};
-                galleryItems = Object.entries(data).map(([id, image]) => ({
-                    id,
-                    ...image
-                }));
-
-                renderGallery();
-                updateStatistics();
+        
+        // تنفيذ جميع عمليات الحذف
+        await Promise.allSettled(deletePromises);
+        
+        // عرض النتائج
+        if (errors.length > 0) {
+            showAlert("تحذير", 
+                `تم حذف ${selectedImages.size - errors.length} صورة\n\n` +
+                `فشل في حذف ${errors.length} صورة`, 
+                "warning");
+        } else {
+            showAlert("نجاح", 
+                `تم حذف ${selectedImages.size} صورة بنجاح!`, 
+                "success");
+            
+            // تأثير مرئي
+            document.querySelectorAll('.gallery-item.selected').forEach(item => {
+                item.style.transition = 'all 0.5s';
+                item.style.opacity = '0';
+                item.style.transform = 'scale(0.8) translateY(20px)';
+                
+                setTimeout(() => {
+                    item.remove();
+                }, 500);
             });
         }
+        
+        // الخروج من وضع التحديد
+        exitSelectMode();
+        
+        // تحديث الإحصائيات
+        updateStatistics();
+        
+    } catch (error) {
+        console.error("❌ خطأ في حذف الصور المحددة:", error);
+        showAlert("خطأ", "حدث خطأ أثناء حذف الصور", "error");
+    }
+}
 
-        function renderGallery() {
-            const galleryList = document.getElementById('gallery-list');
-            const galleryCount = document.getElementById('gallery-count');
-            const emptyGallery = document.getElementById('empty-gallery');
-            const loadMoreContainer = document.getElementById('load-more-container');
+async function deleteImageFromDatabase(imageId) {
+    if (!database) {
+        throw new Error("قاعدة البيانات غير متاحة");
+    }
+    
+    try {
+        const imageRef = ref(database, `classes/${classId}/gallery/${imageId}`);
+        await remove(imageRef);
+        return { success: true, id: imageId };
+    } catch (error) {
+        console.error(`❌ خطأ في حذف الصورة ${imageId}:`, error);
+        throw error;
+    }
+}
 
-            if (!galleryList || !galleryCount) return;
+function playSelectionSound() {
+    // إنشاء صوت بسيط باستخدام Web Audio API
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(selectedImages.size % 2 === 0 ? 800 : 600, audioContext.currentTime);
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+        
+    } catch (error) {
+        // تجاهل الخطأ إذا لم يكن Web Audio API مدعوماً
+        console.log("⚠️ Web Audio API غير مدعوم");
+    }
+}
 
-            // تطبيق الفلتر
-            let filteredImages = [...galleryItems];
-            
-            switch(currentFilter) {
-                case 'mine':
-                    filteredImages = galleryItems.filter(img => img.addedById === userId);
-                    break;
-                case 'recent':
-                    filteredImages = galleryItems.sort((a, b) => 
-                        (b.createdAtTimestamp || 0) - (a.createdAtTimestamp || 0)
-                    );
-                    break;
-                case 'popular':
-                    filteredImages = galleryItems.sort((a, b) => 
-                        (b.views || 0) - (a.views || 0)
-                    );
-                    break;
-                default:
-                    // الكل - الأحدث أولاً
-                    filteredImages = galleryItems.sort((a, b) => 
-                        (b.createdAtTimestamp || 0) - (a.createdAtTimestamp || 0)
-                    );
-            }
+// دالة مساعدة لعرض التنبيهات
+function showAlert(title, message, type = 'info', duration = 4000) {
+    const alertsContainer = document.getElementById('alerts-container');
+    if (!alertsContainer) return;
+    
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.innerHTML = `
+        <i class="fas fa-${getAlertIcon(type)} alert-icon"></i>
+        <div>
+            <strong>${title}</strong><br>
+            ${message}
+        </div>
+    `;
+    
+    alertsContainer.insertBefore(alert, alertsContainer.firstChild);
+    
+    // إزالة التنبيه بعد المدة المحددة
+    setTimeout(() => {
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(-20px)';
+        setTimeout(() => alert.remove(), 300);
+    }, duration);
+}
 
-            galleryCount.textContent = `${filteredImages.length} صورة`;
+function getAlertIcon(type) {
+    const icons = {
+        'success': 'check-circle',
+        'warning': 'exclamation-triangle',
+        'error': 'exclamation-circle',
+        'info': 'info-circle'
+    };
+    return icons[type] || 'info-circle';
+}
 
-            if (filteredImages.length === 0) {
-                emptyGallery.style.display = 'block';
-                galleryList.innerHTML = '';
-                loadMoreContainer.style.display = 'none';
-                return;
-            }
+// ===============================
+// تعديل دالة renderGallery لدعم التحديد
+// ===============================
 
-            emptyGallery.style.display = 'none';
+// حفظ النسخة الأصلية من renderGallery
+const originalRenderGallery = window.renderGallery || renderGallery;
 
-            // عرض الصور (بدون نصوص مشفرة)
-            galleryList.innerHTML = filteredImages.slice(0, 6).map(image => createGalleryItem(image)).join('');
-
-            // عرض زر تحميل المزيد إذا كان هناك أكثر من 6 صور
-            if (filteredImages.length > 6) {
-                loadMoreContainer.style.display = 'block';
-                const loadMoreBtn = document.getElementById('load-more-btn');
-                loadMoreBtn.onclick = () => loadMoreImages(filteredImages);
-            } else {
-                loadMoreContainer.style.display = 'none';
-            }
-
-            // إضافة مستمعي الأحداث
-            addGalleryEventListeners();
-        }
-
-        function loadMoreImages(filteredImages) {
-            if (isLoadingMore) return;
-            
-            isLoadingMore = true;
-            const galleryList = document.getElementById('gallery-list');
-            const currentCount = document.querySelectorAll('.gallery-item').length;
-            const imagesToAdd = filteredImages.slice(currentCount, currentCount + 3);
-
-            if (imagesToAdd.length === 0) {
-                document.getElementById('load-more-container').style.display = 'none';
-                isLoadingMore = false;
-                return;
-            }
-
-            imagesToAdd.forEach(image => {
-                const itemHTML = createGalleryItem(image);
-                galleryList.insertAdjacentHTML('beforeend', itemHTML);
-            });
-
-            // إعادة إضافة مستمعي الأحداث للعناصر الجديدة
-            addGalleryEventListeners();
-            
-            isLoadingMore = false;
-        }
-
-        function createGalleryItem(image) {
-            const isOwner = image.addedById === userId;
-            const savingPercent = image.originalSize && image.compressedSize ? 
-                Math.round((1 - image.compressedSize / image.originalSize) * 100) : 0;
-
-            return `
-                <div class="gallery-item" data-id="${image.id}">
-                    <div class="gallery-header">
-                        <div class="gallery-title">${image.title}</div>
-                        <div class="gallery-meta">
-                            <div class="gallery-author">
-                                <i class="fas fa-user"></i>
-                                <span>${image.addedBy || 'مجهول'}</span>
-                            </div>
-                            <div class="gallery-date">
-                                <i class="far fa-clock"></i>
-                                <span>${formatDate(image.createdAt)}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="gallery-body">
-                        <!-- عرض الصورة مباشرة بدون أي ضغطات -->
-                        <div class="image-display">
-                            <img src="${image.encodedData}" 
-                                 alt="${image.title}" 
-                                 loading="lazy"
-                                 onload="this.style.opacity='1'"
-                                 style="opacity:0; transition: opacity 0.3s">
-                        </div>
-                        
-                        ${image.description ? `
-                            <div class="gallery-description">
-                                ${image.description}
-                            </div>
-                        ` : ''}
-                        
-                        <div class="gallery-stats">
-                            <div class="stat" title="الأبعاد">
-                                <i class="fas fa-expand-alt"></i>
-                                <span>${image.dimensions?.width || 0}×${image.dimensions?.height || 0}</span>
-                            </div>
-                            <div class="stat" title="الحجم">
-                                <i class="fas fa-weight-hanging"></i>
-                                <span>${formatFileSize(image.compressedSize || 0)}</span>
-                            </div>
-                            <div class="stat" title="عدد المشاهدات">
-                                <i class="fas fa-eye"></i>
-                                <span>${image.views || 0}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="gallery-footer">
-                        <div class="gallery-actions">
-                            <!-- زر عرض كامل الشاشة -->
-                            <button class="btn btn-success btn-sm view-btn" data-id="${image.id}" data-image="${image.encodedData}">
-                                <i class="fas fa-expand"></i> عرض كامل
-                            </button>
-                            
-                            <!-- زر تنزيل الصورة -->
-                            <button class="btn btn-primary btn-sm download-btn" data-id="${image.id}" 
-                                    data-filename="${image.title.replace(/[^a-z0-9]/gi, '_')}.jpg"
-                                    data-image="${image.encodedData}">
-                                <i class="fas fa-download"></i> تنزيل
-                            </button>
-                            
-                            ${isOwner ? `
-                                <button class="btn btn-danger btn-sm delete-btn" data-id="${image.id}">
-                                    <i class="fas fa-trash"></i> حذف
-                                </button>
-                            ` : ''}
-                        </div>
-                        <div style="color: #666; font-size: 0.85rem; text-align: center;">
-                            <i class="fas fa-check-circle" style="color: var(--success);"></i> معروضة تلقائياً
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function addGalleryEventListeners() {
-            // زر العرض الكامل
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const imageId = e.target.closest('.view-btn').dataset.id;
-                    const imageData = e.target.closest('.view-btn').dataset.image;
-                    viewImageFullscreen(imageId, imageData);
-                });
-            });
-
-            // زر التنزيل
-            document.querySelectorAll('.download-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const imageId = e.target.closest('.download-btn').dataset.id;
-                    const filename = e.target.closest('.download-btn').dataset.filename;
-                    const imageData = e.target.closest('.download-btn').dataset.image;
-                    await downloadImage(imageId, filename, imageData);
-                });
-            });
-
-            // زر الحذف
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const imageId = e.target.closest('.delete-btn').dataset.id;
-                    deleteImage(imageId);
-                });
-            });
-        }
-
-        function viewImageFullscreen(imageId, imageData) {
-            const image = galleryItems.find(img => img.id === imageId);
-            if (!image) {
-                showAlert("خطأ", "الصورة غير موجودة", "error");
-                return;
-            }
-
-            // زيادة عدد المشاهدات
-            updateViewCount(imageId);
-
-            // فتح نافذة العرض
-            const modal = document.getElementById('image-modal');
-            const modalImage = document.getElementById('modal-image');
-            const modalTitle = document.getElementById('modal-title');
-            const modalFooter = document.getElementById('modal-footer');
-            const modalClose = document.getElementById('modal-close');
-
-            modalImage.src = imageData;
-            modalTitle.textContent = image.title;
-            modalFooter.innerHTML = `
-                نشرها: <strong>${image.addedBy}</strong> | 
-                الأبعاد: <strong>${image.dimensions?.width || 0}×${image.dimensions?.height || 0}</strong> | 
-                المشاهدات: <strong>${(image.views || 0) + 1}</strong>
-                <br>
-                <button class="btn btn-sm btn-success" style="margin-top: 10px;" onclick="downloadImage('${imageId}', '${image.title.replace(/[^a-z0-9]/gi, '_')}.jpg', '${imageData}')">
-                    <i class="fas fa-download"></i> تنزيل الصورة
-                </button>
-            `;
-
-            modal.classList.add('active');
-            document.body.classList.add('modal-open');
-
-            // إغلاق النافذة
-            modalClose.onclick = () => {
-                modal.classList.remove('active');
-                document.body.classList.remove('modal-open');
-            };
-            
-            modal.onclick = (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                    document.body.classList.remove('modal-open');
-                }
-            };
-
-            // إغلاق بالزر ESC
-            document.addEventListener('keydown', function closeOnEsc(e) {
-                if (e.key === 'Escape') {
-                    modal.classList.remove('active');
-                    document.body.classList.remove('modal-open');
-                    document.removeEventListener('keydown', closeOnEsc);
-                }
-            });
-        }
-
-        async function downloadImage(imageId, filename, imageData) {
-            try {
-                // زيادة عدد المشاهدات
-                await updateViewCount(imageId);
-                
-                // تحويل Base64 إلى Blob
-                const response = await fetch(imageData);
-                const blob = await response.blob();
-                
-                // إنشاء رابط تنزيل
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-                
-                showAlert("تم التنزيل", "تم تحميل الصورة بنجاح", "success");
-                
-            } catch (error) {
-                console.error("❌ خطأ في تنزيل الصورة:", error);
-                showAlert("خطأ", "تعذر تنزيل الصورة", "error");
-            }
-        }
-
-        async function updateViewCount(imageId) {
-            if (!database) return;
-
-            try {
-                const imageRef = ref(database, `classes/${classId}/gallery/${imageId}`);
-                const snapshot = await get(imageRef);
-                
-                if (snapshot.exists()) {
-                    const imageData = snapshot.val();
-                    const currentViews = imageData.views || 0;
-                    
-                    await update(imageRef, {
-                        views: currentViews + 1
-                    });
-                }
-            } catch (error) {
-                console.warn("⚠️ لم تحديث عدد المشاهدات:", error);
-            }
-        }
-
-        async function deleteImage(imageId) {
-            if (!confirm('هل أنت متأكد من حذف هذه الصورة؟ هذا الإجراء لا يمكن التراجع عنه.')) {
-                return;
-            }
-
-            try {
-                const imageRef = ref(database, `classes/${classId}/gallery/${imageId}`);
-                await remove(imageRef);
-
-                showAlert("تم الحذف", "تم حذف الصورة بنجاح", "success");
-
-            } catch (error) {
-                console.error("❌ خطأ في حذف الصورة:", error);
-                showAlert("خطأ", "تعذر حذف الصورة", "error");
-            }
-        }
-
-        function updateStatistics() {
-            const statsTotal = document.getElementById('stats-total');
-            const statsMysize = document.getElementById('stats-mysize');
-            const statsViews = document.getElementById('stats-views');
-
-            if (!galleryItems.length) {
-                statsTotal.textContent = '0';
-                statsMysize.textContent = '0';
-                statsViews.textContent = '0';
-                return;
-            }
-
-            // الإجمالي
-            statsTotal.textContent = galleryItems.length;
-
-            // صوري
-            const myImages = galleryItems.filter(img => img.addedById === userId);
-            statsMysize.textContent = myImages.length;
-
-            // إجمالي المشاهدات
-            const totalViews = galleryItems.reduce((sum, img) => sum + (img.views || 0), 0);
-            statsViews.textContent = totalViews;
-        }
-
-        // ===============================
-        // إدارة المستخدم
-        // ===============================
-        function checkAuthStatus() {
-            updateLoadingMessage("جاري التحقق من حالة الدخول...");
-
-            if (!auth) {
-                console.error("❌ Firebase Authentication غير متوفر");
-                redirectToLogin();
-                return;
-            }
-
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    console.log("✅ المستخدم مسجل:", user.email);
-                    currentUser = user;
-                    userId = user.uid;
-                    
-                    await loadUserData();
-                    showUserInterface();
-                    
-                } else {
-                    console.log("❌ المستخدم غير مسجل");
-                    redirectToLogin();
-                }
-            }, (error) => {
-                console.error("❌ خطأ في التحقق من المصادقة:", error);
-                updateLoadingMessage("خطأ في الاتصال بالخادم");
-                redirectToLogin();
-            });
-        }
-
-        async function loadUserData() {
-            if (!userId || !database) return;
-
-            try {
-                const userRef = ref(database, `users/${userId}`);
-                const snapshot = await get(userRef);
-                
-                if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    userFullName = userData.fullName || userData.displayName || 'مستخدم';
-                    userName = userData.firstName || userData.displayName || 'مستخدم';
-                    userNickname = userData.nickname || userData.displayName || userData.firstName || 'مستخدم';
-                    updateUserDisplay();
-                    await addUserToClass();
-                } else {
-                    userFullName = currentUser.displayName || currentUser.email || 'مستخدم';
-                    userName = currentUser.displayName || currentUser.email || 'مستخدم';
-                    userNickname = currentUser.displayName || currentUser.email || 'مستخدم';
-                    updateUserDisplay();
-                }
-                
-            } catch (error) {
-                console.warn("⚠️ لم يتم تحميل بيانات المستخدم:", error);
-                userFullName = currentUser.displayName || currentUser.email || 'مستخدم';
-                userName = currentUser.displayName || currentUser.email || 'مستخدم';
-                userNickname = currentUser.displayName || currentUser.email || 'مستخدم';
-                updateUserDisplay();
-            }
-        }
-
-        function updateUserDisplay() {
-            const userDisplay = document.getElementById('user-display-name');
-            const welcomeMessage = document.getElementById('welcome-message');
-            const userNameElement = document.getElementById('user-name');
-
-            if (userDisplay) {
-                userDisplay.textContent = `معرض ${userNickname || userName}`;
-            }
-
-            if (welcomeMessage) {
-                const now = new Date();
-                const hour = now.getHours();
-                let greeting = '';
-                
-                if (hour < 12) greeting = 'صباح الخير';
-                else if (hour < 18) greeting = 'مساء الخير';
-                else greeting = 'مساء الخير';
-                
-                welcomeMessage.textContent = greeting;
-            }
-
-            if (userNameElement) {
-                userNameElement.textContent = userNickname || userName;
-            }
-        }
-
-        async function addUserToClass() {
-            if (!userId || !database) return;
-
-            try {
-                const classRef = ref(database, `classes/${classId}`);
-                const classSnapshot = await get(classRef);
-                
-                if (!classSnapshot.exists()) {
-                    await set(classRef, {
-                        name: 'شعبة 306',
-                        description: 'الصف الدراسي المشترك لشعبة 306',
-                        created: new Date().toISOString(),
-                        members: { [userId]: true },
-                        memberCount: 1
-                    });
-                    
-                    // إنشاء قسم المعرض
-                    await set(ref(database, `classes/${classId}/gallery`), {});
-                    
-                    console.log('✅ تم إنشاء الصف المشترك');
-                }
-            } catch (error) {
-                console.warn("⚠️ لم يتم إضافة المستخدم للصف:", error);
-            }
-        }
-
-        function showUserInterface() {
-            const loadingScreen = document.getElementById('loading-screen');
-            const mainContainer = document.getElementById('main-container');
-            
-            if (loadingScreen) {
-                loadingScreen.style.display = 'none';
-            }
-            
-            if (mainContainer) {
-                mainContainer.style.display = 'block';
-            }
-            
-            // تهيئة نظام رفع الصور
-            initImageUpload();
-            
-            // تهيئة المعرض
-            initGallery();
-            
-            // تهيئة زر الخروج
-            const logoutBtn = document.getElementById('logout-btn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', async () => {
-                    if (confirm('هل تريد تسجيل الخروج من النظام؟')) {
-                        try {
-                            await signOut(auth);
-                            showAlert("تم تسجيل الخروج", "تم تسجيل الخروج بنجاح!", "success");
-                            
-                            setTimeout(() => {
-                                window.location.href = "index.html";
-                            }, 1500);
-                            
-                        } catch (error) {
-                            console.error("❌ خطأ تسجيل الخروج:", error);
-                            showAlert("خطأ", "تعذر تسجيل الخروج", "error");
-                        }
-                    }
-                });
-            }
-            
-            // تهيئة زر التبديل للهواتف
-            const navToggle = document.getElementById('nav-toggle');
-            if (navToggle) {
-                navToggle.addEventListener('click', () => {
-                    const mainNav = document.querySelector('.main-nav');
-                    if (mainNav) {
-                        mainNav.classList.toggle('active');
-                    }
-                });
-            }
-            
-            // إغلاق القائمة عند النقر خارجها
-            document.addEventListener('click', (e) => {
-                const mainNav = document.querySelector('.main-nav');
-                const navToggle = document.getElementById('nav-toggle');
-                
-                if (mainNav && mainNav.classList.contains('active') && 
-                    !mainNav.contains(e.target) && 
-                    navToggle && !navToggle.contains(e.target)) {
-                    mainNav.classList.remove('active');
-                }
-            });
-        }
-
-        function redirectToLogin() {
-            updateLoadingMessage("جاري التوجيه إلى صفحة الدخول...");
-            
-            setTimeout(() => {
-                window.location.href = "index.html";
-            }, 2000);
-        }
-
-        // ===============================
-        // بدء التطبيق
-        // ===============================
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log("🚀 بدء تحميل معرض الصور المشفر...");
-            checkAuthStatus();
-            
-            // جعل وظائف التنزيل متاحة عالمياً
-            window.downloadImage = downloadImage;
-            window.viewImageFullscreen = viewImageFullscreen;
+// تعديل دالة renderGallery لإضافة data-id
+function enhancedRenderGallery() {
+    // استدعاء الدالة الأصلية
+    if (originalRenderGallery) {
+        originalRenderGallery();
+    }
+    
+    // إضافة data-id للعناصر
+    setTimeout(() => {
+        document.querySelectorAll('.gallery-item').forEach((item, index) => {
+            const imageId = `img_${Date.now()}_${index}`;
+            item.dataset.id = imageId;
         });
+    }, 100);
+}
+
+// استبدال الدالة الأصلية
+window.renderGallery = enhancedRenderGallery;
+
+// ===============================
+// تهيئة النظام عند تحميل الصفحة
+// ===============================
+
+// إضافة حدث لتهيئة نظام التحديد
+document.addEventListener('DOMContentLoaded', () => {
+    // الانتظار حتى يكتمل تحميل Firebase والمستخدم
+    setTimeout(() => {
+        initMultiDeleteSystem();
+    }, 2000);
+});
+
+// جعل الدوال متاحة عالمياً للنقر من HTML
+window.toggleSelectMode = toggleSelectMode;
+window.selectAllImages = selectAllImages;
+window.deselectAllImages = deselectAllImages;
+window.deleteSelectedImages = deleteSelectedImages;
     </script>
 </body>
+
 </html>
