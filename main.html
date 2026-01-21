@@ -1523,11 +1523,16 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
                         <select id="assignment-subject" class="form-control" required>
                             <option value="">اختر المادة</option>
                             <option value="الرياضيات">الرياضيات</option>
-                            <option value="اللغة العربية">اللغة العربية</option>
-                            <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                            <option value="فقه">فقه</option>
+                            <option value="انجليزي">انجليزي</option>
                             <option value="الفيزياء">الفيزياء</option>
-                            <option value="الكيمياء">الكيمياء</option>
-                            <option value="التاريخ">التاريخ</option>
+                            <option value="الدراسات الأدبية">الدراسات الأدبية</option>
+                            <option value="الجغرافيا">الجغرافيا</option>
+                            <option value="المواطنة الرقمية">المواطنة الرقمية</option>
+                            <option value="تنمية مستدامة">تنمية مستدامة</option>
+                            <option value="الدراسات النفسية">الدراسات النفسية</option>
+                            <option value="المهارات الحياتية">المهارات الحياتية</option>
+                            <option value="الفقه">الفقه</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1582,6 +1587,7 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
                                 <th>الحصة الرابعة</th>
                                 <th>الحصة الخامسة</th>
                                 <th>الحصة السادسة</th>
+                                <th>الحصة السابعة</th>
                             </tr>
                         </thead>
                         <tbody id="schedule-body">
@@ -1608,11 +1614,16 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
                         <select id="exam-subject" class="form-control" required>
                             <option value="">اختر المادة</option>
                             <option value="الرياضيات">الرياضيات</option>
-                            <option value="اللغة العربية">اللغة العربية</option>
-                            <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                            <option value="فقه">فقه</option>
+                            <option value="انجليزي">انجليزي</option>
                             <option value="الفيزياء">الفيزياء</option>
-                            <option value="الكيمياء">الكيمياء</option>
-                            <option value="التاريخ">التاريخ</option>
+                            <option value="الدراسات الأدبية">الدراسات الأدبية</option>
+                            <option value="الجغرافيا">الجغرافيا</option>
+                            <option value="المواطنة الرقمية">المواطنة الرقمية</option>
+                            <option value="تنمية مستدامة">تنمية مستدامة</option>
+                            <option value="الدراسات النفسية">الدراسات النفسية</option>
+                            <option value="المهارات الحياتية">المهارات الحياتية</option>
+                            <option value="الفقه">الفقه</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -4299,11 +4310,11 @@ async function loadSchedule() {
 
 function getDefaultSchedule() {
     return {
-        "الأحد": ["الرياضيات", "المواطنة الرقمية", "اللغة الإنجليزية", "الفيزياء", "الكيمياء", "الجغرافيا"],
-        "الإثنين": ["المواطنة الرقمية", "الرياضيات", "الفيزياء", "الكيمياء", "اللغة الإنجليزية", "الجغرافيا"],
-        "الثلاثاء": ["اللغة الإنجليزية", "الرياضيات", "الكيمياء", "الفيزياء", "المواطنة الرقمية", "الجغرافيا"],
-        "الأربعاء": ["الفيزياء", "الكيمياء", "الرياضيات", "اللغة العربية", "اللغة الإنجليزية", "الجغرافيا"],
-        "الخميس": ["المهارات الحياتية", "الفيزياء", "المهارات الإدارية", "الرياضيات", "الدراسات الإسلامية", "اللغة الإنجليزية"]
+        "الأحد": ["علوم الأرض", "المواطنة الرقمية", "المهارات الحياتية", "النشاط", "الرياضيات", "الفيزياء", "انجليزي"],
+        "الإثنين": ["المواطنة الرقمية", "الرياضيات", "الفيزياء", "الكيمياء", "اللغة الإنجليزية", "الجغرافيا", "علوم الأرض"],
+        "الثلاثاء": ["اللغة الإنجليزية", "الرياضيات", "الكيمياء", "الفيزياء", "المواطنة الرقمية", "الجغرافيا", "علوم الأرض"],
+        "الأربعاء": ["الفيزياء", "الكيمياء", "الرياضيات", "اللغة العربية", "اللغة الإنجليزية", "الجغرافيا", "علوم الأرض"],
+        "الخميس": ["المهارات الحياتية", "الفيزياء", "المهارات الإدارية", "الرياضيات", "الدراسات الإسلامية", "اللغة الإنجليزية", "علوم الأرض"]
     };
 }
 
@@ -4352,20 +4363,25 @@ function renderSchedule(schedule) {
                                 <option value="4">الحصة الرابعة</option>
                                 <option value="5">الحصة الخامسة</option>
                                 <option value="6">الحصة السادسة</option>
+                                <option value="7">الحصة السابعة</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="edit-subject">المادة</label>
                             <select id="edit-subject" class="form-control" required>
-                                <option value="">اختر المادة</option>
-                                <option value="الرياضيات">الرياضيات</option>
-                                <option value="المواطنة الرقمية">المواطنة الرقمية</option>
-                                <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
-                                <option value="الفيزياء">الفيزياء</option>
-                                <option value="المهارات الحياتية">المهارات الحياتية</option>
-                                <option value="الجغرافيا">الجغرافيا</option>
-                                <option value="المهارات الإدارية">المهارات الإدارية</option>
-                                <option value="الدراسات الإسلامية">الدراسات الإسلامية</option>
+                            <option value="">اختر المادة</option>
+                            <option value="الرياضيات">الرياضيات</option>
+                            <option value="فقه">فقه</option>
+                            <option value="انجليزي">انجليزي</option>
+                            <option value="الفيزياء">الفيزياء</option>
+                            <option value="الدراسات الأدبية">الدراسات الأدبية</option>
+                            <option value="الجغرافيا">الجغرافيا</option>
+                            <option value="المواطنة الرقمية">المواطنة الرقمية</option>
+                            <option value="تنمية مستدامة">تنمية مستدامة</option>
+                            <option value="الدراسات النفسية">الدراسات النفسية</option>
+                            <option value="المهارات الحياتية">المهارات الحياتية</option>
+                            <option value="فقه">فقه</option>
+                            <option value="النشاط">النشاط</option>
                             </select>
                         </div>
                     </div>
